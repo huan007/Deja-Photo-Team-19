@@ -1,8 +1,14 @@
 package com.android.dejaphoto;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
+import android.preference.SwitchPreference;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,101 +29,96 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        Switch switchDeja = (Switch) findViewById(R.id.DejaVu);
-        switchDeja.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // ToDO Turn Deja Vu Mode On
-                    Toast.makeText(getApplicationContext(), "Deja Vu Mode ON", Toast.LENGTH_SHORT).show();
-                } else {
-                    // ToDo Turn Deja Vu Mode Off
-                    Toast.makeText(getApplicationContext(), "Deja Vu Mode OFF", Toast.LENGTH_SHORT).show();
-                }
-                Log.d("Deja Vu Mode Preference", Boolean.valueOf(isChecked).toString());
-            }
-        });
-
-        Switch switchLocation = (Switch) findViewById(R.id.Location);
-        switchLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // ToDO Turn Location Preference On
-                    Toast.makeText(getApplicationContext(), "Location ON", Toast.LENGTH_SHORT).show();
-                } else {
-                    // ToDO Turn Location Preference Off
-                    Toast.makeText(getApplicationContext(), "Locatoin OFF", Toast.LENGTH_SHORT).show();
-                }
-                Log.d("Location Preference", Boolean.valueOf(isChecked).toString());
-            }
-        });
-
-        Switch switchDay = (Switch) findViewById(R.id.DayOfWeek);
-        switchDay.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // ToDO Turn Day of Week Preference On
-                    Toast.makeText(getApplicationContext(), "Day of Week ON", Toast.LENGTH_SHORT).show();
-                } else {
-                    // ToDO Turn Day of Week Preference Off
-                    Toast.makeText(getApplicationContext(), "Day of Week OFF", Toast.LENGTH_SHORT).show();
-                }
-                Log.d("Day of Week Preference", Boolean.valueOf(isChecked).toString());
-            }
-        });
-
-        Switch switchTime = (Switch) findViewById(R.id.Time);
-        switchTime.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // ToDO Turn Time Preference On
-                    Toast.makeText(getApplicationContext(), "Time ON", Toast.LENGTH_SHORT).show();
-                } else {
-                    // ToDO Turn Time Preference Off
-                    Toast.makeText(getApplicationContext(), "Time OFF", Toast.LENGTH_SHORT).show();
-                }
-                Log.d("Time Preference", Boolean.valueOf(isChecked).toString());
-            }
-        });
-
-        final Button interval = (Button) findViewById(R.id.intervalButton);
-        interval.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditText inputInterval = (EditText) findViewById(R.id.inputInterval);
-
-                SharedPreferences sharedPreferences = getSharedPreferences("interval", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                editor.putString("newInterval", inputInterval.getText().toString());
-
-                editor.apply();
-                changeInterval();
-            }
-        });
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
     }
 
-    public void changeInterval() {
-        SharedPreferences sharedPreferences = getSharedPreferences("newInterval", MODE_PRIVATE);
-        Toast.makeText(getApplicationContext(), "Changed Update Interval", Toast.LENGTH_SHORT).show();
-        //ToDO change update interval
+    public static class PrefsFragment extends PreferenceFragment {
+
+        @Override
+        public void onCreate(Bundle saveInstanceState) {
+            super.onCreate(saveInstanceState);
+
+            addPreferencesFromResource(R.xml.pref_general);
+
+            SwitchPreference dejaVu = (SwitchPreference) findPreference("DejaVu");
+
+            dejaVu.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object object) {
+                    //ToDo
+                    if (object != null) {
+                        Toast.makeText(getContext(), "Deja Vu Mode ON", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Deja Vu Mode OFF", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+            });
+
+            SwitchPreference location = (SwitchPreference) findPreference("Location");
+
+            location.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object object) {
+                    //ToDo
+                    if (object != null) {
+                        Toast.makeText(getContext(), "Location ON", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Location OFF", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+            });
+
+            SwitchPreference dayWeek = (SwitchPreference) findPreference("DayOfWeek");
+
+            dayWeek.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object object) {
+                    //ToDo
+                    if (object != null) {
+                        Toast.makeText(getContext(), "Day of Week ON", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Day of Week OFF", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+            });
+
+            SwitchPreference time = (SwitchPreference) findPreference("Time");
+
+            time.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object object) {
+                    //ToDo
+                    if (object != null) {
+                        Toast.makeText(getContext(), "Time ON", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Time OFF", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+            });
+
+            final EditTextPreference interval = (EditTextPreference) findPreference("interval");
+
+            interval.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object object) {
+                    //ToDo
+                    Toast.makeText(getContext(), "Changed Refresh Interval", Toast.LENGTH_SHORT).show();
+
+                    return true;
+                }
+            });
+        }
     }
 
     @Override
