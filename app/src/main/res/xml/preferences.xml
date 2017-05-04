@@ -1,0 +1,46 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="General">
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="60"
+            android:inputType="number"
+            android:key="interval"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="Enter frequency of update in minutes"
+            android:title="Refresh Interval" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Deja Vu Mode">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="dejavu"
+            android:summary="Displays photos that remind you of past times and locales"
+            android:title="Enable Deja Vu Mode" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="location"
+            android:summary="Displays photos taken near your location"
+            android:title="Enable Location Preference" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="day"
+            android:summary="Displays photos taken at current Day of Week"
+            android:title="Enable Day of Week Preference" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="time"
+            android:summary="Displays photos close to current time"
+            android:title="Enable Time of Day Preference" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
