@@ -1,10 +1,7 @@
 package com.android.dejaphoto;
 
 import android.os.Bundle;
-import android.preference.EditTextPreference;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.SwitchPreference;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -49,78 +46,73 @@ public class MainActivity extends AppCompatActivity {
             addPreferencesFromResource(R.xml.preferences);
 
             // set button change listener for Interval Setting
-            findPreference("interval").setOnPreferenceChangeListener((preference, object) -> {
-                    //ToDo
-                    Log.d("interval value", "change to " + ((EditTextPreference) preference).getText());
-                    return true;
+            findPreference("interval").setOnPreferenceChangeListener((preference, newValue) -> {
+                Log.d("interval value", "change to " + newValue);
+                return true;
             });
 
             // set button change listener for Deja Vu Mode Setting
-            findPreference("dejavu").setOnPreferenceChangeListener((preference, object) -> {
-                    //ToDo
-                    if (((SwitchPreference) preference).isChecked()) {
-                        // checked -> unchecked
+            findPreference("dejavu").setOnPreferenceChangeListener((preference, newValue) -> {
+                if ((Boolean) newValue) {
+                    // unchecked -> checked
 
-                        findPreference("location").setEnabled(false);
-                        findPreference("day").setEnabled(false);
-                        findPreference("time").setEnabled(false);
+                    findPreference("location").setEnabled(false);
+                    findPreference("day").setEnabled(false);
+                    findPreference("time").setEnabled(false);
 
-                        Log.d("deja value", "change to " + false);
-                    } else {
-                        // unchecked -> checked
+                    Log.d("deja value", "change to " + false);
+                } else {
+                    // checked -> unchecked
 
-                        findPreference("location").setEnabled(true);
-                        findPreference("day").setEnabled(true);
-                        findPreference("time").setEnabled(true);
+                    findPreference("location").setEnabled(true);
+                    findPreference("day").setEnabled(true);
+                    findPreference("time").setEnabled(true);
 
-                        Log.d("deja value", "change to " + true);
-                    }
-                    return true;
+                    Log.d("deja value", "change to " + true);
+                }
+                return true;
             });
 
             // set button change listener for Location Setting
-            findPreference("location").setOnPreferenceChangeListener((preference, object) -> {
-                    //ToDo
-                    if (((SwitchPreference) preference).isChecked()) {
-                        // checked -> unchecked
+            findPreference("location").setOnPreferenceChangeListener((preference, newValue) -> {
+                if ((Boolean) newValue) {
+                    // unchecked -> checked
 
-                        Log.d("location value", "change to " + false);
-                    } else {
-                        // unchecked -> checked
+                    Log.d("location value", "change to " + true);
+                } else {
+                    // checked -> unchecked
 
-                        Log.d("location value", "change to " + true);
-                    }
-                    return true;
+                    Log.d("location value", "change to " + false);
+                }
+                return true;
             });
 
             // set button change listener for Day of Week Setting
-            findPreference("day").setOnPreferenceChangeListener((preference, object) -> {
-                    //ToDo
-                    if (((SwitchPreference) preference).isChecked()) {
-                        // checked -> unchecked
+            findPreference("day").setOnPreferenceChangeListener((preference, newValue) -> {
+                if ((Boolean) newValue) {
+                    // unchecked -> checked
 
-                        Log.d("day value", "change to " + false);
-                    } else {
-                        // unchecked -> checked
+                    Log.d("day value", "change to " + true);
+                } else {
+                    // checked -> unchecked
 
-                        Log.d("day value", "change to " + true);
-                    }
-                    return true;
+                    Log.d("day value", "change to " + false);
+                }
+                return true;
             });
 
             // set button change listener for Time of Day Setting
-            findPreference("time").setOnPreferenceChangeListener((preference, object) -> {
-                    //ToDo
-                    if (((SwitchPreference) preference).isChecked()) {
-                        // checked -> unchecked
+            findPreference("time").setOnPreferenceChangeListener((preference, newValue) -> {
+                if ((Boolean) newValue) {
+                    // unchecked -> checked
 
-                        Log.d("time value", "change to " + false);
-                    } else {
-                        // unchecked -> checked
+                    Log.d("time value", "change to " + true);
+                } else {
+                    // checked -> unchecked
 
-                        Log.d("time value", "change to " + true);
-                    }
-                    return true;
+                    Log.d("time value", "change to " + false);
+                }
+                return true;
             });
         }
     }
