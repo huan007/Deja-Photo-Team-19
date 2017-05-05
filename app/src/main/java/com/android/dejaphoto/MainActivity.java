@@ -48,18 +48,15 @@ public class MainActivity extends AppCompatActivity {
             super.onCreate(saveInstanceState);
             addPreferencesFromResource(R.xml.preferences);
 
-            findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object object) {
+            // set button change listener for Interval Setting
+            findPreference("interval").setOnPreferenceChangeListener((preference, object) -> {
                     //ToDo
                     Log.d("interval value", "change to " + ((EditTextPreference) preference).getText());
                     return true;
-                }
             });
 
-            findPreference("dejavu").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object object) {
+            // set button change listener for Deja Vu Mode Setting
+            findPreference("dejavu").setOnPreferenceChangeListener((preference, object) -> {
                     //ToDo
                     if (((SwitchPreference) preference).isChecked()) {
                         // checked -> unchecked
@@ -79,12 +76,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("deja value", "change to " + true);
                     }
                     return true;
-                }
             });
 
-            findPreference("location").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object object) {
+            // set button change listener for Location Setting
+            findPreference("location").setOnPreferenceChangeListener((preference, object) -> {
                     //ToDo
                     if (((SwitchPreference) preference).isChecked()) {
                         // checked -> unchecked
@@ -96,12 +91,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("location value", "change to " + true);
                     }
                     return true;
-                }
             });
 
-            findPreference("day").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object object) {
+            // set button change listener for Day of Week Setting
+            findPreference("day").setOnPreferenceChangeListener((preference, object) -> {
                     //ToDo
                     if (((SwitchPreference) preference).isChecked()) {
                         // checked -> unchecked
@@ -113,12 +106,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("day value", "change to " + true);
                     }
                     return true;
-                }
             });
 
-            findPreference("time").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object object) {
+            // set button change listener for Time of Day Setting
+            findPreference("time").setOnPreferenceChangeListener((preference, object) -> {
                     //ToDo
                     if (((SwitchPreference) preference).isChecked()) {
                         // checked -> unchecked
@@ -130,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("time value", "change to " + true);
                     }
                     return true;
-                }
             });
         }
     }
