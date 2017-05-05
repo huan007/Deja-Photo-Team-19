@@ -56,19 +56,19 @@ public class MainActivity extends AppCompatActivity {
                 if ((Boolean) newValue) {
                     // unchecked -> checked
 
-                    findPreference("location").setEnabled(false);
-                    findPreference("day").setEnabled(false);
-                    findPreference("time").setEnabled(false);
-
-                    Log.d("deja value", "change to " + false);
-                } else {
-                    // checked -> unchecked
-
                     findPreference("location").setEnabled(true);
                     findPreference("day").setEnabled(true);
                     findPreference("time").setEnabled(true);
 
                     Log.d("deja value", "change to " + true);
+                } else {
+                    // checked -> unchecked
+
+                    findPreference("location").setEnabled(false);
+                    findPreference("day").setEnabled(false);
+                    findPreference("time").setEnabled(false);
+
+                    Log.d("deja value", "change to " + false);
                 }
                 return true;
             });
