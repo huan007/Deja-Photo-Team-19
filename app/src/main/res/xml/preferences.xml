@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="General">
+    <PreferenceCategory android:title="@string/settings_general">
 
         <EditTextPreference
             android:capitalize="words"
@@ -10,36 +10,36 @@
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:summary="Enter frequency of update in minutes"
-            android:title="Refresh Interval" />
+            android:summary="@string/interval_summary"
+            android:title="@string/interval_title" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Deja Vu Mode">
+    <PreferenceCategory android:title="@string/settings_deja">
 
         <SwitchPreference
             android:defaultValue="true"
             android:key="dejavu"
-            android:summary="Displays photos that remind you of past times and locales"
-            android:title="Enable Deja Vu Mode" />
+            android:summary="@string/dejavu_summary"
+            android:title="@string/dejavu_title" />
 
         <SwitchPreference
             android:defaultValue="true"
             android:key="location"
-            android:summary="Displays photos taken near your location"
-            android:title="Enable Location Preference" />
+            android:summary="@string/location_summary"
+            android:title="@string/location_title" />
 
         <SwitchPreference
             android:defaultValue="true"
             android:key="day"
-            android:summary="Displays photos taken at current Day of Week"
-            android:title="Enable Day of Week Preference" />
+            android:summary="@string/day_summary"
+            android:title="@string/day_title" />
 
         <SwitchPreference
             android:defaultValue="true"
             android:key="time"
-            android:summary="Displays photos close to current time"
-            android:title="Enable Time of Day Preference" />
+            android:summary="@string/time_summary"
+            android:title="@string/day_title" />
 
     </PreferenceCategory>
 

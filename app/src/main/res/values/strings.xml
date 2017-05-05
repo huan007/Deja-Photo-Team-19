@@ -4,7 +4,23 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Main App -->
+    <string name="settings_general">General</string>
+    <string name="settings_deja">Deja Vu Mode</string>
 
+    <string name="interval_title">Refresh Interval</string>
+    <string name="interval_summary">Enter update frequency in minutes</string>
+
+    <string name="dejavu_title">Deja Vu Mode</string>
+    <string name="dejavu_summary">Displays photos that remind you of past times and locales</string>
+
+    <string name="location_title">Prefer Location</string>
+    <string name="location_summary">Prefer photos taken closer to current location</string>
+
+    <string name="day_title">Prefer Day of Week</string>
+    <string name="day_summary">Prefer photos taken on current day of week</string>
+
+    <string name="time_title">Prefer Time of Day</string>
+    <string name="time_summary">Prefer photos taken during same time of day</string>
 
 
     <!-- Strings related to Widget -->
