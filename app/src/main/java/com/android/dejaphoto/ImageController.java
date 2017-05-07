@@ -29,11 +29,11 @@ public class ImageController {
     /**
      * Change the wallpaper
      */
-    public void displayImage(){
+    public void displayImage(Photo photo){
 
 
         try{
-            wallpaperManager.setResource(R.drawable.apple);
+            wallpaperManager.setBitmap(photo.photo);
             Log.d("ImageController", "Wallpaper Changed");
         }
         catch (IOException e)

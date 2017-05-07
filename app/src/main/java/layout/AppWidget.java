@@ -3,6 +3,8 @@ package layout;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.RemoteViews;
 
 
@@ -11,6 +13,7 @@ import android.content.Intent;
 
 
 import com.android.dejaphoto.MainActivity;
+import com.android.dejaphoto.Photo;
 import com.android.dejaphoto.R;
 import com.android.dejaphoto.ImageController;
 //import com.android.dejaphoto.SettingsActivity;
@@ -72,7 +75,10 @@ public class AppWidget extends AppWidgetProvider {
     public void show(Context context)
     {
         ImageController controller = new ImageController(context);
-        controller.displayImage();
+        Photo photo = new Photo();
+        Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
+        photo.setPhoto(newBitmap);
+        controller.displayImage(photo);
     }
 
 
