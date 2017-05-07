@@ -38,10 +38,9 @@
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_chevron_left_black_48dp"
-        android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        />
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_chevron_left_black_48dp" />
 
     <ImageButton
         android:layout_width="wrap_content"

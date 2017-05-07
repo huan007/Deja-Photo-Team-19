@@ -3,22 +3,16 @@ package layout;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.view.View;
 import android.widget.RemoteViews;
 
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.util.Log;
 
 
 import com.android.dejaphoto.MainActivity;
 import com.android.dejaphoto.R;
+import com.android.dejaphoto.ImageController;
 //import com.android.dejaphoto.SettingsActivity;
 
 /**
@@ -64,9 +58,17 @@ public class AppWidget extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
     }
 
-    private void openSettings()
+    @Override
+    public void onReceive(Context context, Intent intent)
     {
+        show(context);
+    }
 
+
+    public void show(Context context)
+    {
+        ImageController controller = new ImageController(context);
+        controller.displayImage();
     }
 
 
