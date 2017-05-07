@@ -1,5 +1,6 @@
 package com.android.dejaphoto;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -45,8 +46,11 @@ public class MainActivity extends AppCompatActivity {
             super.onCreate(saveInstanceState);
             addPreferencesFromResource(R.xml.preferences);
 
+            SharedPreferences.Editor editor = getContext().getSharedPreferences("settings", MODE_PRIVATE).edit();
+
             // set button change listener for Interval Setting
             findPreference("interval").setOnPreferenceChangeListener((preference, newValue) -> {
+                editor.putInt("interval", Integer.valueOf((String) newValue));
                 Log.d("interval value", "change to " + newValue);
                 return true;
             });
@@ -55,21 +59,18 @@ public class MainActivity extends AppCompatActivity {
             findPreference("dejavu").setOnPreferenceChangeListener((preference, newValue) -> {
                 if ((Boolean) newValue) {
                     // unchecked -> checked
-
                     findPreference("location").setEnabled(true);
                     findPreference("day").setEnabled(true);
                     findPreference("time").setEnabled(true);
-
-                    Log.d("deja value", "change to " + true);
                 } else {
                     // checked -> unchecked
-
                     findPreference("location").setEnabled(false);
                     findPreference("day").setEnabled(false);
                     findPreference("time").setEnabled(false);
-
-                    Log.d("deja value", "change to " + false);
                 }
+
+                Log.d("deja value", newValue.toString());
+                editor.putBoolean("dejavu", (Boolean) newValue);
                 return true;
             });
 
@@ -77,13 +78,12 @@ public class MainActivity extends AppCompatActivity {
             findPreference("location").setOnPreferenceChangeListener((preference, newValue) -> {
                 if ((Boolean) newValue) {
                     // unchecked -> checked
-
-                    Log.d("location value", "change to " + true);
                 } else {
                     // checked -> unchecked
-
-                    Log.d("location value", "change to " + false);
                 }
+
+                Log.d("deja value", newValue.toString());
+                editor.putBoolean("location", (Boolean) newValue);
                 return true;
             });
 
@@ -91,13 +91,12 @@ public class MainActivity extends AppCompatActivity {
             findPreference("day").setOnPreferenceChangeListener((preference, newValue) -> {
                 if ((Boolean) newValue) {
                     // unchecked -> checked
-
-                    Log.d("day value", "change to " + true);
                 } else {
                     // checked -> unchecked
-
-                    Log.d("day value", "change to " + false);
                 }
+
+                Log.d("deja value", newValue.toString());
+                editor.putBoolean("day", (Boolean) newValue);
                 return true;
             });
 
@@ -105,15 +104,16 @@ public class MainActivity extends AppCompatActivity {
             findPreference("time").setOnPreferenceChangeListener((preference, newValue) -> {
                 if ((Boolean) newValue) {
                     // unchecked -> checked
-
-                    Log.d("time value", "change to " + true);
                 } else {
                     // checked -> unchecked
-
-                    Log.d("time value", "change to " + false);
                 }
+
+                Log.d("deja value", newValue.toString());
+                editor.putBoolean("time", (Boolean) newValue);
                 return true;
             });
+
+            editor.apply();
         }
     }
 }
