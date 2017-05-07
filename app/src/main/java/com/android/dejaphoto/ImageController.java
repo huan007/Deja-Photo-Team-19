@@ -3,6 +3,7 @@ package com.android.dejaphoto;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import com.android.dejaphoto.MainActivity;
 import com.android.dejaphoto.R;
@@ -33,9 +34,11 @@ public class ImageController {
 
         try{
             wallpaperManager.setResource(R.drawable.apple);
+            Log.d("ImageController", "Wallpaper Changed");
         }
         catch (IOException e)
         {
+            Log.d("ImageController", "Failed to change wallpaper");
             e.printStackTrace();
         }
     }

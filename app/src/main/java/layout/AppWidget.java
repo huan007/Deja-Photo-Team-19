@@ -50,6 +50,7 @@ public class AppWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
+        show(context);
 
     }
 
@@ -58,11 +59,14 @@ public class AppWidget extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
     }
 
+    /*
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        show(context);
+        //show(context);
     }
+    */
+
 
 
     public void show(Context context)
@@ -70,6 +74,7 @@ public class AppWidget extends AppWidgetProvider {
         ImageController controller = new ImageController(context);
         controller.displayImage();
     }
+
 
 
 
