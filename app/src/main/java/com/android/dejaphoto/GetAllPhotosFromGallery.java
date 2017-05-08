@@ -23,7 +23,11 @@ public class GetAllPhotosFromGallery {
         images = null;
     }
 
-    GetAllPhotosFromGallery(File directoryName, Context context) {
+    public List<Photo> getImages() {
+        return images;
+    }
+
+    public GetAllPhotosFromGallery(File directoryName, Context context) {
         directory = directoryName;
 
         images = new ArrayList<Photo>();

@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
         //TextView textView = (TextView) findViewById(R.id.message);
         //textView.setText( file.listFiles()[0].getName() );
 
-        //Bitmap image = gallery.images.get(1).photo;
-        //String date = gallery.images.get(1).datetime;
+        //Bitmap image = gallery.photos.get(1).photo;
+        //String date = gallery.photos.get(1).datetime;
 
     }
 
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                     // checked -> unchecked
                 }
 
-                Log.d("deja value", newValue.toString());
+                Log.d("location", newValue.toString());
                 editor.putBoolean("location", (Boolean) newValue);
                 return true;
             });
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     // checked -> unchecked
                 }
 
-                Log.d("deja value", newValue.toString());
+                Log.d("day", newValue.toString());
                 editor.putBoolean("day", (Boolean) newValue);
                 return true;
             });
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     // checked -> unchecked
                 }
 
-                Log.d("deja value", newValue.toString());
+                Log.d("time", newValue.toString());
                 editor.putBoolean("time", (Boolean) newValue);
                 return true;
             });

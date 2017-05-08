@@ -9,10 +9,10 @@ import java.util.Random;
  */
 public class PhotoChooser implements Chooser<Photo> {
 
-    List<Photo> images;
+    List<Photo> photos;
 
-    public PhotoChooser(GetAllPhotosFromGallery photos) {
-        images = photos.images;
+    public PhotoChooser(List<Photo> photos) {
+        this.photos = photos;
     }
 
     /**
@@ -39,7 +39,7 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next element
      */
     private Photo randomNext() {
-        return images.get(new Random(Calendar.getInstance().get(Calendar.SECOND)).nextInt(images.size()));
+        return photos.get(new Random(Calendar.getInstance().get(Calendar.SECOND)).nextInt(photos.size()));
     }
 
 }

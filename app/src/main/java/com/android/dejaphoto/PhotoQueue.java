@@ -57,6 +57,10 @@ public class PhotoQueue<E> {
      * @return the previous element in the list
      */
     public E previous() {
+        // size of queue is 0
+        if( queue.isEmpty())
+            return null;
+
         // curr is at beginning of list
         if (curr.previousIndex() == -1) {
             return queue.getFirst();
