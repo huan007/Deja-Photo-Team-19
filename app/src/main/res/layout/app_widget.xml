@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:layout_margin="10dp"
-    android:background="@color/transparent">
+    android:background="@color/transparent"
+    android:gravity="center"
+    android:orientation="horizontal">
 
     <!--
     <Button
@@ -36,6 +36,7 @@
     -->
 
     <ImageButton
+        android:id="@+id/previousButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
@@ -43,38 +44,36 @@
         android:src="@drawable/ic_chevron_left_black_48dp" />
 
     <ImageButton
+        android:id="@+id/releaseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_visibility_off_black_48dp"
-        android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        />
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_visibility_off_black_48dp" />
 
     <ImageButton
         android:id="@+id/settingsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_settings_black_48dp"
-        android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        />
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_settings_black_48dp" />
 
     <ImageButton
+        android:id="@+id/karmaButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_favorite_black_48dp"
-        android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        />
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_favorite_black_48dp" />
 
     <ImageButton
+        android:id="@+id/nextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_chevron_right_black_48dp"
-        android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        />
-
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_chevron_right_black_48dp" />
 
 
 </LinearLayout>
