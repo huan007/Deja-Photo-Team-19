@@ -1,6 +1,7 @@
 package com.android.dejaphoto;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -23,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
+
+        // Start DejaService
+        Intent intent = new Intent(MainActivity.this, DejaService.class);
+        startService(intent);
 
 
         // Ask user for permission to access photos -- Phillip

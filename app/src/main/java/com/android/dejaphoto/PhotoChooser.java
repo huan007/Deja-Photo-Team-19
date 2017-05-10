@@ -21,7 +21,7 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next photo
      */
     public Photo next() {
-        return (true) ? dejaNext() : randomNext();
+        return (false) ? dejaNext() : randomNext();
     }
 
     /**
