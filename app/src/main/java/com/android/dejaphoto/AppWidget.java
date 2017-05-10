@@ -1,13 +1,14 @@
-package layout;
+package com.android.dejaphoto;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.Environment;
+import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -15,15 +16,6 @@ import android.widget.RemoteViews;
 import android.app.PendingIntent;
 import android.content.Intent;
 
-
-import com.android.dejaphoto.GetAllPhotosFromGallery;
-import com.android.dejaphoto.MainActivity;
-import com.android.dejaphoto.Photo;
-import com.android.dejaphoto.PhotoQueue;
-import com.android.dejaphoto.PhotoChooser;
-import com.android.dejaphoto.Chooser;
-import com.android.dejaphoto.R;
-import com.android.dejaphoto.ImageController;
 
 import java.io.File;
 //import com.android.dejaphoto.SettingsActivity;
@@ -36,8 +28,13 @@ public class AppWidget extends AppWidgetProvider {
     public static String nextAction = "nextPhoto";
     public static String previousAction = "previousPhoto";
 
+
+
     ImageController controller;
     PhotoQueue<Photo> queue;
+
+    DejaService mService;
+    boolean mBound = false;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -54,7 +51,7 @@ public class AppWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            Log.e("App Widget", "onUpdate()");
+            Log.d("App Widget", "onUpdate()");
             updateAppWidget(context, appWidgetManager, appWidgetId);
 
             //Get views
@@ -87,91 +84,89 @@ public class AppWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
-        Log.e("App Widget", "onEnabled()");
-        initialize(context);
-        show(context);
+
+        //Get Binder from service
+        //Intent serviceIntent = new Intent(context, DejaService.class);
+        //context.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+
+        Log.d("App Widget", "onEnabled()");
+
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+
+        //unbind if necessary
+        if (mBound)
+        {
+            context.unbindService(mConnection);
+            mBound = false;
+        }
     }
 
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("App Widget", "onReceive()");
+        super.onReceive(context, intent);
         //Call Enabled()
-        onEnabled(context);
+        //onEnabled(context);
         //Call onUpdate()
-        AppWidgetManager manager = AppWidgetManager.getInstance(context);
-        ComponentName thisAppWidget = new ComponentName(context.getPackageName(), AppWidget.class.getName());
-        int[] appWidgetIds = manager.getAppWidgetIds(thisAppWidget);
+        //AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        //ComponentName thisAppWidget = new ComponentName(context.getPackageName(), AppWidget.class.getName());
+        //int[] appWidgetIds = manager.getAppWidgetIds(thisAppWidget);
+        //onUpdate(context, manager, appWidgetIds);
 
-        onUpdate(context, manager, appWidgetIds);
+        if (queue != null)
+        {
+            Log.d("App Widget", "Queue is not null");
+        }
+        else
+            Log.d("App Widget", "Queue is NULL");
 
         if (intent.getAction().equals(nextAction)) {//Next Photo
-            Log.e("App Widget", "onReceive()");
-            next(context);
+            //TODO
+            Log.d("App Widget","nextAction is called");
+
+            //Start the service
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.nextAction);
+            Log.d("App Widget", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+            context.startService(serviceIntent);
+            //mService.runNext();
         }
 
         if (intent.getAction().equals(previousAction)) {//Previous Photo
-            previous(context);
+            //TODO
+            Log.d("App Widget","previousAction is called");
+            //Start the service
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.previousAction);
+            Log.d("App Widget", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+            context.startService(serviceIntent);
+            //mService.runPrevious();
         }
+        Log.d("App Widget", "End onReceive()");
     }
 
 
-    public void show(Context context) {
-        Photo photo = new Photo();
-        Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
-        photo.setPhoto(newBitmap);
-        controller.displayImage(photo);
-    }
-
-    public void next(Context context) {
-        //get next photo
-        Log.d("App Widget", "nextCalled");
-        Photo nextPhoto = queue.next();
-
-        // no photos in album
-        if (nextPhoto == null) {
-            Log.d("App Widget", "No Photo");
-            Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
-            System.out.println(newBitmap);
-            nextPhoto = new Photo();
-            nextPhoto.setPhoto(newBitmap);
-
-
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            DejaService.MyBinder binder = (DejaService.MyBinder) iBinder;
+            mService = binder.getService();
+            mBound = true;
+            Log.d("App Widget", "Binded to service");
         }
-        controller.displayImage(nextPhoto);
-    }
 
-    public void previous(Context context) {
-        //get previous photo
-        Log.d("App Widget", "previousCalled");
-        Photo previousPhoto = queue.previous();
-
-        // no previous photo
-        if (previousPhoto == null) {
-            Log.d("App Widget", "No Photo");
-            Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
-            System.out.println(newBitmap);
-            previousPhoto = new Photo();
-            previousPhoto.setPhoto(newBitmap);
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBound = false;
+            Log.d("App Widget", "Unbinded to service");
         }
-        controller.displayImage(previousPhoto);
-    }
+    };
 
-    public void initialize(Context context) {
-        //Create controller
-        controller = new ImageController(context);
-
-        //Get list of pictures
-        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context);
-
-        PhotoChooser chooser = new PhotoChooser(gallery.getImages());
-        queue = new PhotoQueue<>(chooser);
-    }
 
 
 }

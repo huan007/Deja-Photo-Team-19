@@ -1,6 +1,7 @@
 package com.android.dejaphoto;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -23,6 +24,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
+
+        // Start DejaService
+        Intent intent = new Intent(MainActivity.this, DejaService.class);
+        startService(intent);
+        Log.d("MainActivity", "Started Service");
 
 
         // Ask user for permission to access photos -- Phillip
@@ -47,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         5);
 
-                Toast toast = Toast.makeText(this.getApplicationContext(), "here", 10000);
+                Toast toast = Toast.makeText(this.getApplicationContext(), "here", Toast.LENGTH_SHORT);
                 toast.show();
 
 

@@ -5,14 +5,18 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.support.test.rule.ActivityTestRule;
 
 import org.junit.*;
 
-import static junit.framework.Assert.assertFalse;
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-//import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Cyrax on 5/6/2017.
@@ -29,13 +33,36 @@ public class ImageControllerTest {
         Activity mainActivity = activityTestRule.getActivity();
         Drawable expected = mainActivity.getResources().getDrawable(R.drawable.apple);
 
-        ImageController changer = new ImageController(mainActivity.getApplicationContext());
-        changer.displayImage();
+        //Create ctontroller
+        ImageController controller = new ImageController(mainActivity.getApplicationContext());
 
-        Drawable result = changer.getImage();
+        //Get list of pictures
+        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
+        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, mainActivity.getApplicationContext());
 
-        assertTrue(areDrawablesIdentical(expected, expected));
+        PhotoChooser chooser = new PhotoChooser(gallery.images);
+        PhotoQueue<Photo> queue = new PhotoQueue<>(chooser);
 
+        List<Photo> list = new LinkedList<>();
+
+        for(int i = 0; i < 5; i++)
+        {
+            list.add(queue.next());
+            System.out.print("hello");
+        }
+
+        for (Photo photo : list)
+        {
+            assertTrue(photo instanceof Photo);
+        }
+
+        assertEquals(list.size(), 5);
+    }
+
+    @Test
+    public void testNothing()
+    {
+        System.out.print("hello");
     }
 
     //Helpers
