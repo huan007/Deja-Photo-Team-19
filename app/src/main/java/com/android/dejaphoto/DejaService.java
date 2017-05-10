@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
@@ -14,23 +15,40 @@ import java.io.File;
 import java.util.Queue;
 
 public class DejaService extends Service {
+    public static final String nextAction = "NEXT";
+    public static final String previousAction = "PREVIOUS";
+    public static final String actionFlag = "ACTION_FLAG";
+
     ImageController controller;
     PhotoQueue<Photo> queue;
+    private IBinder mBinder = new MyBinder();
+
 
     public class DejaThread implements Runnable
     {
-        Queue<Photo> photoQueue;
-        public DejaThread(Queue<Photo> queue)
+        PhotoQueue<Photo> photoQueue;
+        String action;
+
+
+        public DejaThread(PhotoQueue<Photo> queue, String action)
         {
             //Get queue from outside
             photoQueue = queue;
+            this.action = action;
         }
         @Override
         public void run() {
-
+            //Only run if the queue is there. Prevent null pointer
+            if (queue != null)
+            {
+                if (action.equals(nextAction))
+                    next();
+                if (action.equals(previousAction))
+                    previous();
+            }
         }
 
-        public void next(Context context) {
+        public void next() {
             //get next photo
             Log.d("App Widget", "nextCalled");
             Photo nextPhoto = queue.next();
@@ -38,17 +56,12 @@ public class DejaService extends Service {
             // no photos in album
             if (nextPhoto == null) {
                 Log.d("App Widget", "No Photo");
-                Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
-                System.out.println(newBitmap);
-                nextPhoto = new Photo();
-                nextPhoto.setPhoto(newBitmap);
-
-
+                return;
             }
             controller.displayImage(nextPhoto);
         }
 
-        public void previous(Context context) {
+        public void previous() {
             //get previous photo
             Log.d("App Widget", "previousCalled");
             Photo previousPhoto = queue.previous();
@@ -56,12 +69,16 @@ public class DejaService extends Service {
             // no previous photo
             if (previousPhoto == null) {
                 Log.d("App Widget", "No Photo");
-                Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
-                System.out.println(newBitmap);
-                previousPhoto = new Photo();
-                previousPhoto.setPhoto(newBitmap);
+                return;
             }
             controller.displayImage(previousPhoto);
+        }
+    }
+
+    public class MyBinder extends Binder{
+        public DejaService getService()
+        {
+            return DejaService.this;
         }
     }
 
@@ -71,18 +88,34 @@ public class DejaService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return mBinder;
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
+    public void onCreate()
     {
         Context context = getApplicationContext();
         initialize(context);
         if(queue != null)
             Log.d("DejaService", "queue is NOT null");
-        Log.d("DejaService", "onStart(): Initialized");
-        stopSelf();
+        Log.d("DejaService", "onCreate(): Initialized");
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        //Deciding whether to run next or previous
+        Log.d("DejaService", "onStart()");
+        String action = intent.getStringExtra(actionFlag);
+        if (action != null) {
+            Log.d("DejaService", "Action received: " + action);
+            if (action.equals(nextAction))
+                runNext();
+            if (action.equals(previousAction))
+                runPrevious();
+        }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -107,14 +140,26 @@ public class DejaService extends Service {
         Log.d("DejaService", "initialize()");
     }
 
+    public void runNext()
+    {
+        Thread worker = new Thread(new DejaThread(queue, nextAction));
+        worker.start();
+    }
 
+    public void runPrevious()
+    {
+        Thread worker = new Thread(new DejaThread(queue, previousAction));
+        worker.start();
+    }
 
+    /*
     public void show(Context context) {
         Photo photo = new Photo();
         Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
         photo.setPhoto(newBitmap);
         controller.displayImage(photo);
-    }
+    }*/
+
 
 
 }

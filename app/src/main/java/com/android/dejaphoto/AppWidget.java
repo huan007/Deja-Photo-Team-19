@@ -4,9 +4,11 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -26,8 +28,13 @@ public class AppWidget extends AppWidgetProvider {
     public static String nextAction = "nextPhoto";
     public static String previousAction = "previousPhoto";
 
+
+
     ImageController controller;
     PhotoQueue<Photo> queue;
+
+    DejaService mService;
+    boolean mBound = false;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -77,6 +84,11 @@ public class AppWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
+
+        //Get Binder from service
+        //Intent serviceIntent = new Intent(context, DejaService.class);
+        //context.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+
         Log.d("App Widget", "onEnabled()");
 
     }
@@ -84,6 +96,13 @@ public class AppWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+
+        //unbind if necessary
+        if (mBound)
+        {
+            context.unbindService(mConnection);
+            mBound = false;
+        }
     }
 
 
@@ -108,15 +127,45 @@ public class AppWidget extends AppWidgetProvider {
 
         if (intent.getAction().equals(nextAction)) {//Next Photo
             //TODO
+            Log.d("App Widget","nextAction is called");
+
+            //Start the service
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.nextAction);
+            Log.d("App Widget", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+            context.startService(serviceIntent);
+            //mService.runNext();
         }
 
         if (intent.getAction().equals(previousAction)) {//Previous Photo
             //TODO
+            Log.d("App Widget","previousAction is called");
+            //Start the service
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.previousAction);
+            Log.d("App Widget", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+            context.startService(serviceIntent);
+            //mService.runPrevious();
         }
         Log.d("App Widget", "End onReceive()");
     }
 
 
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            DejaService.MyBinder binder = (DejaService.MyBinder) iBinder;
+            mService = binder.getService();
+            mBound = true;
+            Log.d("App Widget", "Binded to service");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBound = false;
+            Log.d("App Widget", "Unbinded to service");
+        }
+    };
 
 
 
