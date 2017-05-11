@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceFragment;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,14 +18,38 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.io.File;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.location.LocationServices;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.File;
+import java.text.BreakIterator;
+
+import static com.google.android.gms.common.api.GoogleApiClient.*;
+
+public class MainActivity extends AppCompatActivity
+        implements ConnectionCallbacks, OnConnectionFailedListener {
+
+    // Create an instance of GoogleAPIClient.
+    GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
+
+
+     //adding APIs to the client
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+
 
         // Start DejaService
         Intent intent = new Intent(MainActivity.this, DejaService.class);
@@ -77,6 +103,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //connect to location services on start
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+    //disconnect to location services on stop
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -99,7 +137,25 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static class PrefsFragment extends PreferenceFragment {
+    //Getting current location as lat
+
+    //Trying to figure out how to implement Googles location API interfaces
+    @Override
+    public void onConnected(Bundle bundle) {
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        // An unresolvable error has occurred and a connection to Google APIs
+        // could not be established. Display an error message, or handle
+        // the failure silently
+    }
+
+            public static class PrefsFragment extends PreferenceFragment {
 
         @Override
         public void onCreate(Bundle saveInstanceState) {
