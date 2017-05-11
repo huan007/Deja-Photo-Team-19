@@ -36,12 +36,12 @@ public class ImageController {
     /**
      * Change the wallpaper
      */
-    public void displayImage(Photo photo) {
+    public void displayImage(final Photo photo) {
         Display display = ((WindowManager) currentContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        int width = size.x;
-        int height = size.y;
+        final int width = size.x;
+        final int height = size.y;
 
         target = new Target() {
             @Override

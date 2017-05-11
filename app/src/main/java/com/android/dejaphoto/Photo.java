@@ -28,6 +28,9 @@ public class Photo {
     boolean release;
     int weight;
 
+    // Release photo
+    public void releasePhoto(Photo photo){ photo.release = true; }
+
     public String getLocation() {
         return location;
     }
