@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -23,6 +24,7 @@ import java.io.IOException;
 public class ImageController {
 
     Target target;
+    Callback callback;
     Context currentContext;
     WallpaperManager wallpaperManager;
 
@@ -34,29 +36,19 @@ public class ImageController {
     /**
      * Change the wallpaper
      */
-    /**
-     * Change the wallpaper.
-     *
-     * @param photo new wallpaper photo
-     */
     public void displayImage(Photo photo) {
-        // get screen dimensions
         Display display = ((WindowManager) currentContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
         int height = size.y;
 
-        // set wallpaper when image done loading
         target = new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                 try {
                     Log.d("ImageController", "Wallpaper Changed");
-                    wallpaperManager.setBitmap(PhotoEditor.open(photo, bitmap)
-                            .fitScreen(width, height)
-                            .appendLocation(currentContext)
-                            .finish());
+                    wallpaperManager.setBitmap(photo.appendLocation(currentContext, bitmap));
                 } catch (IOException e) {
                     Log.d("ImageController", "Wallpaper Not Changed");
                     e.printStackTrace();
@@ -73,14 +65,13 @@ public class ImageController {
             }
         };
 
-        // resize image on main thread
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 Picasso.with(currentContext)
-                        .load(photo.getPhotoUri(currentContext))
+                        .load(photo.getImageUri(currentContext))
                         .resize(width, height)
-                        .centerInside()
+                        .centerCrop()
                         .into(target);
             }
         };
