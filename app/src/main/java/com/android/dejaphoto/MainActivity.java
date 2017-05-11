@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -89,6 +90,29 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        5);
+                Toast.makeText(this.getApplicationContext(), "here", Toast.LENGTH_SHORT).show();
+            }
+        }
+
 
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
 
@@ -165,68 +189,84 @@ public class MainActivity extends AppCompatActivity
             SharedPreferences.Editor editor = getContext().getSharedPreferences("settings", MODE_PRIVATE).edit();
 
             // set button change listener for Interval Setting
-            findPreference("interval").setOnPreferenceChangeListener((preference, newValue) -> {
-                editor.putInt("interval", Integer.valueOf((String) newValue));
-                Log.d("interval value", "change to " + newValue);
-                return true;
+            findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                    editor.putInt("interval", Integer.valueOf((String) newValue));
+                    Log.d("interval value", "change to " + newValue);
+                    return true;
+                }
             });
 
             // set button change listener for Deja Vu Mode Setting
-            findPreference("dejavu").setOnPreferenceChangeListener((preference, newValue) -> {
-                if ((Boolean) newValue) {
-                    // unchecked -> checked
-                    findPreference("location").setEnabled(true);
-                    findPreference("day").setEnabled(true);
-                    findPreference("time").setEnabled(true);
-                } else {
-                    // checked -> unchecked
-                    findPreference("location").setEnabled(false);
-                    findPreference("day").setEnabled(false);
-                    findPreference("time").setEnabled(false);
-                }
+            findPreference("dejavu").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if ((Boolean) newValue) {
+                        // unchecked -> checked
+                        findPreference("location").setEnabled(true);
+                        findPreference("day").setEnabled(true);
+                        findPreference("time").setEnabled(true);
+                    } else {
+                        // checked -> unchecked
+                        findPreference("location").setEnabled(false);
+                        findPreference("day").setEnabled(false);
+                        findPreference("time").setEnabled(false);
+                    }
 
-                Log.d("deja value", newValue.toString());
-                editor.putBoolean("dejavu", (Boolean) newValue);
-                return true;
+                    Log.d("deja value", newValue.toString());
+                    editor.putBoolean("dejavu", (Boolean) newValue);
+                    return true;
+                }
             });
 
             // set button change listener for Location Setting
-            findPreference("location").setOnPreferenceChangeListener((preference, newValue) -> {
-                if ((Boolean) newValue) {
-                    // unchecked -> checked
-                } else {
-                    // checked -> unchecked
-                }
+            findPreference("location").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if ((Boolean) newValue) {
+                        // unchecked -> checked
+                    } else {
+                        // checked -> unchecked
+                    }
 
-                Log.d("location", newValue.toString());
-                editor.putBoolean("location", (Boolean) newValue);
-                return true;
+                    Log.d("location", newValue.toString());
+                    editor.putBoolean("location", (Boolean) newValue);
+                    return true;
+                }
             });
 
             // set button change listener for Day of Week Setting
-            findPreference("day").setOnPreferenceChangeListener((preference, newValue) -> {
-                if ((Boolean) newValue) {
-                    // unchecked -> checked
-                } else {
-                    // checked -> unchecked
-                }
+            findPreference("day").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if ((Boolean) newValue) {
+                        // unchecked -> checked
+                    } else {
+                        // checked -> unchecked
+                    }
 
-                Log.d("day", newValue.toString());
-                editor.putBoolean("day", (Boolean) newValue);
-                return true;
+                    Log.d("day", newValue.toString());
+                    editor.putBoolean("day", (Boolean) newValue);
+                    return true;
+                }
             });
 
             // set button change listener for Time of Day Setting
-            findPreference("time").setOnPreferenceChangeListener((preference, newValue) -> {
-                if ((Boolean) newValue) {
-                    // unchecked -> checked
-                } else {
-                    // checked -> unchecked
-                }
+            findPreference("time").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if ((Boolean) newValue) {
+                        // unchecked -> checked
+                    } else {
+                        // checked -> unchecked
+                    }
 
-                Log.d("time", newValue.toString());
-                editor.putBoolean("time", (Boolean) newValue);
-                return true;
+                    Log.d("time", newValue.toString());
+                    editor.putBoolean("time", (Boolean) newValue);
+                    return true;
+                }
             });
 
             editor.apply();
