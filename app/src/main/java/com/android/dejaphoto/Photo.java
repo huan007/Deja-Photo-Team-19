@@ -24,6 +24,9 @@ public class Photo {
     String latitude;
     String longitude;
     Bitmap photo;
+    boolean karma;
+    boolean release;
+    int weight;
 
     public String getLocation() {
         return location;
@@ -65,10 +68,11 @@ public class Photo {
         this.photo = photo;
     }
 
+    // Returns a photo with location in bottom-left corner
     public Bitmap appendLocation(Context context, Bitmap bitmap) throws IOException {
 
         // if no location data return normal photo
-        /*if (latitude == null || latitude.length() == 0 || longitude == null || longitude.length() == 0)
+        if (latitude == null || latitude.length() == 0 || longitude == null || longitude.length() == 0)
             return bitmap;
 
         // get address from location data
@@ -78,7 +82,7 @@ public class Photo {
 
         // if no such location return normal photo
         if (location == null)
-            return bitmap;*/
+            return bitmap;
 
         // add location to bottom-left of photo
         Bitmap edit = Bitmap.createBitmap(bitmap);
@@ -86,15 +90,15 @@ public class Photo {
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTextSize((float) (canvas.getWidth() * 0.05));
-        canvas.drawText("Locatoin", (float) (canvas.getWidth() * 0.1), (float) (canvas.getHeight() * 0.81), paint);
+        canvas.drawText(location, (float) (canvas.getWidth() * 0.1), (float) (canvas.getHeight() * 0.8), paint);
 
         return edit;
     }
 
-    public static Uri getImageUri(Context inContext, Bitmap inImage) {
+    public Uri getImageUri(Context inContext) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), photo, "Title", null);
         return Uri.parse(path);
     }
 

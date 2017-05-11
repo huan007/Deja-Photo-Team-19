@@ -69,7 +69,7 @@ public class ImageController {
             @Override
             public void run() {
                 Picasso.with(currentContext)
-                        .load(Photo.getImageUri(currentContext, photo.photo))
+                        .load(photo.getImageUri(currentContext))
                         .resize(width, height)
                         .centerCrop()
                         .into(target);
