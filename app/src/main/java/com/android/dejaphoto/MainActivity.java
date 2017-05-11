@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.Preference;
@@ -31,6 +32,9 @@ public class MainActivity extends AppCompatActivity
 
     // Create an instance of GoogleAPIClient.
     GoogleApiClient mGoogleApiClient;
+    Location mLastLocation;
+    public static double latitude;
+    public static double longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,9 +163,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Getting current location as lat
-    Location mLastLocation;
-    double latitude;
-    double longitude;
+
 
     //Trying to figure out how to implement Googles location API interfaces
     //need to figure out how to check user permissions
