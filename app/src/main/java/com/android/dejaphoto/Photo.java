@@ -1,6 +1,18 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.location.Address;
+import android.location.Geocoder;
+import android.net.Uri;
+import android.provider.MediaStore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Locale;
 
 /**
  * Created by Phillip on 5/3/17.
@@ -49,9 +61,41 @@ public class Photo {
         return photo;
     }
 
-    public void setPhoto(Bitmap photo)
-    {
+    public void setPhoto(Bitmap photo) {
         this.photo = photo;
+    }
+
+    public Bitmap appendLocation(Context context, Bitmap bitmap) throws IOException {
+
+        // if no location data return normal photo
+        /*if (latitude == null || latitude.length() == 0 || longitude == null || longitude.length() == 0)
+            return bitmap;
+
+        // get address from location data
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        Address address = geocoder.getFromLocation(Double.valueOf(latitude), Double.valueOf(longitude), 1).get(0);
+        String location = address.getAddressLine(0);
+
+        // if no such location return normal photo
+        if (location == null)
+            return bitmap;*/
+
+        // add location to bottom-left of photo
+        Bitmap edit = Bitmap.createBitmap(bitmap);
+        Canvas canvas = new Canvas(edit);
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize((float) (canvas.getWidth() * 0.05));
+        canvas.drawText("Locatoin", (float) (canvas.getWidth() * 0.1), (float) (canvas.getHeight() * 0.81), paint);
+
+        return edit;
+    }
+
+    public static Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
 }
