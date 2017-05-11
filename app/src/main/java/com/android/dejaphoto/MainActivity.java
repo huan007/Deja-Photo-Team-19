@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -162,11 +163,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Getting current location as lat
+    Location mLastLocation;
+    double latitude;
+    double longitude;
 
     //Trying to figure out how to implement Googles location API interfaces
+    //need to figure out how to check user permissions
     @Override
     public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+            latitude = mLastLocation.getLatitude();
+            longitude = mLastLocation.getLongitude();
+        }
     }
+
 
     @Override
     public void onConnectionSuspended(int i) {
