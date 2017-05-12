@@ -49,7 +49,6 @@ public class PhotoQueue<E> {
             next = chooser.next();
 
             curr.add(next);
-            System.out.println("Size of queue is " + queue.size());
         } else {
             if(pressedPrev) {
                 curr.next();

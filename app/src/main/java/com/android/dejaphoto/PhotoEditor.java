@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Geocoder;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -52,6 +53,8 @@ public class PhotoEditor {
      * @return modified image
      */
     public PhotoEditor fitScreen(int width, int height, boolean fit) {
+        Log.d("PhotoEditor", "fitting photo to screen");
+
         // create blank canvas
         Bitmap background = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
@@ -82,6 +85,8 @@ public class PhotoEditor {
      * @return resized image
      */
     private Bitmap resize(int width, int height, boolean fit) {
+        Log.d("PhotoEditor", "resizing photo with fit = " + fit);
+
         // get scale factor to match screen size
         float scale;
         if ((bitmap.getHeight() / bitmap.getWidth()) < (height / width))
@@ -104,6 +109,7 @@ public class PhotoEditor {
      * @throws IOException on fail to get location
      */
     public PhotoEditor appendLocation(Context context) throws IOException {
+        Log.d("PhotoEditor", "appending location to photo");
 
         // if no location data return normal photo
         if (photo.latitude == null || photo.latitude.length() == 0 || photo.longitude == null || photo.longitude.length() == 0)
@@ -132,6 +138,8 @@ public class PhotoEditor {
      * @return edited bitmap
      */
     public PhotoEditor addText(String string) {
+        Log.d("PhotoEditor", "adding text to photo");
+
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);

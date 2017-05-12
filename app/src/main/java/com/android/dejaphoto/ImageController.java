@@ -33,7 +33,6 @@ public class ImageController {
         ((WindowManager) currentContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
 
         boolean default_background = (photo == null);
-        System.out.println(photo == null);
 
         // create default photo if photo is null
         if (default_background) {

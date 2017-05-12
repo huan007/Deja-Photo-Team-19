@@ -19,11 +19,9 @@ public class DejaService extends Service {
     PhotoQueue<Photo> queue;
     private IBinder mBinder = new MyBinder();
 
-
     public class DejaThread implements Runnable {
         PhotoQueue<Photo> photoQueue;
         String action;
-
 
         public DejaThread(PhotoQueue<Photo> queue, String action) {
             //Get queue from outside
@@ -44,19 +42,18 @@ public class DejaService extends Service {
 
         public void next() {
             //get next photo
-            Log.d("App Widget", "nextCalled");
-            Photo nextPhoto = queue.next();
-            controller.displayImage(nextPhoto);
+            Log.d("DejaService", "next called");
+            controller.displayImage(queue.next());
         }
 
         public void previous() {
             //get previous photo
-            Log.d("App Widget", "previousCalled");
+            Log.d("DejaService", "previous called");
             Photo previousPhoto = queue.previous();
 
             // no previous photo
             if (previousPhoto == null)
-                Log.d("App Widget", "No Photo");
+                Log.d("DejaService", "no previous photo");
             else
                 controller.displayImage(previousPhoto);
         }
@@ -73,7 +70,6 @@ public class DejaService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
         return mBinder;
     }
 
@@ -108,9 +104,10 @@ public class DejaService extends Service {
         Log.d("DejaService", "onDestroy()");
     }
 
-
     //Helpers
     public void initialize(Context context) {
+        Log.d("DejaService", "initialize()");
+
         //Create controller
         controller = new ImageController(context);
 
@@ -120,7 +117,7 @@ public class DejaService extends Service {
 
         PhotoChooser chooser = new PhotoChooser(gallery.getImages());
         queue = new PhotoQueue<>(chooser);
-        Log.d("DejaService", "initialize()");
+        controller.displayImage(queue.next());
     }
 
     public void runNext() {
