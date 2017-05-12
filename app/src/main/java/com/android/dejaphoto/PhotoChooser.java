@@ -39,7 +39,7 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next element
      */
     private Photo randomNext() {
-        return photos.get(new Random(Calendar.getInstance().get(Calendar.SECOND)).nextInt(photos.size()));
+        return (photos.size() > 0 ) ? photos.get(new Random(Calendar.getInstance().get(Calendar.SECOND)).nextInt(photos.size())) : null;
     }
 
 }
