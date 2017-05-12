@@ -18,16 +18,24 @@ import android.view.MenuItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.maps.model.LatLng;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
 public class MainActivity extends AppCompatActivity
-        implements ConnectionCallbacks, OnConnectionFailedListener {
+        implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
     // Create an instance of GoogleAPIClient.
     GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
+    //LocationRequest mLocationRequest;
+
+    public static Location mCurrentLocation;
     public static double latitude;
     public static double longitude;
 
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
+
 
         // Start DejaService
         Intent intent = new Intent(MainActivity.this, DejaService.class);
@@ -87,17 +96,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //connect to location services on start
-    protected void onStart() {
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
-
-    //disconnect to location services on stop
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,19 +119,37 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     //Trying to figure out how to implement Googles location API interfaces
-    //need to figure out how to check user permissions
     @Override
     public void onConnected(Bundle bundle) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            latitude = mLastLocation.getLatitude();
-            longitude = mLastLocation.getLongitude();
+        LatLng latLng;
+       // Get last known recent location.
+        checkPermission();
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        // Note that this can be NULL if last location isn't already known.
+        if (mCurrentLocation != null) {
+            // Print current location if not null
+            Log.d("DEBUG", "current location: " + mCurrentLocation.toString());
+            latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+
+            latitude = mCurrentLocation.getLatitude();
+            longitude = mCurrentLocation.getLongitude();
+            Log.d("Latitude and Longtitude", "current location: " + latLng.toString());
+        }
+        //don't call startLocationUpdates if mGoogleApiClient is not connected:
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
         }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+      /*  if (i == CAUSE_SERVICE_DISCONNECTED) {
+            Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+        } else if (i == CAUSE_NETWORK_LOST) {
+            Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
+        }*/
     }
 
     @Override
@@ -142,6 +158,71 @@ public class MainActivity extends AppCompatActivity
         // could not be established. Display an error message, or handle
         // the failure silently
     }
+    @Override
+    public void onLocationChanged(Location location) {
+        checkPermission();
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+        //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
+        if (mCurrentLocation != null) {
+            returnLatitude();
+            returnLong();
+
+            //latitude = mCurrentLocation.getLatitude();
+            //longitude = mCurrentLocation.getLongitude();
+        }
+    }
+
+    public void checkPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                ){//Can add more as per requirement
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
+                    123);
+        }
+    }
+
+    //Start getting regular location updates with low power interval
+    protected void startLocationUpdates() {
+       LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+
+        checkPermission();
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        //Thread.dumpStack();
+
+    }
+
+    public static double returnLatitude(){
+        return (latitude = mCurrentLocation.getLatitude());
+    }
+    public static double returnLong(){
+        return (longitude = mCurrentLocation.getLongitude());
+    }
+
+    //connect to location services on start
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+    //disconnect from location services on stop
+    protected void onStop() {
+
+        // Disconnecting the client invalidates it.
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+        // only stop if it's connected, otherwise we crash
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
 
     // For getting permission from user to access photos -- Phillip
     @Override
