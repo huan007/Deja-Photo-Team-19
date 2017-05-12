@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity
 
         checkPermission();
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        Thread.dumpStack();
+        //Thread.dumpStack();
 
     }
 
