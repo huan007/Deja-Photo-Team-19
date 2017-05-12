@@ -2,17 +2,11 @@ package com.android.dejaphoto;
 
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.util.Log;
-import android.view.Display;
 import android.view.WindowManager;
-
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.IOException;
 
@@ -23,8 +17,6 @@ import java.io.IOException;
 
 public class ImageController {
 
-    Target target;
-    Callback callback;
     Context currentContext;
     WallpaperManager wallpaperManager;
 
@@ -34,49 +26,33 @@ public class ImageController {
     }
 
     /**
-     * Change the wallpaper
+     * Change the wallpaper to specified photo.
      */
-    public void displayImage(final Photo photo) {
-        Display display = ((WindowManager) currentContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+    public void displayImage(Photo photo) {
         Point size = new Point();
-        display.getSize(size);
-        final int width = size.x;
-        final int height = size.y;
+        ((WindowManager) currentContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
 
-        target = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                try {
-                    Log.d("ImageController", "Wallpaper Changed");
-                    wallpaperManager.setBitmap(photo.appendLocation(currentContext, bitmap));
-                } catch (IOException e) {
-                    Log.d("ImageController", "Wallpaper Not Changed");
-                    e.printStackTrace();
-                }
-            }
+        boolean default_background = (photo == null);
 
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                Log.d("ImageController", "Wallpaper Not Changed");
-            }
+        // create default photo if photo is null
+        if (default_background) {
+            Log.d("ImageController", "create default wallpaper");
+            photo = new Photo();
+            photo.photo = BitmapFactory.decodeResource(currentContext.getResources(), R.drawable.apple);
+        }
 
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Picasso.with(currentContext)
-                        .load(photo.getImageUri(currentContext))
-                        .resize(width, height)
-                        .centerCrop()
-                        .into(target);
-            }
-        };
-
-        new Handler(currentContext.getMainLooper()).post(runnable);
+        // set wallpaper
+        try {
+            Log.d("ImageController", "change wallpaper successful");
+            wallpaperManager.setBitmap(PhotoEditor.start(photo)
+                    .fitScreen(size.x, size.y, !default_background)
+                    .appendLocation(currentContext)
+                    .addText(default_background ? "No Photos in Gallery" : "")
+                    .finish());
+        } catch (IOException e) {
+            Log.d("ImageController", "change wallpaper unsuccessful");
+            e.printStackTrace();
+        }
     }
 
     /**

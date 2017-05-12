@@ -12,7 +12,9 @@ public class PhotoQueue<E> {
 
     Chooser<E> chooser;         // chooses next E
     LinkedList<E> queue;        // stores up to max E
-    ListIterator<E> curr;       // current E
+    ListIterator<E> curr;       // iterator to traverse through queue
+    E currentPhoto;             // current E
+    boolean pressedPrev;        // boolean to track if traverse back through queue
 
     /**
      * Default contructor.
@@ -23,6 +25,8 @@ public class PhotoQueue<E> {
         this.chooser = chooser;
         queue = new LinkedList<E>();
         curr = queue.listIterator();
+        currentPhoto = null;
+        pressedPrev = false;
     }
 
     /**
@@ -43,13 +47,17 @@ public class PhotoQueue<E> {
 
             // get next element
             next = chooser.next();
+
             curr.add(next);
-            System.out.println("Size of queue is " + queue.size());
         } else {
+            if(pressedPrev) {
+                curr.next();
+                pressedPrev = false;
+            }
             next = curr.next();
         }
-
-        return next;
+        currentPhoto = next;
+        return currentPhoto;
     }
 
     /**
@@ -66,8 +74,22 @@ public class PhotoQueue<E> {
         if (curr.previousIndex() == -1) {
             return queue.getFirst();
         }
+        if(!pressedPrev) {
+            curr.previous();
+            pressedPrev = true;
+        }
 
-        return curr.previous();
+        currentPhoto = curr.previous();
+        return currentPhoto;
+    }
+
+    /**
+     * Returns the photo at iterator
+     *
+     * @return photo iterator is currently at
+     */
+    public E getCurrentPhoto() {
+        return currentPhoto;
     }
 
     /**
@@ -81,3 +103,4 @@ public class PhotoQueue<E> {
 
 
 }
+
