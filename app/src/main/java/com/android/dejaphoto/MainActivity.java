@@ -97,19 +97,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    //connect to location services on start
-    protected void onStart() {
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
-
-    //disconnect to location services on stop
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
-    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -155,7 +142,7 @@ public class MainActivity extends AppCompatActivity
             startLocationUpdates();
         }
     }
-<<<
+
     @Override
     public void onConnectionSuspended(int i) {
       /*  if (i == CAUSE_SERVICE_DISCONNECTED) {
@@ -235,10 +222,6 @@ public class MainActivity extends AppCompatActivity
         }
         super.onStop();
     }
-
-
-
-
 
 
     // For getting permission from user to access photos -- Phillip
