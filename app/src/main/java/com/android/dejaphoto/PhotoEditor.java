@@ -30,9 +30,9 @@ public class PhotoEditor {
      *
      * @param photo photo to edit
      */
-    private PhotoEditor(Photo photo) {
+    private PhotoEditor(Photo photo, Bitmap bitmap) {
         this.photo = photo;
-        this.bitmap = Bitmap.createBitmap(photo.photo).copy(Bitmap.Config.ARGB_8888, true);
+        this.bitmap = bitmap;
     }
 
     /**
@@ -41,8 +41,8 @@ public class PhotoEditor {
      * @param photo photo to edit
      * @return PhotoEditor object
      */
-    public static PhotoEditor start(Photo photo) {
-        return new PhotoEditor(photo);
+    public static PhotoEditor start(Photo photo, Bitmap bitmap) {
+        return new PhotoEditor(photo, bitmap);
     }
 
     /**
@@ -82,23 +82,37 @@ public class PhotoEditor {
      *
      * @param width  width dimension
      * @param height width dimension
+     * @param fit    fit or centerCrop
      * @return resized image
      */
     private Bitmap resize(int width, int height, boolean fit) {
         Log.d("PhotoEditor", "resizing photo with fit = " + fit);
 
         // get scale factor to match screen size
-        float scale;
-        if ((bitmap.getHeight() / bitmap.getWidth()) < (height / width))
-            scale = fit ? (float) width / bitmap.getWidth() : (float) height / bitmap.getHeight();
-        else
-            scale = fit ? (float) height / bitmap.getHeight() : (float) width / bitmap.getWidth();
+        float scale = getScale(width, height, fit);
 
         // create new resized bitmap
         return Bitmap.createScaledBitmap(bitmap,
                 (int) (scale * bitmap.getWidth()),
                 (int) (scale * bitmap.getHeight()),
                 false);
+    }
+
+    /**
+     * Gets scale factor to resize image to display size.
+     *
+     * @param width  width of display
+     * @param height height of display
+     * @param fit    fit or centerCrop
+     * @return scale factor
+     */
+    public float getScale(int width, int height, boolean fit) {
+        float scale;
+        if ((bitmap.getHeight() / bitmap.getWidth()) < (height / width))
+            scale = fit ? (float) width / bitmap.getWidth() : (float) height / bitmap.getHeight();
+        else
+            scale = fit ? (float) height / bitmap.getHeight() : (float) width / bitmap.getWidth();
+        return scale;
     }
 
     /**
@@ -141,10 +155,13 @@ public class PhotoEditor {
         Log.d("PhotoEditor", "adding text to photo");
 
         Canvas canvas = new Canvas(bitmap);
+
+        // set text style
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTextSize((float) (canvas.getWidth() * 0.05));
         paint.setTextAlign(Paint.Align.CENTER);
+
         canvas.drawText(string, (float) (canvas.getWidth() / 2), (float) (canvas.getHeight() / 2) - (paint.getTextSize() / 2), paint);
 
         return this;
