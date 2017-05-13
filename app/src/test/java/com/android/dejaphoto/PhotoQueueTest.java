@@ -39,6 +39,13 @@ public class PhotoQueueTest {
             history.add(next);
             return next;
         }
+
+        /**
+         * Refresh the list of elements.
+         */
+        @Override
+        public void refresh() {
+        }
     }
 
     IntChooser chooser;
@@ -71,7 +78,9 @@ public class PhotoQueueTest {
     public void previousTest() {
         nextTest();
         for (int i = 0; i < TRIALS; ++i) {
-            assertEquals(queue.previous(), chooser.history.get(chooser.history.size() - 1 - ((i < PhotoQueue.MAX_SIZE) ? i : PhotoQueue.MAX_SIZE - 1)));
+            int q = queue.previous();
+            int c = chooser.history.get((i < 10) ? chooser.history.size() - 2 - i : chooser.history.size() - PhotoQueue.MAX_SIZE);
+            assertEquals(q, c);
             assertEquals(queue.size(), PhotoQueue.MAX_SIZE);
         }
     }

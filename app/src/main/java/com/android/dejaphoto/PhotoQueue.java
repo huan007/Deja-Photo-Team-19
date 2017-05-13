@@ -8,13 +8,11 @@ import java.util.ListIterator;
  */
 public class PhotoQueue<E> {
 
-    public static final int MAX_SIZE = 10;
+    public static final int MAX_SIZE = 11;
 
-    Chooser<E> chooser;         // chooses next E
-    LinkedList<E> queue;        // stores up to max E
-    ListIterator<E> curr;       // iterator to traverse through queue
-    E currentPhoto;             // current E
-    boolean pressedPrev;        // boolean to track if traverse back through queue
+    private Chooser<E> chooser;         // chooses next E
+    private LinkedList<E> prevQ;
+    private LinkedList<E> nextQ;
 
     /**
      * Default contructor.
@@ -23,10 +21,8 @@ public class PhotoQueue<E> {
      */
     public PhotoQueue(Chooser<E> chooser) {
         this.chooser = chooser;
-        queue = new LinkedList<E>();
-        curr = queue.listIterator();
-        currentPhoto = null;
-        pressedPrev = false;
+        nextQ = new LinkedList<>();
+        prevQ = new LinkedList<>();
     }
 
     /**
@@ -35,29 +31,19 @@ public class PhotoQueue<E> {
      * @return the next element in the list
      */
     public E next() {
-        E next;
-
         // if curr is end of queue
-        if (curr.nextIndex() == queue.size()) {
+        if (nextQ.isEmpty()) {
             // queue is at max size
-            if (queue.size() == MAX_SIZE) {
-                queue.removeFirst();
-                curr = queue.listIterator(queue.size());
-            }
+            if (prevQ.size() == MAX_SIZE)
+                prevQ.pollFirst();
 
             // get next element
-            next = chooser.next();
-
-            curr.add(next);
+            prevQ.addLast(chooser.next());
         } else {
-            if(pressedPrev) {
-                curr.next();
-                pressedPrev = false;
-            }
-            next = curr.next();
+            prevQ.addLast(nextQ.pollFirst());
         }
-        currentPhoto = next;
-        return currentPhoto;
+
+        return prevQ.getLast();
     }
 
     /**
@@ -67,29 +53,16 @@ public class PhotoQueue<E> {
      */
     public E previous() {
         // size of queue is 0
-        if( queue.isEmpty())
+        if (prevQ.isEmpty())
             return null;
 
         // curr is at beginning of list
-        if (curr.previousIndex() == -1) {
-            return queue.getFirst();
+        if (prevQ.size() == 1) {
+            return prevQ.getFirst();
+        } else {
+            nextQ.addFirst(prevQ.pollLast());
+            return prevQ.getLast();
         }
-        if(!pressedPrev) {
-            curr.previous();
-            pressedPrev = true;
-        }
-
-        currentPhoto = curr.previous();
-        return currentPhoto;
-    }
-
-    /**
-     * Returns the photo at iterator
-     *
-     * @return photo iterator is currently at
-     */
-    public E getCurrentPhoto() {
-        return currentPhoto;
     }
 
     /**
@@ -98,9 +71,26 @@ public class PhotoQueue<E> {
      * @return the number of elements in this list
      */
     public int size() {
-        return queue.size();
+        return prevQ.size() + nextQ.size();
     }
 
+    /**
+     * Returns the photo at iterator
+     *
+     * @return photo iterator is currently at
+     */
+    public E getCurrentPhoto() {
+        return (prevQ == null) ? null : prevQ.getLast();
+    }
+
+    /**
+     * Returns the chooser.
+     *
+     * @return chooser
+     */
+    public Chooser<E> getChooser() {
+        return chooser;
+    }
 
 }
 

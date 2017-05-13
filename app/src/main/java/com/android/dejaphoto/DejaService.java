@@ -13,6 +13,7 @@ import java.io.File;
 public class DejaService extends Service {
     public static final String nextAction = "NEXT";
     public static final String previousAction = "PREVIOUS";
+    public static final String refreshAction = "REFRESH";
     public static final String actionFlag = "ACTION_FLAG";
     public static final String karmaAction = "KARMA";
     public static final String releaseAction = "RELEASE";
@@ -43,6 +44,8 @@ public class DejaService extends Service {
                     karma();
                 if (action.equals(releaseAction))
                     release();
+                if (action.equals(refreshAction))
+                    refresh();
             }
         }
 
@@ -71,11 +74,16 @@ public class DejaService extends Service {
             photoQueue.getCurrentPhoto().setKarma();
         }
 
-        public void release()
-        {
+        public void release() {
             Log.d("DejaService", "photo released bye bye");
 
             photoQueue.getCurrentPhoto().releasePhoto();
+        }
+
+            public void refresh() {
+            Log.d("DejaService", "refresh called");
+            queue.getChooser().refresh();
+            controller.displayImage(queue.next());
         }
     }
 
@@ -118,6 +126,8 @@ public class DejaService extends Service {
                 runKarma();
             if (action.equals(releaseAction))
                 runRelease();
+            if (action.equals(refreshAction))
+                runRefresh();
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -158,11 +168,15 @@ public class DejaService extends Service {
     {
         Thread worker = new Thread(new DejaThread(queue, karmaAction));
         worker.start();
+
     }
 
-    public void runRelease()
-    {
+    public void runRelease() {
         Thread worker = new Thread(new DejaThread(queue, releaseAction));
+    }
+
+    public void runRefresh() {
+        Thread worker = new Thread(new DejaThread(queue, refreshAction));
         worker.start();
     }
 

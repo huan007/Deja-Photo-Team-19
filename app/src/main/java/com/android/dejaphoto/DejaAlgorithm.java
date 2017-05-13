@@ -14,16 +14,17 @@ public class DejaAlgorithm {
 
     TreeSet<Photo> set;
 
+
     public DejaAlgorithm() {
-        set = new TreeSet<>(new Comparator<Photo>()  {
+        set = new TreeSet<>(new Comparator<Photo>() {
             @Override
             public int compare(Photo o1, Photo o2) {
                 if (o1.location + o1.datetime == o2.location + o2.datetime)
                     return 0;
 
-                if( o1.weight != o2.weight)
+                if (o1.weight != o2.weight)
                     return o1.weight - o2.weight;
-                else if( o1.karma != o2.karma)
+                else if (o1.karma != o2.karma)
                     return (o1.karma) ? 1 : -1;
                 else  // TODO RECENCY
                     return 1;
@@ -31,21 +32,27 @@ public class DejaAlgorithm {
         });
     }
 
-    public void fill(List<Photo> photoList) {
+    public void initializeSet(List<Photo> photoList) {
+        // null check
+        if (photoList == null)
+            return;
+
+        // clear current set
+        set.clear();
 
         // reset weight to 0
-        for ( Photo photo: photoList ) {
+        for (Photo photo : photoList) {
             photo.weight = 0;
         }
 
         // increment weight of photos that are relevant
-        for ( Photo photo: photoList ) {
+        for (Photo photo : photoList) {
             photo.weight++;
         }
 
         // insert photos into BST
-        for ( Photo photo: photoList ) {
-            if(!photo.release)
+        for (Photo photo : photoList) {
+            if (!photo.release)
                 set.add(photo);
         }
     }

@@ -1,12 +1,15 @@
 package com.android.dejaphoto;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.ActivityCompat;
@@ -31,7 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
 public class MainActivity extends AppCompatActivity
-        implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
+        implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     // Create an instance of GoogleAPIClient.
     GoogleApiClient mGoogleApiClient;
@@ -54,7 +57,6 @@ public class MainActivity extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
-
 
         // Start DejaService
         Intent intent = new Intent(MainActivity.this, DejaService.class);
@@ -134,12 +136,11 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-
     //Trying to figure out how to implement Googles location API interfaces
     @Override
     public void onConnected(Bundle bundle) {
         LatLng latLng;
-       // Get last known recent location.
+        // Get last known recent location.
         checkPermission();
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         // Note that this can be NULL if last location isn't already known.
@@ -173,6 +174,7 @@ public class MainActivity extends AppCompatActivity
         // could not be established. Display an error message, or handle
         // the failure silently
     }
+
     @Override
     public void onLocationChanged(Location location) {
         checkPermission();
@@ -189,34 +191,35 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void checkPermission(){
+    public void checkPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                ){//Can add more as per requirement
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                ) {//Can add more as per requirement
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     123);
         }
     }
 
     //Start getting regular location updates with low power interval
     protected void startLocationUpdates() {
-       LocationRequest mLocationRequest = new LocationRequest();
+        LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
 
         checkPermission();
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        Thread.dumpStack();
+        //Thread.dumpStack();
 
     }
 
-    public static double returnLatitude(){
+    public static double returnLatitude() {
         return (latitude = mCurrentLocation.getLatitude());
     }
-    public static double returnLong(){
+
+    public static double returnLong() {
         return (longitude = mCurrentLocation.getLongitude());
     }
 
@@ -225,6 +228,7 @@ public class MainActivity extends AppCompatActivity
         mGoogleApiClient.connect();
         super.onStart();
     }
+
     //disconnect from location services on stop
     protected void onStop() {
 
@@ -237,11 +241,6 @@ public class MainActivity extends AppCompatActivity
         }
         super.onStop();
     }
-
-
-
-
-
 
     // For getting permission from user to access photos -- Phillip
     @Override
@@ -270,19 +269,40 @@ public class MainActivity extends AppCompatActivity
 
     public static class PrefsFragment extends PreferenceFragment {
 
+        AlarmManager alarmManager;
+        PendingIntent pending;
+
         @Override
         public void onCreate(Bundle saveInstanceState) {
             super.onCreate(saveInstanceState);
             addPreferencesFromResource(R.xml.preferences);
 
-            final SharedPreferences.Editor editor = getContext().getSharedPreferences("settings", MODE_PRIVATE).edit();
+            final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+            final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            // update homescreen automatically at a rate specified by the user
+            final Handler refresh = new Handler();
+            refresh.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // set next photo
+                    Intent serviceIntent = new Intent(getContext(), DejaService.class);
+                    serviceIntent.putExtra(DejaService.actionFlag, DejaService.refreshAction);
+                    Log.d("Refresh Receiver", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+                    getContext().startService(serviceIntent);
+
+                    // call handler again
+                    refresh.postDelayed(this, sharedPreferences.getInt("interval", 300) * 1000);
+                }
+            }, sharedPreferences.getInt("interval", 300) * 1000);
 
             // set button change listener for Interval Setting
             findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-
+                    int interval = Integer.valueOf((String) newValue);
                     editor.putInt("interval", Integer.valueOf((String) newValue));
+                    editor.apply();
                     Log.d("interval value", "change to " + newValue);
                     return true;
                 }
@@ -304,8 +324,9 @@ public class MainActivity extends AppCompatActivity
                         findPreference("time").setEnabled(false);
                     }
 
-                    Log.d("deja value", newValue.toString());
                     editor.putBoolean("dejavu", (Boolean) newValue);
+                    editor.apply();
+                    Log.d("deja value", newValue.toString());
                     return true;
                 }
             });
@@ -314,14 +335,9 @@ public class MainActivity extends AppCompatActivity
             findPreference("location").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if ((Boolean) newValue) {
-                        // unchecked -> checked
-                    } else {
-                        // checked -> unchecked
-                    }
-
-                    Log.d("location", newValue.toString());
                     editor.putBoolean("location", (Boolean) newValue);
+                    editor.apply();
+                    Log.d("location", newValue.toString());
                     return true;
                 }
             });
@@ -330,14 +346,9 @@ public class MainActivity extends AppCompatActivity
             findPreference("day").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if ((Boolean) newValue) {
-                        // unchecked -> checked
-                    } else {
-                        // checked -> unchecked
-                    }
-
-                    Log.d("day", newValue.toString());
                     editor.putBoolean("day", (Boolean) newValue);
+                    editor.apply();
+                    Log.d("day", newValue.toString());
                     return true;
                 }
             });
@@ -346,19 +357,13 @@ public class MainActivity extends AppCompatActivity
             findPreference("time").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if ((Boolean) newValue) {
-                        // unchecked -> checked
-                    } else {
-                        // checked -> unchecked
-                    }
-
-                    Log.d("time", newValue.toString());
                     editor.putBoolean("time", (Boolean) newValue);
+                    editor.apply();
+                    Log.d("time", newValue.toString());
                     return true;
                 }
             });
-
-            editor.apply();
         }
+
     }
 }

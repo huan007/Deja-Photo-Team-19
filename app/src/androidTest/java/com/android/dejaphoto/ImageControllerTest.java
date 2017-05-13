@@ -7,10 +7,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.test.rule.ActivityTestRule;
+import android.util.Log;
 
 import org.junit.*;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,18 +48,24 @@ public class ImageControllerTest {
 
         List<Photo> list = new LinkedList<>();
 
-        for(int i = 0; i < 5; i++)
+        for(int i = 0; i < 10; i++)
         {
             list.add(queue.next());
-            System.out.print("hello");
         }
 
         for (Photo photo : list)
         {
             assertTrue(photo instanceof Photo);
+            Log.d("Tester", photo.toString());
+            String dow = photo.getDayOfTheWeek();
+            if (dow != null) {
+                Log.d("Tester", "Day of the Week: " + dow);
+            }
+            else
+                Log.d("Tester", "Day of the Week: NULL");
         }
 
-        assertEquals(list.size(), 5);
+        assertEquals(list.size(), 10);
     }
 
     @Test

@@ -4,7 +4,7 @@
 
         <EditTextPreference
             android:capitalize="words"
-            android:defaultValue="60"
+            android:defaultValue="300"
             android:inputType="number"
             android:key="interval"
             android:maxLines="1"

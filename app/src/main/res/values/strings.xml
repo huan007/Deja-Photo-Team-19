@@ -8,7 +8,7 @@
     <string name="settings_deja">Deja Vu Mode</string>
 
     <string name="interval_title">Refresh Interval</string>
-    <string name="interval_summary">Enter update frequency in minutes</string>
+    <string name="interval_summary">Enter update frequency in seconds</string>
 
     <string name="dejavu_title">Deja Vu Mode</string>
     <string name="dejavu_summary">Displays photos that remind you of past times and locales</string>
