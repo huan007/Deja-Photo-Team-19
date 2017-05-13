@@ -12,6 +12,9 @@ import android.provider.MediaStore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -41,6 +44,44 @@ public class Photo {
 
     public String getDatetime() {
         return datetime;
+    }
+
+    public String getDayOfTheWeek()
+    {
+        if (datetime != null) {
+            SimpleDateFormat rawFormat = new SimpleDateFormat("yyyy:MM:dd");
+            SimpleDateFormat dowFormat = new SimpleDateFormat("EEEE");
+            try {
+                Date rawDate = rawFormat.parse(datetime);
+                String newDate = dowFormat.format(rawDate);
+                return newDate;
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else return null;
+    }
+
+    public String getHour()
+    {
+        if (datetime != null)
+        {
+            SimpleDateFormat rawFormat = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss");
+            SimpleDateFormat hourFormat = new SimpleDateFormat("kk");
+            try
+            {
+                Date rawDate = rawFormat.parse(datetime);
+                String hour = hourFormat.format(rawDate);
+                return hour;
+            }
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else return null;
     }
 
     public void setDatetime(String datetime) {
