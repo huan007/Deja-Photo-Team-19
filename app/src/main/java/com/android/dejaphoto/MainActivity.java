@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -99,6 +100,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+    //connect to location services on start
+    /*protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }*/
+
+    //disconnect to location services on stop
+    /*protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -352,5 +366,4 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
-
 }
