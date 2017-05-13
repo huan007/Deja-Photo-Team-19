@@ -29,7 +29,9 @@ public class Photo {
     int weight;
 
     // Release photo
-    public void releasePhoto(Photo photo){ photo.release = true; }
+    public void releasePhoto(){ release = true; }
+
+    public void setKarma(){ karma = true; }
 
     public String getLocation() {
         return location;

@@ -1,5 +1,6 @@
 package com.android.dejaphoto;
 
+import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -10,11 +11,13 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.widget.Toast;
 
 
 import java.io.File;
@@ -27,14 +30,17 @@ public class AppWidget extends AppWidgetProvider {
     public static String settingsAction = "openSettings";
     public static String nextAction = "nextPhoto";
     public static String previousAction = "previousPhoto";
-
+    public static String karmaAction = "karma";
+    public static String releaseAction = "release";
 
 
     ImageController controller;
-    PhotoQueue<Photo> queue;
+     PhotoQueue<Photo> queue;
 
     DejaService mService;
     boolean mBound = false;
+
+
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -74,6 +80,19 @@ public class AppWidget extends AppWidgetProvider {
             previousPhotoIntent.setAction(previousAction);
             PendingIntent pendingPreviousPhotoIntent = PendingIntent.getBroadcast(context, 0, previousPhotoIntent, 0);
             views.setOnClickPendingIntent(R.id.previousButton, pendingPreviousPhotoIntent);
+
+            //Register karma button
+
+            Intent karmaIntent = new Intent(context, AppWidget.class);
+            karmaIntent.setAction(karmaAction);
+            PendingIntent pendingKarmaIntent = PendingIntent.getBroadcast(context, 0, karmaIntent, 0);
+            views.setOnClickPendingIntent(R.id.karmaButton, pendingKarmaIntent);
+
+            //Register release button
+            Intent releaseIntent = new Intent(context, AppWidget.class);
+            releaseIntent.setAction(releaseAction);
+            PendingIntent pendingReleaseIntent = PendingIntent.getBroadcast(context, 0, releaseIntent, 0);
+            views.setOnClickPendingIntent(R.id.releaseButton, pendingReleaseIntent);
 
 
             //update the intents
@@ -147,6 +166,25 @@ public class AppWidget extends AppWidgetProvider {
             context.startService(serviceIntent);
             //mService.runPrevious();
         }
+
+        if (intent.getAction().equals(karmaAction))
+        {
+            Log.d("AppWidget","karmaAction is called");
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.karmaAction);
+            context.startService(serviceIntent);
+        }
+
+        if (intent.getAction().equals(releaseAction))
+        {
+            Log.d("AppWidget","releaseAction is called");
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.releaseAction);
+            context.startService(serviceIntent);
+
+
+        }
+
         Log.d("App Widget", "End onReceive()");
     }
 
