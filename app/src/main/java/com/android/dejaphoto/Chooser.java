@@ -11,4 +11,9 @@ public interface Chooser<E> {
      * @return the next element
      */
     E next();
+
+    /**
+     * Refresh the list of elements.
+     */
+    void refresh();
 }

@@ -140,7 +140,7 @@ public class PhotoEditor {
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTextSize((float) (canvas.getWidth() * 0.05));
-        canvas.drawText(location, (float) (canvas.getWidth() * 0.1), (float) (canvas.getHeight() * 0.8), paint);
+        canvas.drawText(location, (float) (canvas.getWidth() * 0.05), (float) (canvas.getHeight() * 0.75), paint);
 
         return this;
     }

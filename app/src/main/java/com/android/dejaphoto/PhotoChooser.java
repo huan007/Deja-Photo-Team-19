@@ -1,6 +1,6 @@
 package com.android.dejaphoto;
 
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -10,9 +10,11 @@ import java.util.Random;
 public class PhotoChooser implements Chooser<Photo> {
 
     List<Photo> photos;
+    DejaAlgorithm dejaPhotos;
 
     public PhotoChooser(List<Photo> photos) {
         this.photos = photos;
+        dejaPhotos = new DejaAlgorithm();
     }
 
     /**
@@ -20,6 +22,7 @@ public class PhotoChooser implements Chooser<Photo> {
      *
      * @return the next photo
      */
+    @Override
     public Photo next() {
         return (false) ? dejaNext() : randomNext();
     }
@@ -30,7 +33,7 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next photo
      */
     private Photo dejaNext() {
-        return null;
+        return dejaPhotos.next();
     }
 
     /**
@@ -39,7 +42,18 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next element
      */
     private Photo randomNext() {
-        return (photos.size() > 0 ) ? photos.get(new Random(Calendar.getInstance().get(Calendar.SECOND)).nextInt(photos.size())) : null;
+        return (photos.size() > 0) ? photos.get(new Random(System.currentTimeMillis()).nextInt(photos.size())) : null;
+    }
+
+    /**
+     * Refresh the list of photos.
+     */
+    @Override
+    public void refresh() {
+        if (false)
+            dejaPhotos.initializeSet(null);
+        else
+            Collections.shuffle(photos, new Random(System.currentTimeMillis()));
     }
 
 }

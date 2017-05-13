@@ -13,6 +13,7 @@ import java.io.File;
 public class DejaService extends Service {
     public static final String nextAction = "NEXT";
     public static final String previousAction = "PREVIOUS";
+    public static final String refreshAction = "REFRESH";
     public static final String actionFlag = "ACTION_FLAG";
 
     ImageController controller;
@@ -37,6 +38,8 @@ public class DejaService extends Service {
                     next();
                 if (action.equals(previousAction))
                     previous();
+                if (action.equals(refreshAction))
+                    refresh();
             }
         }
 
@@ -56,6 +59,12 @@ public class DejaService extends Service {
                 Log.d("DejaService", "no previous photo");
             else
                 controller.displayImage(previousPhoto);
+        }
+
+        public void refresh() {
+            Log.d("DejaService", "refresh called");
+            queue.getChooser().refresh();
+            controller.displayImage(queue.next());
         }
     }
 
@@ -94,6 +103,8 @@ public class DejaService extends Service {
                 runNext();
             if (action.equals(previousAction))
                 runPrevious();
+            if (action.equals(refreshAction))
+                runRefresh();
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -127,6 +138,11 @@ public class DejaService extends Service {
 
     public void runPrevious() {
         Thread worker = new Thread(new DejaThread(queue, previousAction));
+        worker.start();
+    }
+
+    public void runRefresh() {
+        Thread worker = new Thread(new DejaThread(queue, refreshAction));
         worker.start();
     }
 
