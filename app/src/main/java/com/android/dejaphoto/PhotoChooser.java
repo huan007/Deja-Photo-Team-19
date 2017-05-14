@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.google.maps.GeoApiContext;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -18,10 +20,12 @@ public class PhotoChooser implements Chooser<Photo> {
     List<Photo> photos;
     DejaSet dejaPhotos;
     boolean dejaMode;
+    GeoApiContext geoContext;
 
-    public PhotoChooser(List<Photo> photos) {
+    public PhotoChooser(List<Photo> photos, GeoApiContext geoContext) {
         this.photos = photos;
         dejaPhotos = new DejaSet();
+        this.geoContext = geoContext;
         dejaMode = false;
     }
 

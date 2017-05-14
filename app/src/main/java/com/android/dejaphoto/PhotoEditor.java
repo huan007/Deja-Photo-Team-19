@@ -55,6 +55,10 @@ public class PhotoEditor {
     public PhotoEditor fitScreen(int width, int height, boolean fit) {
         Log.d("PhotoEditor", "fitting photo to screen");
 
+        // incorrect params
+        if (width <=0 || height <= 0)
+            return this;
+
         // create blank canvas
         Bitmap background = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
@@ -85,8 +89,12 @@ public class PhotoEditor {
      * @param fit    fit or centerCrop
      * @return resized image
      */
-    private Bitmap resize(int width, int height, boolean fit) {
+    public Bitmap resize(int width, int height, boolean fit) {
         Log.d("PhotoEditor", "resizing photo with fit = " + fit);
+
+        // incorrect params
+        if (width <=0 || height <= 0)
+            return null;
 
         // get scale factor to match screen size
         float scale = getScale(width, height, fit);
@@ -107,6 +115,10 @@ public class PhotoEditor {
      * @return scale factor
      */
     public float getScale(int width, int height, boolean fit) {
+        // incorrect params
+        if (width <=0 || height <= 0)
+            return -1;
+
         float scale;
         if ((bitmap.getHeight() / bitmap.getWidth()) < (height / width))
             scale = fit ? (float) width / bitmap.getWidth() : (float) height / bitmap.getHeight();
@@ -154,6 +166,10 @@ public class PhotoEditor {
      */
     public PhotoEditor addText(String string) {
         Log.d("PhotoEditor", "adding text to photo");
+
+        // null check
+        if (string == null)
+            return this;
 
         Canvas canvas = new Canvas(bitmap);
 

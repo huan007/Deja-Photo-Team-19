@@ -8,6 +8,8 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.google.maps.GeoApiContext;
+
 import java.io.File;
 
 import static com.android.dejaphoto.AppWidget.releaseAction;
@@ -19,6 +21,8 @@ public class DejaService extends Service {
     public static final String releaseAction = "RELEASE";
     public static final String actionFlag = "ACTION_FLAG";
     public static final String karmaAction = "KARMA";
+
+    GeoApiContext geoContext;
 
     ImageController controller;
     PhotoQueue<Photo> queue;
@@ -146,12 +150,14 @@ public class DejaService extends Service {
 
         //Create controller
         controller = new ImageController(context);
+        //Get GeoAPI context
+        geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
 
         //Get list of pictures
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context);
+        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context, geoContext);
 
-        PhotoChooser chooser = new PhotoChooser(gallery.getImages());
+        PhotoChooser chooser = new PhotoChooser(gallery.getImages(), geoContext);
         queue = new PhotoQueue<>(chooser);
         controller.displayImage(queue.next(getApplicationContext()));
     }

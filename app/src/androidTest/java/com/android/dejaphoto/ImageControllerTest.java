@@ -9,6 +9,8 @@ import android.os.Environment;
 import android.support.test.rule.ActivityTestRule;
 import android.util.Log;
 
+import com.google.maps.GeoApiContext;
+
 import org.junit.*;
 
 import java.io.File;
@@ -26,6 +28,7 @@ import static junit.framework.Assert.assertTrue;
  */
 
 public class ImageControllerTest {
+    GeoApiContext geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
 
     @Rule
     public ActivityTestRule activityTestRule = new ActivityTestRule(MainActivity.class);
@@ -41,9 +44,9 @@ public class ImageControllerTest {
 
         //Get list of pictures
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, mainActivity.getApplicationContext());
+        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, mainActivity.getApplicationContext(), geoContext);
 
-        PhotoChooser chooser = new PhotoChooser(gallery.images);
+        PhotoChooser chooser = new PhotoChooser(gallery.images, geoContext);
         PhotoQueue<Photo> queue = new PhotoQueue<>(chooser);
 
         List<Photo> list = new LinkedList<>();
