@@ -19,7 +19,6 @@ public class DejaService extends Service {
     public static final String releaseAction = "RELEASE";
     public static final String actionFlag = "ACTION_FLAG";
     public static final String karmaAction = "KARMA";
-    public static final String releaseAction = "RELEASE";
 
     ImageController controller;
     PhotoQueue<Photo> queue;
@@ -49,8 +48,6 @@ public class DejaService extends Service {
                     release();
                 if (action.equals(refreshAction))
                     refresh();
-                //if (action.equals(releaseAction))
-                  //  Photo.releasePhoto(queue.getCurrentPhoto());
             }
         }
 
@@ -133,8 +130,6 @@ public class DejaService extends Service {
                 runRelease();
             if (action.equals(refreshAction))
                 runRefresh();
-           // if (action.equals(releaseAction))
-             //   releasePhoto(queue.getCurrentPhoto());
         }
 
         return super.onStartCommand(intent, flags, startId);
