@@ -31,6 +31,12 @@ public class UpdateLocationTimeTest {
         assertEquals("Saturday", dayOfWeek);
     }
 
+    @Test
+    public void testZipCode(){
+
+
+        String zipCode = UpdateLocationTime.getCurrentZip()
+    }
 
 
 
