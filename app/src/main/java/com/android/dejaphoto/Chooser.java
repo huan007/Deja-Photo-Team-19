@@ -1,5 +1,7 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
+
 /**
  * Returns a next element.
  */

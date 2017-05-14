@@ -10,10 +10,13 @@ import android.util.Log;
 
 import java.io.File;
 
+import static com.android.dejaphoto.AppWidget.releaseAction;
+
 public class DejaService extends Service {
     public static final String nextAction = "NEXT";
     public static final String previousAction = "PREVIOUS";
     public static final String refreshAction = "REFRESH";
+    public static final String releaseAction = "RELEASE";
     public static final String actionFlag = "ACTION_FLAG";
 
     ImageController controller;
@@ -40,6 +43,8 @@ public class DejaService extends Service {
                     previous();
                 if (action.equals(refreshAction))
                     refresh();
+                //if (action.equals(releaseAction))
+                  //  Photo.releasePhoto(queue.getCurrentPhoto());
             }
         }
 
@@ -105,6 +110,8 @@ public class DejaService extends Service {
                 runPrevious();
             if (action.equals(refreshAction))
                 runRefresh();
+           // if (action.equals(releaseAction))
+             //   releasePhoto(queue.getCurrentPhoto());
         }
 
         return super.onStartCommand(intent, flags, startId);

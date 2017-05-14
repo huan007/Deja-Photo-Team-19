@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -82,6 +83,25 @@ public class Photo {
             }
         }
         else return null;
+    }
+
+
+    public long getRecency() {
+        if (datetime != null)
+        {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z");
+            try {
+                Date rawDate = dateFormat.parse(datetime);
+                long unixTime = (long) rawDate.getTime()/1000;
+                return unixTime;
+            } catch (ParseException e)
+            {
+                e.printStackTrace();
+                return 0;
+            }
+
+        } else
+            return 0;
     }
 
     public void setDatetime(String datetime) {

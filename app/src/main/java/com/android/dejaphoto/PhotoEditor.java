@@ -135,6 +135,7 @@ public class PhotoEditor {
         if (location == null)
             return this;
 
+        Log.i("PhotoEditor", "Location appended to photo is " + location);
         // add location to bottom-left of photo
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();

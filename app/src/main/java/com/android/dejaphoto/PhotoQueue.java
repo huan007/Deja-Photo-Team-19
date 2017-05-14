@@ -1,21 +1,22 @@
 package com.android.dejaphoto;
 
+import android.util.Log;
+
 import java.util.LinkedList;
-import java.util.ListIterator;
 
 /**
  * Stores history of photos.
  */
 public class PhotoQueue<E> {
 
-    public static final int MAX_SIZE = 11;
+    public static final int MAX_SIZE = 11;  // 10 previous photos + current photo
 
     private Chooser<E> chooser;         // chooses next E
-    private LinkedList<E> prevQ;
-    private LinkedList<E> nextQ;
+    private LinkedList<E> prevQ;        // LinkedList of previously seen photos + current photo
+    private LinkedList<E> nextQ;        // LinkedList of photos populated when calling previous
 
     /**
-     * Default contructor.
+     * Default constructor.
      *
      * @param chooser chooses next element
      */
@@ -31,6 +32,8 @@ public class PhotoQueue<E> {
      * @return the next element in the list
      */
     public E next() {
+        Log.d("Photo Queue", "Getting next photo");
+        Log.i("Photo Queue", "Size of queue is " + size());
         // if curr is end of queue
         if (nextQ.isEmpty()) {
             // queue is at max size
@@ -38,7 +41,9 @@ public class PhotoQueue<E> {
                 prevQ.pollFirst();
 
             // get next element
-            prevQ.addLast(chooser.next());
+            E temp = chooser.next();
+            if(temp != null)
+                prevQ.addLast(chooser.next());
         } else {
             prevQ.addLast(nextQ.pollFirst());
         }
@@ -56,6 +61,8 @@ public class PhotoQueue<E> {
         if (prevQ.isEmpty())
             return null;
 
+        Log.d("Photo Queue", "Getting previous photo");
+        Log.i("Photo Queue", "Size of queue is " + size());
         // curr is at beginning of list
         if (prevQ.size() == 1) {
             return prevQ.getFirst();

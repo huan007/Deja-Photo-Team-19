@@ -1,8 +1,13 @@
 package com.android.dejaphoto;
 
+import android.content.SharedPreferences;
+import android.util.Log;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Returns a next photo.
@@ -10,11 +15,11 @@ import java.util.Random;
 public class PhotoChooser implements Chooser<Photo> {
 
     List<Photo> photos;
-    DejaAlgorithm dejaPhotos;
+    DejaSet dejaPhotos;
 
     public PhotoChooser(List<Photo> photos) {
         this.photos = photos;
-        dejaPhotos = new DejaAlgorithm();
+        dejaPhotos = new DejaSet();
     }
 
     /**
@@ -24,7 +29,8 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     @Override
     public Photo next() {
-        return (false) ? dejaNext() : randomNext();
+        SharedPreferences sharedPreferences = MainActivity.getAppContext().getSharedPreferences("settings", MODE_PRIVATE);
+        return (sharedPreferences.getBoolean("dejavu", true)) ? dejaNext() : randomNext();
     }
 
     /**
@@ -33,7 +39,8 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next photo
      */
     private Photo dejaNext() {
-        return dejaPhotos.next();
+        Log.d("Photo Chooser", "Using Deja Algorithm to select next photo");
+        return (photos.size() > 0) ? dejaPhotos.next() : null;
     }
 
     /**
@@ -42,6 +49,7 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next element
      */
     private Photo randomNext() {
+        Log.d("Photo Chooser", "Using random algorithm to select next photo");
         return (photos.size() > 0) ? photos.get(new Random(System.currentTimeMillis()).nextInt(photos.size())) : null;
     }
 
@@ -50,9 +58,10 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     @Override
     public void refresh() {
-        if (false)
-            dejaPhotos.initializeSet(null);
-        else
+        if (false) {
+            Log.d("Photo Chooser", "updating set of Deja Photos");
+            dejaPhotos.initializeSet(null);   // TODO pass new list of photos
+        } else
             Collections.shuffle(photos, new Random(System.currentTimeMillis()));
     }
 
