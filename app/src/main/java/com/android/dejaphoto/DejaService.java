@@ -54,7 +54,7 @@ public class DejaService extends Service {
         public void next() {
             //get next photo
             Log.d("DejaService", "next called");
-            controller.displayImage(queue.next());
+            controller.displayImage(queue.next(getApplicationContext()));
         }
 
         public void previous() {
@@ -85,7 +85,7 @@ public class DejaService extends Service {
             public void refresh() {
             Log.d("DejaService", "refresh called");
             queue.getChooser().refresh();
-            controller.displayImage(queue.next());
+            controller.displayImage(queue.next(getApplicationContext()));
         }
     }
 
@@ -153,7 +153,7 @@ public class DejaService extends Service {
 
         PhotoChooser chooser = new PhotoChooser(gallery.getImages());
         queue = new PhotoQueue<>(chooser);
-        controller.displayImage(queue.next());
+        controller.displayImage(queue.next(getApplicationContext()));
     }
 
     public void runNext() {
