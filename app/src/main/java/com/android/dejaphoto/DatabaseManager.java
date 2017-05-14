@@ -162,20 +162,19 @@ public class DatabaseManager {
 
         Location.distanceBetween(currLat, currLng, photoLat, photoLng, results);
 
-        double weight = 200.0 / results[0];
+        double weight = (results[0] == 0) ? 1 : 200.0 / results[0];
         return (weight > 1) ? 1 : weight;
     }
 
     public static double weighDay(String currDay, String photoDay) {
         int photoNormalized = Math.abs(dayToInt(photoDay) - dayToInt(currDay));
-        double weight = 2.0 / photoNormalized;
-        System.out.println((weight > 1) ? 1 : weight);
+        double weight = (photoNormalized == 0) ? 1 : 2.0 / photoNormalized;
         return (weight > 1) ? 1 : weight;
     }
 
     public static double weighHour(int currHour, int photoHour) {
         int photoNormalized = Math.abs(photoHour - currHour);
-        double weight = 2.0 / photoNormalized;
+        double weight = (photoNormalized == 0) ? 1 : 2.0 / photoNormalized;
         return (weight > 1) ? 1 : weight;
     }
 
