@@ -2,6 +2,9 @@ package com.android.dejaphoto;
 
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.LatLng;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +22,8 @@ public class PhotoTest {
     public static final String EARLIER_DATE = "1997:01:01 10:10:10";
     public static final String MALFORMED_DATE = "XXXX:XX:XX XX:XX:XX";
 
+    GeoApiContext geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
+
     Photo photo;
 
     @Before
@@ -29,8 +34,8 @@ public class PhotoTest {
     @Test
     public void testSetZipCode() {
         // test invalid input
-        photo.datetime = null;
-        assertEquals(0, photo.getRecency());
+        photo.setZipCode(geoContext, new LatLng(32.840396, -117.150627));
+        assertEquals(92111, photo.getZipCode());
     }
 
     @Test
@@ -81,4 +86,5 @@ public class PhotoTest {
         photo.datetime = null;
         assertEquals(0, photo.getRecency());
     }
+
 }

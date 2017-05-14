@@ -3,6 +3,7 @@ package com.android.dejaphoto;
 import android.support.test.rule.ActivityTestRule;
 
 import com.google.android.gms.nearby.messages.internal.Update;
+import com.google.maps.GeoApiContext;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,6 +15,8 @@ import static junit.framework.Assert.assertEquals;
  */
 
 public class UpdateLocationTimeTest {
+
+    GeoApiContext geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
 
     //@Rule
    // public ActivityTestRule<UpdateLocationTime> updateLocationTime = new ActivityTestRule<UpidateLocationTime>(UpdateLocationTime.class);
