@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,12 +13,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity
     public static Location mCurrentLocation;
     public static double latitude;
     public static double longitude;
-
+    LocationRequest mLocationRequest;
 
 
     @Override
@@ -51,6 +55,11 @@ public class MainActivity extends AppCompatActivity
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
 
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(10);
+        mLocationRequest.setFastestInterval(10);
+        //fusedLocationProviderApi = LocationServices.FusedLocationApi;
         //adding APIs to the client
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new Builder(this)
@@ -59,6 +68,8 @@ public class MainActivity extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
+
+
 
         // Start DejaService
         Intent intent = new Intent(MainActivity.this, DejaService.class);
@@ -128,9 +139,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle bundle) {
         LatLng latLng;
+
+
+        //don't call startLocationUpdates if mGoogleApiClient is not connected:
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
+        }
+
         // Get last known recent location.
         checkPermission();
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
         // Note that this can be NULL if last location isn't already known.
         if (mCurrentLocation != null) {
             // Print current location if not null
@@ -140,27 +159,26 @@ public class MainActivity extends AppCompatActivity
             latitude = mCurrentLocation.getLatitude();
             longitude = mCurrentLocation.getLongitude();
             Log.d("Latitude and Longtitude", "current location: " + latLng.toString());
-        } else
-        //don't call startLocationUpdates if mGoogleApiClient is not connected:
-        if (mGoogleApiClient.isConnected()) {
-            startLocationUpdates();
         }
+
+
+        String latString = Double.toString(latitude);
+        Toast.makeText(this, "here is Lat" + latString, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-      /*  if (i == CAUSE_SERVICE_DISCONNECTED) {
+        if (i == CAUSE_SERVICE_DISCONNECTED) {
             Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
         } else if (i == CAUSE_NETWORK_LOST) {
             Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
-        }*/
+        }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and a connection to Google APIs
-        // could not be established. Display an error message, or handle
-        // the failure silently
+        Toast.makeText(this, "Connection Failed", Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
@@ -168,14 +186,10 @@ public class MainActivity extends AppCompatActivity
         checkPermission();
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-        //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-
         if (mCurrentLocation != null) {
             returnLatitude();
             returnLong();
 
-            //latitude = mCurrentLocation.getLatitude();
-            //longitude = mCurrentLocation.getLongitude();
         }
     }
 
@@ -192,14 +206,12 @@ public class MainActivity extends AppCompatActivity
 
     //Start getting regular location updates with low power interval
     protected void startLocationUpdates() {
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
 
         checkPermission();
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         //Thread.dumpStack();
+
+
 
     }
 
@@ -268,6 +280,9 @@ public class MainActivity extends AppCompatActivity
             final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
 
+            final Context cont = getContext();
+
+
             // update homescreen automatically at a rate specified by the user
             final Handler refresh = new Handler();
             refresh.postDelayed(new Runnable() {
@@ -278,6 +293,8 @@ public class MainActivity extends AppCompatActivity
                     serviceIntent.putExtra(DejaService.actionFlag, DejaService.refreshAction);
                     Log.d("Refresh Receiver", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
                     getContext().startService(serviceIntent);
+
+
 
                     // call handler again
                     refresh.postDelayed(this, sharedPreferences.getInt("interval", 300) * 1000);
@@ -351,6 +368,8 @@ public class MainActivity extends AppCompatActivity
                     return true;
                 }
             });
+
+
         }
 
     }

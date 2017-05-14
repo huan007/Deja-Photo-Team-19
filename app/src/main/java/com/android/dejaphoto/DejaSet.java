@@ -16,13 +16,12 @@ public class DejaSet {
 
     TreeSet<Photo> set;
 
-
     public DejaSet() {
         set = new TreeSet<>(new Comparator<Photo>() {
             @Override
             public int compare(Photo o1, Photo o2) {
                 // Photos are the same; duplicates
-                if (o1.location + o1.datetime == o2.location + o2.datetime)
+                if ((o1.location + o1.datetime).equals(o2.location + o2.datetime))
                     return 0;
 
                 //  First photo with more relevant location, day of week, and  time
