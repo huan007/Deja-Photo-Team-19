@@ -14,7 +14,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -23,6 +23,11 @@ android {
         }
     }
 }
+
+repositories {
+    mavenCentral()
+}
+
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -37,5 +42,6 @@ dependencies {
     compile 'com.google.android.gms:play-services:10.2.4' //To add google play services to our app
     compile 'com.github.bumptech.glide:glide:3.7.0'
 
+    compile 'com.google.maps:google-maps-services:0.1.20'
     testCompile 'junit:junit:4.12'
 }

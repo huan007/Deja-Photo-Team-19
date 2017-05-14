@@ -75,6 +75,9 @@ public class GetAllPhotosFromGallery {
                         if (photo.latitude != null && photo.longitude != null) {
                             double lat = convertDMStoDouble(photo.latitude, isNorth);
                             double longtitude = convertDMStoDouble(photo.longitude, isEast);
+                            //Update lat and long
+                            photo.latitude = String.valueOf(lat);
+                            photo.longitude = String.valueOf(longtitude);
                             LatLng location = new LatLng(lat, longtitude);
                             photo.setZipCode(geoContext, location);
                         }
@@ -96,7 +99,7 @@ public class GetAllPhotosFromGallery {
 
     }
 
-    public double convertDMStoDouble(String raw, boolean isPositive)
+    public static double convertDMStoDouble(String raw, boolean isPositive)
     {
         Scanner rawScanner = new Scanner(raw).useDelimiter(",");
         double reverseDMS[] = new double[3];
