@@ -1,5 +1,7 @@
 package com.android.dejaphoto;
 
+import android.location.Location;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -19,42 +21,32 @@ public class DatabaseManager {
     HashMap<String, List<Photo>> locationMap;
     int size;
 
-    public DatabaseManager()
-    {
+    public DatabaseManager() {
         initialize();
     }
 
-    public DatabaseManager(List<Photo> photoList)
-    {
+    public DatabaseManager(List<Photo> photoList) {
         //Put photos into the database
         initialize();
         update(photoList);
     }
 
-    public List<Photo> queryDayOfTheWeek(String dow)
-    {
+    public List<Photo> queryDayOfTheWeek(String dow) {
         if (dow != null) {
-            List <Photo> photoList = dayMap.get(dow);
+            List<Photo> photoList = dayMap.get(dow);
             return photoList;
-        }
-
-        else return null;
+        } else return null;
     }
 
-    public List<Photo> queryHour(String hour)
-    {
-        if (hour != null)
-        {
+    public List<Photo> queryHour(String hour) {
+        if (hour != null) {
             List<Photo> photoList = timeMap.get(hour);
             return photoList;
-        }
-        else return null;
+        } else return null;
     }
 
-    public List<Photo> queryLocation(String latitude, String longitude)
-    {
-        if (latitude != null && longitude != null)
-        {
+    public List<Photo> queryLocation(String latitude, String longitude) {
+        if (latitude != null && longitude != null) {
             double latDouble = new Double(latitude);
             double longDouble = new Double(longitude);
             TreeSet<Photo> results = new TreeSet<>(new Comparator<Photo>() {
@@ -65,8 +57,7 @@ public class DatabaseManager {
                 }
             });
 
-            for (Photo photo : locationMap.get("Normal"))
-            {//Since we do have location, we will compare in the normal set
+            for (Photo photo : locationMap.get("Normal")) {//Since we do have location, we will compare in the normal set
 
                 //Use the distance formula to calculate the differences
                 double latDifference = Math.pow(latDouble - new Double(photo.latitude), 2);
@@ -86,8 +77,7 @@ public class DatabaseManager {
         else return locationMap.get("Unknown");
     }
 
-    public void initialize()
-    {
+    public void initialize() {
         dayMap = new HashMap<String, List<Photo>>(5);
         timeMap = new HashMap<String, List<Photo>>(5);
         locationMap = new HashMap<String, List<Photo>>(5);
@@ -104,8 +94,7 @@ public class DatabaseManager {
         dayMap.put("Unknown", new LinkedList<Photo>());
 
         //Add containers to timeMap
-        for(int i = 1; i < 25; i++)
-        {
+        for (int i = 1; i < 25; i++) {
             SimpleDateFormat hourFormat = new SimpleDateFormat("kk");
             try {
                 Date myDate = hourFormat.parse(Integer.toString(i));
@@ -121,10 +110,8 @@ public class DatabaseManager {
         locationMap.put("Normal", new LinkedList<Photo>());
     }
 
-    public void update(List<Photo> photoList)
-    {
-        for (Photo photo : photoList)
-        {//Parse each photo and put it into appropriate container
+    public void update(List<Photo> photoList) {
+        for (Photo photo : photoList) {//Parse each photo and put it into appropriate container
             //Put in dayMap
             List<Photo> dayContainer;
             List<Photo> timeContainer;
@@ -132,25 +119,20 @@ public class DatabaseManager {
 
             //Put photo in appropriate dayContainer
             String dow = photo.getDayOfTheWeek();
-            if (dow != null)
-            {
+            if (dow != null) {
                 dayContainer = dayMap.get(dow);
                 dayContainer.add(photo);
-            }
-            else
-            {//No information about DOW
+            } else {//No information about DOW
                 dayContainer = dayMap.get("Unknown");
                 dayContainer.add(photo);
             }
 
             //Put photo in appropriate timeContainer
             String hour = photo.getHour();
-            if (hour != null){
+            if (hour != null) {
                 timeContainer = timeMap.get(hour);
                 timeContainer.add(photo);
-            }
-            else
-            {//No information about the time
+            } else {//No information about the time
                 timeContainer = timeMap.get("Unknown");
                 timeContainer.add(photo);
             }
@@ -158,13 +140,10 @@ public class DatabaseManager {
             //Put photo in appropriate locationContainer
             String latitude = photo.getLatitude();
             String longitude = photo.getLongitude();
-            if (latitude != null && longitude != null)
-            {
+            if (latitude != null && longitude != null) {
                 locationContainer = locationMap.get("Normal");
                 locationContainer.add(photo);
-            }
-            else
-            {//No information about the location
+            } else {//No information about the location
                 locationContainer = locationMap.get("Unknown");
                 locationContainer.add(photo);
             }
@@ -174,10 +153,52 @@ public class DatabaseManager {
         }
     }
 
-    public int size()
-    {
+    public int size() {
         return size;
     }
 
+    public static double weighLocation(double currLat, double currLng, double photoLat, double photoLng) {
+        float[] results = new float[3];
+
+        Location.distanceBetween(currLat, currLng, photoLat, photoLng, results);
+
+        double weight = 200.0 / results[0];
+        return (weight > 1) ? 1 : weight;
+    }
+
+    public static double weighDay(String currDay, String photoDay) {
+        int photoNormalized = Math.abs(dayToInt(photoDay) - dayToInt(currDay));
+        double weight = 2.0 / photoNormalized;
+        System.out.println((weight > 1) ? 1 : weight);
+        return (weight > 1) ? 1 : weight;
+    }
+
+    public static double weighHour(int currHour, int photoHour) {
+        int photoNormalized = Math.abs(photoHour - currHour);
+        double weight = 2.0 / photoNormalized;
+        return (weight > 1) ? 1 : weight;
+    }
+
+    private static int dayToInt(String day) {
+        if (day.equalsIgnoreCase("sunday"))
+            return 0;
+
+        if (day.equalsIgnoreCase("monday"))
+            return 1;
+
+        if (day.equalsIgnoreCase("tuesday"))
+            return 2;
+
+        if (day.equalsIgnoreCase("wednesday"))
+            return 3;
+
+        if (day.equalsIgnoreCase("thursday"))
+            return 4;
+
+        if (day.equalsIgnoreCase("friday"))
+            return 5;
+
+        return 6;
+    }
 
 }
