@@ -12,7 +12,7 @@ public interface Chooser<E> {
      *
      * @return the next element
      */
-    E next();
+    E next(Context context);
 
     /**
      * Refresh the list of elements.

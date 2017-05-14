@@ -43,12 +43,11 @@ public class MainActivity extends AppCompatActivity
     public static double latitude;
     public static double longitude;
 
-    private static Context context;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.context = getApplicationContext();
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
         //adding APIs to the client
@@ -100,10 +99,6 @@ public class MainActivity extends AppCompatActivity
                         5);
             }
         }
-    }
-
-    public static Context getAppContext() {
-        return MainActivity.context;
     }
 
     @Override
