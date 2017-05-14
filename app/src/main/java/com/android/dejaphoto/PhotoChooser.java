@@ -1,5 +1,6 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -28,8 +29,9 @@ public class PhotoChooser implements Chooser<Photo> {
      * @return the next photo
      */
     @Override
-    public Photo next() {
-        SharedPreferences sharedPreferences = MainActivity.getAppContext().getSharedPreferences("settings", MODE_PRIVATE);
+    public Photo next(Context context) {
+        //SharedPreferences sharedPreferences = MainActivity.getAppContext().getSharedPreferences("settings", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
         return (sharedPreferences.getBoolean("dejavu", true)) ? dejaNext() : randomNext();
     }
 

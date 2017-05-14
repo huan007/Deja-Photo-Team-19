@@ -49,6 +49,16 @@ public class DatabaseManager {
         else return null;
     }
 
+    public List<Photo> queryLocation(String zipCode)
+    {
+        if (zipCode != null)
+        {
+            List<Photo> photoList = locationMap.get(zipCode);
+            return photoList;
+        }
+        else return null;
+    }
+
     public void initialize()
     {
         dayMap = new HashMap<String, List<Photo>>(5);
@@ -78,6 +88,9 @@ public class DatabaseManager {
             }
         }
         timeMap.put("Unknown", new LinkedList<Photo>());
+
+        //Add Unknown container to locationMap
+        locationMap.put("Unknown", new LinkedList<Photo>());
     }
 
     public void update(List<Photo> photoList)
@@ -87,6 +100,7 @@ public class DatabaseManager {
             //Put in dayMap
             List<Photo> dayContainer;
             List<Photo> timeContainer;
+            List<Photo> locationContainer;
 
             //Put photo in appropriate dayContainer
             String dow = photo.getDayOfTheWeek();
@@ -111,6 +125,24 @@ public class DatabaseManager {
             {//No information about the time
                 timeContainer = timeMap.get("Unknown");
                 timeContainer.add(photo);
+            }
+
+            //Put photo in appropriate locationContainer
+            String zipCode = photo.getZipCode();
+            if (zipCode != null)
+            {
+                locationContainer = locationMap.get(zipCode);
+                if (locationContainer == null)
+                {//If container doesn't exist, then put it into the database
+                    locationContainer = new LinkedList<>();
+                    locationMap.put(zipCode, locationContainer);
+                }
+                locationContainer.add(photo);
+            }
+            else
+            {//No information about the location
+                locationContainer = locationMap.get("Unknown");
+                locationContainer.add(photo);
             }
 
             //Update size

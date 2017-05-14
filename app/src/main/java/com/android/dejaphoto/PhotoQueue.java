@@ -1,5 +1,6 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ public class PhotoQueue<E> {
      *
      * @return the next element in the list
      */
-    public E next() {
+    public E next(Context context) {
         Log.d("Photo Queue", "Getting next photo");
         Log.i("Photo Queue", "Size of queue is " + size());
         // if curr is end of queue
@@ -41,9 +42,8 @@ public class PhotoQueue<E> {
                 prevQ.pollFirst();
 
             // get next element
-            E temp = chooser.next();
 
-            prevQ.addLast(temp);
+            prevQ.addLast(chooser.next(context));
         } else {
             prevQ.addLast(nextQ.pollFirst());
         }

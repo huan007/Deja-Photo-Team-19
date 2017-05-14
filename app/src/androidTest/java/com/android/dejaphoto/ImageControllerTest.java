@@ -50,7 +50,7 @@ public class ImageControllerTest {
 
         for(int i = 0; i < 10; i++)
         {
-            list.add(queue.next());
+            list.add(queue.next(mainActivity));
         }
 
         for (Photo photo : list)
