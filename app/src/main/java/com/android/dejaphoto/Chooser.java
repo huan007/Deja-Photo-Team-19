@@ -1,6 +1,7 @@
 package com.android.dejaphoto;
 
 import android.content.Context;
+import android.util.Log;
 
 /**
  * Returns a next element.

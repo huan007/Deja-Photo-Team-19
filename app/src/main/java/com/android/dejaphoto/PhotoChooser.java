@@ -19,12 +19,14 @@ public class PhotoChooser implements Chooser<Photo> {
 
     List<Photo> photos;
     DejaSet dejaPhotos;
+    boolean dejaMode;
     GeoApiContext geoContext;
 
     public PhotoChooser(List<Photo> photos, GeoApiContext geoContext) {
         this.photos = photos;
         dejaPhotos = new DejaSet();
         this.geoContext = geoContext;
+        dejaMode = false;
     }
 
     /**
@@ -34,9 +36,8 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     @Override
     public Photo next(Context context) {
-        //SharedPreferences sharedPreferences = MainActivity.getAppContext().getSharedPreferences("settings", MODE_PRIVATE);
         SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
-        return (sharedPreferences.getBoolean("dejavu", true)) ? dejaNext() : randomNext();
+        return (dejaMode =(sharedPreferences.getBoolean("dejavu", false))) ? dejaNext(context) : randomNext();
     }
 
     /**
@@ -44,9 +45,24 @@ public class PhotoChooser implements Chooser<Photo> {
      *
      * @return the next photo
      */
-    private Photo dejaNext() {
+    private Photo dejaNext(Context context) {
         Log.d("Photo Chooser", "Using Deja Algorithm to select next photo");
+        SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
+        if( sharedPreferences.getBoolean("location", false) ) {
+            // If location has changed, reinitialize set
+
+        }
+        if( sharedPreferences.getBoolean("day", false) ) {
+            // If day of week has changed, reinitialize it
+
+        }
+        if( sharedPreferences.getBoolean("time", false) ) {
+            // If time has changed, reinitialize set
+        }
+        // get next photo from DejaSet
         return (photos.size() > 0) ? dejaPhotos.next() : null;
+        //return (photos.size() > 0) ? photos.get(new Random(System.currentTimeMillis()).nextInt(photos.size())) : null;
+
     }
 
     /**
@@ -64,7 +80,7 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     @Override
     public void refresh() {
-        if (false) {
+        if (dejaMode) {
             Log.d("Photo Chooser", "updating set of Deja Photos");
             dejaPhotos.initializeSet(null);   // TODO pass new list of photos
         } else
