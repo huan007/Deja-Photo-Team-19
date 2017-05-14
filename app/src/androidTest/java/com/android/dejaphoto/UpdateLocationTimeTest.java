@@ -25,22 +25,23 @@ public class UpdateLocationTimeTest {
     public void testTimeOfDay(){
 
         String timeOfDay = UpdateLocationTime.getCurrentTime();
-        assertEquals("19", timeOfDay);
+        assertEquals("12", timeOfDay);
     }
 
     @Test
     public void testDayOfWeek(){
         String dayOfWeek = UpdateLocationTime.getCurrentDay();
-        assertEquals("Saturday", dayOfWeek);
+        assertEquals("Sunday", dayOfWeek);
     }
 
     @Test
-    public void testZipCode(){
+    public void testLocation(){
 
+        String latitude = UpdateLocationTime.getCurrentLat();
+        String longitude = UpdateLocationTime.getCurrentLong();
 
-        String zipCode = UpdateLocationTime.getCurrentZip(geoContext);
-
-        assertEquals("94043", zipCode);
+        assertEquals(UpdateLocationTime.getCurrentLat(), latitude);
+        assertEquals(UpdateLocationTime.getCurrentLong(), longitude);
     }
 
 

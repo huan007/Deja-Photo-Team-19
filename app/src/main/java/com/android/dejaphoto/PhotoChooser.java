@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.google.android.gms.nearby.messages.internal.Update;
 import com.google.maps.GeoApiContext;
 
 import java.util.ArrayList;
@@ -24,8 +25,9 @@ public class PhotoChooser implements Chooser<Photo> {
     GeoApiContext geoContext;
     DatabaseManager database;
     String prevHour;
-    String prevLocation;
     String prevDay;
+    String prevLat;
+    String prevLong;
 
     public PhotoChooser(List<Photo> photos, GeoApiContext geoContext) {
         this.photos = photos;
@@ -35,8 +37,9 @@ public class PhotoChooser implements Chooser<Photo> {
         this.geoContext = geoContext;
         database = new DatabaseManager(photos);
         prevHour = UpdateLocationTime.getCurrentTime();
-        prevLocation = UpdateLocationTime.getCurrentZip(geoContext);
         prevDay = UpdateLocationTime.getCurrentDay();
+        prevLat = UpdateLocationTime.getCurrentLat();
+        prevLong = UpdateLocationTime.getCurrentLong();
     }
 
     /**
@@ -65,15 +68,16 @@ public class PhotoChooser implements Chooser<Photo> {
         List relevantPhotos = new ArrayList<Photo>();
         SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
 
-        String currLocation = UpdateLocationTime.getCurrentZip(geoContext);
+        String currLat = UpdateLocationTime.getCurrentLat();
+        String currLong = UpdateLocationTime.getCurrentLong();
         String currDay = UpdateLocationTime.getCurrentDay();
         String currHour = UpdateLocationTime.getCurrentTime();
 
-        if (!prevLocation.equals(currLocation) || !prevDay.equals(currDay) || !prevHour.equals(currHour)) {
+        if (!prevLat.equals(currLat) || !prevLong.equals(currLong) || !prevDay.equals(currDay) || !prevHour.equals(currHour)) {
             if (sharedPreferences.getBoolean("location", false)) { // location is a factor
                 // If location has changed, reinitialize set
                 Log.d("Photo Chooser", "updating photos based on location");
-                List<Photo> locationlist = database.queryLocation(currLocation);
+                List<Photo> locationlist = database.queryLocation(currLat, currLong);
                 if (locationlist != null)
                     relevantPhotos.addAll(locationlist);
             }

@@ -59,7 +59,7 @@ public class DatabaseTest {
     public void testQueryLocation()
     {
         //There were 18 photos, 15 of which has no location
-        assertEquals(15, database.queryLocation("Unknown").size());
+        assertEquals(15, database.queryLocation(null, null).size());
     }
 
     @Test

@@ -35,6 +35,7 @@ public class Photo {
     String datetime;
     String latitude;
     String longitude;
+    double distanceFromOrigin;
 
     public String getZipCode() {
         return zipCode;

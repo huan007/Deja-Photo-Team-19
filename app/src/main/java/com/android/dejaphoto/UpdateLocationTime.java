@@ -45,29 +45,14 @@ public class UpdateLocationTime {
     }
 
     //Returns a string describing users current zip code
-    public static String getCurrentZip(GeoApiContext geoContext){
-        Double latitude = MainActivity.returnLatitude();
-        Double longitude = MainActivity.returnLong();
+    public static String getCurrentLat()
+    {//return string value
+        return String.valueOf(MainActivity.returnLatitude());
+    }
 
-        if( latitude == 999 || longitude == 999)
-            return "";
-
-        LatLng location = new LatLng(latitude, longitude);
-
-        try {
-            GeocodingResult[] results = GeocodingApi.reverseGeocode(geoContext, location).await();
-            int numOfComponents = results[0].addressComponents.length;
-            return results[0].addressComponents[numOfComponents-1].longName;
-        } catch (ApiException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        return null;
+    public static String getCurrentLong()
+    {//return string value
+        return String.valueOf(MainActivity.returnLong());
     }
 
 
