@@ -1,4 +1,7 @@
 package com.android.dejaphoto;
+import java.util.Calendar;
+import java.util.Locale;
+
 
 /**
  * Created by chuck on 5/13/17.
@@ -8,12 +11,29 @@ public class UpdateLocationTime {
 
     //Returns a string describing what hour of the day it is
     public static String getCurrentTime(){
-        return null;
+
+        Calendar c = Calendar.getInstance();
+
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+
+        String hourOfDay = Integer.toString(hour);
+
+        return hourOfDay;
     }
 
     //Returns a string describing current day of the week
     public static String getCurrentDay(){
-        return null;
+
+        Calendar c = Calendar.getInstance();
+
+        //creating Locale object for the US
+        Locale english = new Locale("english");
+        english = Locale.US;
+
+        //getting day of week in long format, i.e. "Thursday"
+        String currDay = c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, english);
+
+        return currDay;
     }
 
     //Returns a string describing users current zip code
