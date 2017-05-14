@@ -86,6 +86,7 @@ public class Photo {
         if (datetime != null) {
             SimpleDateFormat rawFormat = new SimpleDateFormat("yyyy:MM:dd");
             SimpleDateFormat dowFormat = new SimpleDateFormat("EEEE");
+
             try {
                 Date rawDate = rawFormat.parse(datetime);
                 String newDate = dowFormat.format(rawDate);

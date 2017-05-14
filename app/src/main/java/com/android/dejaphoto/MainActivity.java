@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
+
         //adding APIs to the client
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new Builder(this)
