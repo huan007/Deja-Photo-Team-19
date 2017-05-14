@@ -13,6 +13,8 @@ import android.provider.MediaStore;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 
@@ -44,8 +46,20 @@ public class Photo {
             //Begin to parse location into zipcode string
             try {
                 GeocodingResult results[] = GeocodingApi.reverseGeocode(context, location).await();
-                int numOfComponents = results[0].addressComponents.length;
-                zipCode = results[0].addressComponents[numOfComponents-1].longName;
+                AddressComponent[] components = results[0].addressComponents;
+                int i = 0;
+                for (AddressComponent component : components)
+                {//Find the zip
+                    //Get the types of the component
+                    AddressComponentType[] types = component.types;
+                    for (AddressComponentType type : types)
+                    {//If the component is the zip code, then make it the zip code
+                        if (type.equals(AddressComponentType.POSTAL_CODE))
+                            zipCode = results[0].addressComponents[i].longName;
+                    }
+                    i++;
+                }
+
             } catch (ApiException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
