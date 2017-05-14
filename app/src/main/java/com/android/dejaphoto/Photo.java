@@ -10,6 +10,12 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LatLng;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -27,13 +33,41 @@ public class Photo {
     String datetime;
     String latitude;
     String longitude;
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(GeoApiContext context, LatLng location) {
+        if (location != null)
+        {
+            //Begin to parse location into zipcode string
+            try {
+                GeocodingResult results[] = GeocodingApi.reverseGeocode(context, location).await();
+                int numOfComponents = results[0].addressComponents.length;
+                zipCode = results[0].addressComponents[numOfComponents-1].longName;
+            } catch (ApiException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        else zipCode = null;
+    }
+
+    String zipCode;
     Bitmap photo;
     boolean karma;
     boolean release;
     int weight;
 
     // Release photo
-    public void releasePhoto(Photo photo){ photo.release = true; }
+    public void releasePhoto(){ release = true; }
+
+    public void setKarma(){ karma = true; }
 
     public String getLocation() {
         return location;
@@ -138,5 +172,7 @@ public class Photo {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), photo, "Title", null);
         return Uri.parse(path);
     }
+
+
 
 }

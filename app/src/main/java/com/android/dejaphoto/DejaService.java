@@ -18,6 +18,8 @@ public class DejaService extends Service {
     public static final String refreshAction = "REFRESH";
     public static final String releaseAction = "RELEASE";
     public static final String actionFlag = "ACTION_FLAG";
+    public static final String karmaAction = "KARMA";
+    public static final String releaseAction = "RELEASE";
 
     ImageController controller;
     PhotoQueue<Photo> queue;
@@ -41,6 +43,10 @@ public class DejaService extends Service {
                     next();
                 if (action.equals(previousAction))
                     previous();
+                if (action.equals(karmaAction))
+                    karma();
+                if (action.equals(releaseAction))
+                    release();
                 if (action.equals(refreshAction))
                     refresh();
                 //if (action.equals(releaseAction))
@@ -66,7 +72,20 @@ public class DejaService extends Service {
                 controller.displayImage(previousPhoto);
         }
 
-        public void refresh() {
+        public void karma()
+        {
+            Log.d("DejaService", "karma received");
+
+            photoQueue.getCurrentPhoto().setKarma();
+        }
+
+        public void release() {
+            Log.d("DejaService", "photo released bye bye");
+
+            photoQueue.getCurrentPhoto().releasePhoto();
+        }
+
+            public void refresh() {
             Log.d("DejaService", "refresh called");
             queue.getChooser().refresh();
             controller.displayImage(queue.next());
@@ -108,6 +127,10 @@ public class DejaService extends Service {
                 runNext();
             if (action.equals(previousAction))
                 runPrevious();
+            if (action.equals(karmaAction))
+                runKarma();
+            if (action.equals(releaseAction))
+                runRelease();
             if (action.equals(refreshAction))
                 runRefresh();
            // if (action.equals(releaseAction))
@@ -146,6 +169,17 @@ public class DejaService extends Service {
     public void runPrevious() {
         Thread worker = new Thread(new DejaThread(queue, previousAction));
         worker.start();
+    }
+
+    public void runKarma()
+    {
+        Thread worker = new Thread(new DejaThread(queue, karmaAction));
+        worker.start();
+
+    }
+
+    public void runRelease() {
+        Thread worker = new Thread(new DejaThread(queue, releaseAction));
     }
 
     public void runRefresh() {

@@ -37,18 +37,15 @@ public class MainActivity extends AppCompatActivity
 
     // Create an instance of GoogleAPIClient.
     GoogleApiClient mGoogleApiClient;
-
     //LocationRequest mLocationRequest;
+
     public static Location mCurrentLocation;
     public static double latitude;
     public static double longitude;
 
-    private static Context context;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.context = getApplicationContext();
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
         //adding APIs to the client
@@ -102,11 +99,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /** Static method to get context of main activity in non-activity classes
-     */
-    public static Context getAppContext() {
-        return context;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -263,6 +255,8 @@ public class MainActivity extends AppCompatActivity
 
     public static class PrefsFragment extends PreferenceFragment {
 
+        AlarmManager alarmManager;
+        PendingIntent pending;
 
         @Override
         public void onCreate(Bundle saveInstanceState) {
@@ -358,6 +352,5 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
-
 
 }

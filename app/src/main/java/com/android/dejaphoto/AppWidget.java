@@ -1,5 +1,6 @@
 package com.android.dejaphoto;
 
+import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -10,11 +11,13 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.widget.Toast;
 
 
 import java.io.File;
@@ -24,17 +27,20 @@ import java.io.File;
  * Implementation of App Widget functionality.
  */
 public class AppWidget extends AppWidgetProvider {
-
-    public static String previousAction = "previousPhoto";
-    public static String releaseAction = "releasePhoto";
     public static String settingsAction = "openSettings";
     public static String nextAction = "nextPhoto";
+    public static String previousAction = "previousPhoto";
+    public static String karmaAction = "karma";
+    public static String releaseAction = "release";
+
 
     ImageController controller;
-    PhotoQueue<Photo> queue;
+     PhotoQueue<Photo> queue;
 
     DejaService mService;
     boolean mBound = false;
+
+
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -57,21 +63,6 @@ public class AppWidget extends AppWidgetProvider {
             //Get views
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.app_widget);
 
-
-
-            //Register previousButton
-            Intent previousPhotoIntent = new Intent(context, AppWidget.class);
-            previousPhotoIntent.setAction(previousAction);
-            PendingIntent pendingPreviousPhotoIntent = PendingIntent.getBroadcast(context, 0, previousPhotoIntent, 0);
-            views.setOnClickPendingIntent(R.id.previousButton, pendingPreviousPhotoIntent);
-
-            /*
-            //Register releaseButton
-            Intent releaseIntent = new Intent(context, AppWidget.class);
-            previousPhotoIntent.setAction(releaseAction);
-            PendingIntent pendingReleaseIntent = PendingIntent.getBroadcast(context, 0,releaseIntent, 0);
-            views.setOnClickPendingIntent(R.id.releaseButton, pendingReleaseIntent); */
-
             //Register openSettings action
             Intent settingsIntent = new Intent(context, MainActivity.class);
             settingsIntent.setAction(settingsAction);
@@ -83,6 +74,25 @@ public class AppWidget extends AppWidgetProvider {
             nextPhotoIntent.setAction(nextAction);
             PendingIntent pendingNextPhotoIntent = PendingIntent.getBroadcast(context, 0, nextPhotoIntent, 0);
             views.setOnClickPendingIntent(R.id.nextButton, pendingNextPhotoIntent);
+
+            //Register previousButton
+            Intent previousPhotoIntent = new Intent(context, AppWidget.class);
+            previousPhotoIntent.setAction(previousAction);
+            PendingIntent pendingPreviousPhotoIntent = PendingIntent.getBroadcast(context, 0, previousPhotoIntent, 0);
+            views.setOnClickPendingIntent(R.id.previousButton, pendingPreviousPhotoIntent);
+
+            //Register karma button
+
+            Intent karmaIntent = new Intent(context, AppWidget.class);
+            karmaIntent.setAction(karmaAction);
+            PendingIntent pendingKarmaIntent = PendingIntent.getBroadcast(context, 0, karmaIntent, 0);
+            views.setOnClickPendingIntent(R.id.karmaButton, pendingKarmaIntent);
+
+            //Register release button
+            Intent releaseIntent = new Intent(context, AppWidget.class);
+            releaseIntent.setAction(releaseAction);
+            PendingIntent pendingReleaseIntent = PendingIntent.getBroadcast(context, 0, releaseIntent, 0);
+            views.setOnClickPendingIntent(R.id.releaseButton, pendingReleaseIntent);
 
 
             //update the intents
@@ -135,7 +145,7 @@ public class AppWidget extends AppWidgetProvider {
             Log.d("App Widget", "Queue is NULL");
 
         if (intent.getAction().equals(nextAction)) {//Next Photo
-
+            //TODO
             Log.d("App Widget","nextAction is called");
 
             //Start the service
@@ -147,7 +157,7 @@ public class AppWidget extends AppWidgetProvider {
         }
 
         if (intent.getAction().equals(previousAction)) {//Previous Photo
-
+            //TODO
             Log.d("App Widget","previousAction is called");
             //Start the service
             Intent serviceIntent = new Intent(context, DejaService.class);
@@ -156,15 +166,25 @@ public class AppWidget extends AppWidgetProvider {
             context.startService(serviceIntent);
             //mService.runPrevious();
         }
-        /*
-        if (intent.getAction().equals(releaseAction)) { //Release photo
-            Log.d("App Widget", "releaseAction is called");
-            // Start the service
+
+        if (intent.getAction().equals(karmaAction))
+        {
+            Log.d("AppWidget","karmaAction is called");
+            Intent serviceIntent = new Intent(context, DejaService.class);
+            serviceIntent.putExtra(DejaService.actionFlag, DejaService.karmaAction);
+            context.startService(serviceIntent);
+        }
+
+        if (intent.getAction().equals(releaseAction))
+        {
+            Log.d("AppWidget","releaseAction is called");
             Intent serviceIntent = new Intent(context, DejaService.class);
             serviceIntent.putExtra(DejaService.actionFlag, DejaService.releaseAction);
-            Log.d("App Widget", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
             context.startService(serviceIntent);
-        }*/
+
+
+        }
+
         Log.d("App Widget", "End onReceive()");
     }
 
