@@ -34,11 +34,10 @@ public class GetAllPhotosFromGallery {
         return images;
     }
 
-    public GetAllPhotosFromGallery(File directoryName, Context context) {
+    public GetAllPhotosFromGallery(File directoryName, Context context, GeoApiContext geoContext) {
         directory = directoryName;
 
-        //Used for getting the zip code from lat long
-        GeoApiContext geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
+
 
         images = new ArrayList<Photo>();
 

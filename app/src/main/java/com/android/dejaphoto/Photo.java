@@ -86,6 +86,7 @@ public class Photo {
         if (datetime != null) {
             SimpleDateFormat rawFormat = new SimpleDateFormat("yyyy:MM:dd");
             SimpleDateFormat dowFormat = new SimpleDateFormat("EEEE");
+
             try {
                 Date rawDate = rawFormat.parse(datetime);
                 String newDate = dowFormat.format(rawDate);
@@ -123,7 +124,7 @@ public class Photo {
     public long getRecency() {
         if (datetime != null)
         {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss");
             try {
                 Date rawDate = dateFormat.parse(datetime);
                 long unixTime = (long) rawDate.getTime()/1000;
