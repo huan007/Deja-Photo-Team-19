@@ -18,8 +18,8 @@ public class UpdateLocationTimeTest {
 
     GeoApiContext geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
 
-    //@Rule
-   // public ActivityTestRule<UpdateLocationTime> updateLocationTime = new ActivityTestRule<UpidateLocationTime>(UpdateLocationTime.class);
+    @Rule
+   public ActivityTestRule<MainActivity> updateLocationTime = new ActivityTestRule<MainActivity>(MainActivity.class);
 
     @Test
     public void testTimeOfDay(){
@@ -38,7 +38,9 @@ public class UpdateLocationTimeTest {
     public void testZipCode(){
 
 
-        String zipCode = UpdateLocationTime.getCurrentZip()
+        String zipCode = UpdateLocationTime.getCurrentZip(geoContext);
+
+        assertEquals("94043", zipCode);
     }
 
 
