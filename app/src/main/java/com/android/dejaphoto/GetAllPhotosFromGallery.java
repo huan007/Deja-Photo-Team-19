@@ -61,18 +61,19 @@ public class GetAllPhotosFromGallery {
                         photo.latitude = exifInterface.getAttribute(android.media.ExifInterface.TAG_GPS_LATITUDE);
                         photo.longitude = exifInterface.getAttribute(android.media.ExifInterface.TAG_GPS_LONGITUDE);
 
-                        //Parse the sign of lat and long
-                        String latRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
-                        String longRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
-                        boolean isNorth = false;
-                        boolean isEast = false;
-
-                        if (latRef.equals("N"))
-                            isNorth = true;
-                        if (longRef.equals("E"))
-                            isEast = true;
 
                         if (photo.latitude != null && photo.longitude != null) {
+                            //Parse the sign of lat and long
+                            String latRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
+                            String longRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
+                            boolean isNorth = false;
+                            boolean isEast = false;
+
+                            if (latRef.equals("N"))
+                                isNorth = true;
+                            if (longRef.equals("E"))
+                                isEast = true;
+
                             double lat = convertDMStoDouble(photo.latitude, isNorth);
                             double longtitude = convertDMStoDouble(photo.longitude, isEast);
                             //Update lat and long
