@@ -35,7 +35,9 @@ public class PhotoTest {
     public void testSetZipCode() {
         // test invalid input
         photo.setZipCode(geoContext, new LatLng(32.840396, -117.150627));
-        assertEquals(92111, photo.getZipCode());
+        assertEquals("92111", photo.getZipCode());
+        photo.setZipCode(geoContext, new LatLng(37.102710, -85.301566));
+        assertEquals("42728", photo.getZipCode());
     }
 
     @Test
