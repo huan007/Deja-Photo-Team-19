@@ -49,6 +49,9 @@ public class UpdateLocationTime {
         Double latitude = MainActivity.returnLatitude();
         Double longitude = MainActivity.returnLong();
 
+        if( latitude == 999 || longitude == 999)
+            return "";
+
         LatLng location = new LatLng(latitude, longitude);
 
         try {

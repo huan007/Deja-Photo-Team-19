@@ -55,7 +55,7 @@ public class QueueTest {
          * Refresh the list of elements.
          */
         @Override
-        public void refresh() {
+        public void refresh(Context context) {
         }
     }
 

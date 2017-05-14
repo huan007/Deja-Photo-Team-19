@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity
             latitude = mCurrentLocation.getLatitude();
             longitude = mCurrentLocation.getLongitude();
             Log.d("Latitude and Longtitude", "current location: " + latLng.toString());
-        }
+        } else
         //don't call startLocationUpdates if mGoogleApiClient is not connected:
         if (mGoogleApiClient.isConnected()) {
             startLocationUpdates();
@@ -204,11 +204,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static double returnLatitude() {
-        return (latitude = mCurrentLocation.getLatitude());
+        return ((mCurrentLocation != null) ? (latitude = mCurrentLocation.getLatitude()) : 999);
     }
 
     public static double returnLong() {
-        return (longitude = mCurrentLocation.getLongitude());
+        return ((mCurrentLocation != null) ? (longitude = mCurrentLocation.getLongitude()) : 999);
     }
 
     //connect to location services on start

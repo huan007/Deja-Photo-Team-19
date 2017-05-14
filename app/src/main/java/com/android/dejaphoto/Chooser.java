@@ -1,7 +1,6 @@
 package com.android.dejaphoto;
 
 import android.content.Context;
-import android.util.Log;
 
 /**
  * Returns a next element.
@@ -18,5 +17,5 @@ public interface Chooser<E> {
     /**
      * Refresh the list of elements.
      */
-    void refresh();
+    void refresh(Context context);
 }

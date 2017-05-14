@@ -42,7 +42,6 @@ public class PhotoQueue<E> {
                 prevQ.pollFirst();
 
             // get next element
-
             prevQ.addLast(chooser.next(context));
         } else {
             prevQ.addLast(nextQ.pollFirst());

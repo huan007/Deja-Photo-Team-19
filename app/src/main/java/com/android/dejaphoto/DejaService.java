@@ -13,6 +13,7 @@ import com.google.maps.GeoApiContext;
 import java.io.File;
 
 import static com.android.dejaphoto.AppWidget.releaseAction;
+import static java.security.AccessController.getContext;
 
 public class DejaService extends Service {
     public static final String nextAction = "NEXT";
@@ -73,8 +74,7 @@ public class DejaService extends Service {
                 controller.displayImage(previousPhoto);
         }
 
-        public void karma()
-        {
+        public void karma() {
             Log.d("DejaService", "karma received");
 
             photoQueue.getCurrentPhoto().setKarma();
@@ -86,9 +86,10 @@ public class DejaService extends Service {
             photoQueue.getCurrentPhoto().releasePhoto();
         }
 
-            public void refresh() {
+        public void refresh() {
             Log.d("DejaService", "refresh called");
-            queue.getChooser().refresh();
+            Context context = getApplicationContext();
+            queue.getChooser().refresh(context);
             controller.displayImage(queue.next(getApplicationContext()));
         }
     }
@@ -172,8 +173,7 @@ public class DejaService extends Service {
         worker.start();
     }
 
-    public void runKarma()
-    {
+    public void runKarma() {
         Thread worker = new Thread(new DejaThread(queue, karmaAction));
         worker.start();
 
@@ -181,6 +181,7 @@ public class DejaService extends Service {
 
     public void runRelease() {
         Thread worker = new Thread(new DejaThread(queue, releaseAction));
+        worker.start();
     }
 
     public void runRefresh() {
