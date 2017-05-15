@@ -9,13 +9,16 @@ import java.util.PriorityQueue;
 import java.util.TreeSet;
 
 /**
- * Created by Andy Or on 5/10/2017.
+ * This class sorts a list of photos by increasing weight, then karma, then recency.
+ * User can then call to get the next more relavent photo.
  */
-
 public class DejaSet {
 
     TreeSet<Photo> set;
 
+    /**
+     * Default Constructor. Sort photos by increasing weight, then karma, then recency.
+     */
     public DejaSet() {
         set = new TreeSet<>(new Comparator<Photo>() {
             @Override
@@ -37,6 +40,11 @@ public class DejaSet {
         });
     }
 
+    /**
+     * Initialize and order photo set.
+     *
+     * @param photoList list of photos
+     */
     public void initializeSet(List<Photo> photoList) {
         // null check
         if (photoList == null) {
@@ -44,18 +52,33 @@ public class DejaSet {
             return;
         }
 
-        Log.d("Deja Set", "Clearing previous existings photo set");
         // clear current set
+        Log.d("Deja Set", "Clearing previous existings photo set");
         set.clear();
 
-        Log.d("Deja Set", "Inserting photos into set");
+        // reset photo weights
+        Log.d("Deja Set", "Reseting photo weights");
+        for (Photo photo : photoList)
+            photo.weight = 0;
+
+        // calculate photo weights
+        Log.d("Deja Set", "Calculating photo weights");
+        for (Photo photo : photoList)
+            photo.weight++;
+
         // insert photos into BST
+        Log.d("Deja Set", "Inserting photos into set");
         for (Photo photo : photoList) {
             if (!photo.release)
                 set.add(photo);
         }
     }
 
+    /**
+     * Get the next photo.
+     *
+     * @return next photo
+     */
     public Photo next() {
         Log.d("Deja Set", "Get last photo in set");
         return set.pollLast();

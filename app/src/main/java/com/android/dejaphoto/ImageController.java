@@ -17,15 +17,18 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import java.io.IOException;
 
 /**
- * Created by Cyrax on 5/4/2017.
- * Image Controller Object takes charge of changing wallpaper pictures
+ * Image Controller Object takes charge of changing wallpaper pictures.
  */
-
 public class ImageController {
 
     Context currentContext;
     WallpaperManager wallpaperManager;
 
+    /**
+     * Default constructor.
+     *
+     * @param context current context
+     */
     public ImageController(Context context) {
         currentContext = context;
         wallpaperManager = WallpaperManager.getInstance(currentContext);
@@ -42,7 +45,7 @@ public class ImageController {
         final boolean default_background = (photo == null);
         final Photo background = (default_background ? new Photo() : photo);
 
-        // set wallpaper
+        // prep and resize the photo using Glide image library
         Runnable runnable = new Runnable() {
             @Override
             public void run() {

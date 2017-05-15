@@ -1,7 +1,6 @@
 package com.android.dejaphoto;
 
-import android.location.Location;
-import android.util.FloatMath;
+import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,6 +17,7 @@ import java.util.TreeSet;
  * location/time of day/day of week. Creates a list of relevant photos to display on homescreen
  */
 public class DatabaseManager {
+
     HashMap<String, List<Photo>> dayMap;
     HashMap<String, List<Photo>> timeMap;
     HashMap<String, List<Photo>> locationMap;
@@ -27,39 +27,31 @@ public class DatabaseManager {
         initialize();
     }
 
-
     //Put photos into the database
-    public DatabaseManager(List<Photo> photoList)
-    {
+    public DatabaseManager(List<Photo> photoList) {
         initialize();
         update(photoList);
     }
+
     //get photos related to current day of the week
-    public List<Photo> queryDayOfTheWeek(String dow)
-    {
+    public List<Photo> queryDayOfTheWeek(String dow) {
         if (dow != null) {
             List<Photo> photoList = dayMap.get(dow);
             return photoList;
-
-        }
-        else return null;
+        } else return null;
     }
-    //get photos related to current hour
-    public List<Photo> queryHour(String hour)
-    {
-        if (hour != null)
-        {
 
+    //get photos related to current hour
+    public List<Photo> queryHour(String hour) {
+        if (hour != null) {
             List<Photo> photoList = timeMap.get(hour);
             return photoList;
         } else return null;
     }
 
     //get photos related to current location
-    public List<Photo> queryLocation(String latitude, String longitude)
-    {
-        if (latitude != null && longitude != null)
-        {
+    public List<Photo> queryLocation(String latitude, String longitude) {
+        if (latitude != null && longitude != null) {
             double latDouble = new Double(latitude);
             double longDouble = new Double(longitude);
             TreeSet<Photo> results = new TreeSet<>(new Comparator<Photo>() {
@@ -92,8 +84,7 @@ public class DatabaseManager {
 
 
     //Method to initialize hash maps with photos from default camera album
-    public void initialize()
-    {
+    public void initialize() {
 
         dayMap = new HashMap<String, List<Photo>>(5);
         timeMap = new HashMap<String, List<Photo>>(5);
@@ -128,10 +119,8 @@ public class DatabaseManager {
     }
 
     //add any new photos taken with camera into hashmaps
-    public void update(List<Photo> photoList)
-    {
-        for (Photo photo : photoList)
-        {//Parse each photo and put it into appropriate container
+    public void update(List<Photo> photoList) {
+        for (Photo photo : photoList) {//Parse each photo and put it into appropriate container
 
             //Put in dayMap
             List<Photo> dayContainer;
@@ -175,47 +164,86 @@ public class DatabaseManager {
     }
 
     //getter method for size of photo database
-    public int size()
-    {
+    public int size() {
         return size;
     }
 
+    /**
+     * Get location weight for photo.
+     *
+     * @param currLat current latitude
+     * @param currLng current longitude
+     * @param photoLat photo latitude
+     * @param photoLng photo longitude
+     * @return location weight
+     */
     public static double weighLocation(double currLat, double currLng, double photoLat, double photoLng) {
+        Log.d("Weight Function", "calculating location weight");
         double results = meterDistanceBetweenPoints(currLat, currLng, photoLat, photoLng);
-        //System.out.println("inLoc: " + photoLat + " " + photoLng + "\t\t" + results);
         double weight = (results == 0) ? 1 : 300.0 / results;
         return (weight > 1) ? 1 : weight;
     }
 
+    /**
+     * Get day weight for photo.
+     *
+     * @param currDay current day
+     * @param photoDay photo day
+     * @return day weight
+     */
     public static double weighDay(String currDay, String photoDay) {
+        Log.d("Weight Function", "calculating day weight");
         int photoNormalized = Math.abs(dayToInt(photoDay) - dayToInt(currDay));
         double weight = (photoNormalized == 0) ? 1 : 0.75 / photoNormalized;
         return (weight > 1) ? 1 : weight;
     }
 
+    /**
+     * Get hour weight for photo.
+     *
+     * @param currHour current hour
+     * @param photoHour photo hour
+     * @return hour weight
+     */
     public static double weighHour(int currHour, int photoHour) {
+        Log.d("Weight Function", "calculating hour weight");
         int photoNormalized = Math.abs(photoHour - currHour);
-        System.out.println(currHour + " " + photoHour);
         double weight = (photoNormalized == 0) ? 1 : 2.0 / photoNormalized;
         return (weight > 1) ? 1 : weight;
     }
 
+    /**
+     * Get distance in meters between 2 coordinates.
+     * Found online on Stackoverflow.
+     *
+     * @param lat_a latitude a
+     * @param lng_a longitude a
+     * @param lat_b latitude b
+     * @param lng_b longitude b
+     * @return
+     */
     private static double meterDistanceBetweenPoints(double lat_a, double lng_a, double lat_b, double lng_b) {
-        double pk = (float) (180.f/Math.PI);
+        double pk = (float) (180.f / Math.PI);
 
         double a1 = lat_a / pk;
         double a2 = lng_a / pk;
         double b1 = lat_b / pk;
         double b2 = lng_b / pk;
 
-        double t1 = Math.cos(a1)*Math.cos(a2)*Math.cos(b1)*Math.cos(b2);
-        double t2 = Math.cos(a1)*Math.sin(a2)*Math.cos(b1)*Math.sin(b2);
-        double t3 = Math.sin(a1)*Math.sin(b1);
+        double t1 = Math.cos(a1) * Math.cos(a2) * Math.cos(b1) * Math.cos(b2);
+        double t2 = Math.cos(a1) * Math.sin(a2) * Math.cos(b1) * Math.sin(b2);
+        double t3 = Math.sin(a1) * Math.sin(b1);
         double tt = Math.acos(t1 + t2 + t3);
 
-        return 6366000*tt;
+        return 6366000 * tt;
     }
 
+    /**
+     * Converts a day to an int.
+     *
+     * @param day day to convert
+     * @return int representing day
+     */
     private static int dayToInt(String day) {
         if (day.equalsIgnoreCase("sunday"))
             return 0;

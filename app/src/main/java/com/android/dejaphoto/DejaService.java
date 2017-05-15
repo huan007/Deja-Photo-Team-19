@@ -12,9 +12,9 @@ import com.google.maps.GeoApiContext;
 
 import java.io.File;
 
-import static com.android.dejaphoto.AppWidget.releaseAction;
-import static java.security.AccessController.getContext;
-
+/**
+ * Long running service that updates photos according to widget button clicks.
+ */
 public class DejaService extends Service {
     public static final String nextAction = "NEXT";
     public static final String previousAction = "PREVIOUS";
@@ -29,16 +29,28 @@ public class DejaService extends Service {
     PhotoQueue<Photo> queue;
     private IBinder mBinder = new MyBinder();
 
+    /**
+     * Thread to execute widget action.
+     */
     public class DejaThread implements Runnable {
         PhotoQueue<Photo> photoQueue;
         String action;
 
+        /**
+         * Default constructor.
+         *
+         * @param queue  queue to use
+         * @param action action to perform
+         */
         public DejaThread(PhotoQueue<Photo> queue, String action) {
             //Get queue from outside
             photoQueue = queue;
             this.action = action;
         }
 
+        /**
+         * Chooses action to run.
+         */
         @Override
         public void run() {
             //Only run if the queue is there. Prevent null pointer
@@ -56,12 +68,18 @@ public class DejaService extends Service {
             }
         }
 
+        /**
+         * Updates wallpaper with next photo.
+         */
         public void next() {
             //get next photo
             Log.d("DejaService", "next called");
             controller.displayImage(queue.next(getApplicationContext()));
         }
 
+        /**
+         * Updates wallpaper with previous photo.
+         */
         public void previous() {
             //get previous photo
             Log.d("DejaService", "previous called");
@@ -74,18 +92,27 @@ public class DejaService extends Service {
                 controller.displayImage(previousPhoto);
         }
 
+        /**
+         * Update karma.
+         */
         public void karma() {
             Log.d("DejaService", "karma received");
 
             photoQueue.getCurrentPhoto().setKarma();
         }
 
+        /**
+         * Update release.
+         */
         public void release() {
             Log.d("DejaService", "photo released bye bye");
 
             photoQueue.getCurrentPhoto().releasePhoto();
         }
 
+        /**
+         * Refresh screen
+         */
         public void refresh() {
             Log.d("DejaService", "refresh called");
             Context context = getApplicationContext();
@@ -94,20 +121,35 @@ public class DejaService extends Service {
         }
     }
 
+    /**
+     * Returns corresponding DejaService.
+     */
     public class MyBinder extends Binder {
         public DejaService getService() {
             return DejaService.this;
         }
     }
 
+    /**
+     * Default constructor.
+     */
     public DejaService() {
     }
 
+    /**
+     * Returns binder.
+     *
+     * @param intent current intent
+     * @return binder
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
+    /**
+     * What to do on service start.
+     */
     @Override
     public void onCreate() {
         Context context = getApplicationContext();
@@ -118,11 +160,21 @@ public class DejaService extends Service {
         super.onCreate();
     }
 
+    /**
+     * Parses action command.
+     *
+     * @param intent  current intent
+     * @param flags   flags
+     * @param startId action to start
+     * @return int
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Deciding whether to run next or previous
         Log.d("DejaService", "onStart()");
         String action = intent.getStringExtra(actionFlag);
+
+        // starts corresponding action
         if (action != null) {
             Log.d("DejaService", "Action received: " + action);
             if (action.equals(nextAction))
@@ -136,15 +188,23 @@ public class DejaService extends Service {
             if (action.equals(refreshAction))
                 runRefresh();
         }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /**
+     * What to do on service destruction.
+     */
     @Override
     public void onDestroy() {
         Log.d("DejaService", "onDestroy()");
     }
 
-    //Helpers
+    /**
+     * Initializes all fields.
+     *
+     * @param context current context
+     */
     public void initialize(Context context) {
         Log.d("DejaService", "initialize()");
 
@@ -162,39 +222,44 @@ public class DejaService extends Service {
         controller.displayImage(queue.next(getApplicationContext()));
     }
 
+    /**
+     * Start next action.
+     */
     public void runNext() {
         Thread worker = new Thread(new DejaThread(queue, nextAction));
         worker.start();
     }
 
+    /**
+     * Start previous action.
+     */
     public void runPrevious() {
         Thread worker = new Thread(new DejaThread(queue, previousAction));
         worker.start();
     }
 
+    /**
+     * Start karma action.
+     */
     public void runKarma() {
         Thread worker = new Thread(new DejaThread(queue, karmaAction));
         worker.start();
-
     }
 
+    /**
+     * Start release action.
+     */
     public void runRelease() {
         Thread worker = new Thread(new DejaThread(queue, releaseAction));
         worker.start();
     }
 
+    /**
+     * Start refresh action.
+     */
     public void runRefresh() {
         Thread worker = new Thread(new DejaThread(queue, refreshAction));
         worker.start();
     }
-
-    /*
-    public void show(Context context) {
-        Photo photo = new Photo();
-        Bitmap newBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
-        photo.setPhoto(newBitmap);
-        controller.displayImage(photo);
-    }*/
-
 
 }

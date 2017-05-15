@@ -30,6 +30,12 @@ public class PhotoChooser implements Chooser<Photo> {
     String prevLat;
     String prevLong;
 
+    /**
+     * Default constructor.
+     *
+     * @param photos list of photos
+     * @param geoContext current geoContext
+     */
     public PhotoChooser(List<Photo> photos, GeoApiContext geoContext) {
         this.photos = photos;
         dejaPhotos = new DejaSet();
@@ -50,14 +56,9 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     @Override
     public Photo next(Context context) {
+        // determine whether to get a dejavu photo or random photo
         SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
         return (dejaMode = (sharedPreferences.getBoolean("dejavu", true))) ? dejaNext(context) : randomNext();
-    }
-
-    private static class Check {
-        boolean location;
-        boolean day;
-        boolean time;
     }
 
     /**
@@ -72,31 +73,43 @@ public class PhotoChooser implements Chooser<Photo> {
 
         Log.d("Photo Chooser", "Using Deja Algorithm to select next photo");
 
+        // initialize helper check file
         Check check = new Check();
         check.location = check.day = check.time = true;
 
+        // update weights
         while (!updateWeights(context, check));
 
+        // sort photos by increasing weights
         Collections.sort(photos, new Comparator<Photo>() {
             @Override
             public int compare(Photo o1, Photo o2) {
-                // Photos are the same; duplicates
+                // photos are the same; duplicates
                 if ((o1.photo).equals(o2.photo))
                     return 0;
 
-                //  First photo with more relevant location, day of week, and  time
+                //  first photo with more relevant location, day of week, and  time
                 if (o1.weight != o2.weight)
                     return Double.compare(o1.weight, o2.weight);
-                    //  One photo has karma while the other doesn't
+                    //  one photo has karma while the other doesn't
                 else if (o1.karma != o2.karma)
                     return (o1.karma) ? 1 : -1;
-                    // More recent photo is greater
+                    // more recent photo is greater
                 else
                     return (o1.getRecency() > o2.getRecency()) ? 1 : -1;
             }
         });
 
-        return photos.get(photos.size() - 1);
+        // get highest weighted photo that has no been released
+        Photo next = null;
+        for (int i = 0; i < photos.size(); ++i) {
+            next = photos.get(photos.size() - 1 - i);
+            if (!next.release)
+                break;
+        }
+
+        // return highest weighted photo
+        return next;
     }
 
     /**
@@ -187,6 +200,15 @@ public class PhotoChooser implements Chooser<Photo> {
             Log.d("Photo Chooser", "updating set of normal photos");
             Collections.shuffle(photos, new Random(System.currentTimeMillis()));
         }
+    }
+
+    /**
+     * Helper class to hold checking data.
+     */
+    private static class Check {
+        boolean location;
+        boolean day;
+        boolean time;
     }
 
 }
