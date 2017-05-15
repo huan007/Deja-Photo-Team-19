@@ -30,7 +30,15 @@ import java.util.Locale;
  * Created by Phillip on 5/3/17.
  */
 
+
+/**
+ * Class Photo objects represent a single photo from the album, along with information about that
+ * photo. For example, they can return information about the photo's location and time, as well as
+ * a bitmap representation of the photo.
+ */
+
 public class Photo {
+
     String location;
     String datetime;
     String latitude;
@@ -82,20 +90,25 @@ public class Photo {
     // Release photo
     public void releasePhoto(){ release = true; }
 
+    // Sets karma value
     public void setKarma(){ karma = true; }
 
+    // Returns the location value for the photo
     public String getLocation() {
         return location;
     }
 
+    // Sets location value of the photo
     public void setLocation(String location) {
         this.location = location;
     }
 
+    // Returns the date/time the photo was taken
     public String getDatetime() {
         return datetime;
     }
 
+    // Returns the day of the week the photo was taken
     public String getDayOfTheWeek()
     {
         if (datetime != null) {
@@ -114,6 +127,7 @@ public class Photo {
         else return null;
     }
 
+    // Returns the hour the photo was taken
     public String getHour()
     {
         if (datetime != null)
@@ -154,34 +168,42 @@ public class Photo {
             return 0;
     }
 
+    // Sets date time for photo
     public void setDatetime(String datetime) {
         this.datetime = datetime;
     }
 
+    // Returns latitude for photo
     public String getLatitude() {
         return latitude;
     }
 
+    // Set latitude value for photo
     public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
 
+    // Returns longitude value for photo
     public String getLongitude() {
         return longitude;
     }
 
+    // Sets longitude value for photo
     public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 
+    // Returns a bitmap representation of the photo
     public Bitmap getPhoto() {
         return photo;
     }
 
+    // Sets photo value
     public void setPhoto(Bitmap photo) {
         this.photo = photo;
     }
 
+    // Returns a URI for the photo
     public Uri getImageUri(Context inContext) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
