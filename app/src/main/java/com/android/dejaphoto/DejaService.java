@@ -136,7 +136,6 @@ public class DejaService extends Service {
             if (action.equals(refreshAction))
                 runRefresh();
         }
-
         return super.onStartCommand(intent, flags, startId);
     }
 
