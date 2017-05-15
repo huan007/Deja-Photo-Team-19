@@ -9,6 +9,7 @@ import com.google.maps.GeoApiContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -50,7 +51,13 @@ public class PhotoChooser implements Chooser<Photo> {
     @Override
     public Photo next(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
-        return (dejaMode = (sharedPreferences.getBoolean("dejavu", false))) ? dejaNext(context) : randomNext();
+        return (dejaMode = (sharedPreferences.getBoolean("dejavu", true))) ? dejaNext(context) : randomNext();
+    }
+
+    private static class Check {
+        boolean location;
+        boolean day;
+        boolean time;
     }
 
     /**
@@ -65,43 +72,97 @@ public class PhotoChooser implements Chooser<Photo> {
 
         Log.d("Photo Chooser", "Using Deja Algorithm to select next photo");
 
-        List relevantPhotos = new ArrayList<Photo>();
-        SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
+        Check check = new Check();
+        check.location = check.day = check.time = true;
 
+        while (!updateWeights(context, check));
+
+        Collections.sort(photos, new Comparator<Photo>() {
+            @Override
+            public int compare(Photo o1, Photo o2) {
+                // Photos are the same; duplicates
+                if ((o1.photo).equals(o2.photo))
+                    return 0;
+
+                //  First photo with more relevant location, day of week, and  time
+                if (o1.weight != o2.weight)
+                    return Double.compare(o1.weight, o2.weight);
+                    //  One photo has karma while the other doesn't
+                else if (o1.karma != o2.karma)
+                    return (o1.karma) ? 1 : -1;
+                    // More recent photo is greater
+                else
+                    return (o1.getRecency() > o2.getRecency()) ? 1 : -1;
+            }
+        });
+
+        return photos.get(photos.size() - 1);
+    }
+
+    /**
+     * Updates weights of all photos
+     *
+     * @param context current context
+     * @param check what to check
+     * @return successful or not
+     */
+    private boolean updateWeights(Context context, Check check) {
+
+        // current information
         String currLat = UpdateLocationTime.getCurrentLat();
         String currLong = UpdateLocationTime.getCurrentLong();
         String currDay = UpdateLocationTime.getCurrentDay();
         String currHour = UpdateLocationTime.getCurrentTime();
 
-        if (!prevLat.equals(currLat) || !prevLong.equals(currLong) || !prevDay.equals(currDay) || !prevHour.equals(currHour)) {
-            if (sharedPreferences.getBoolean("location", false)) { // location is a factor
-                // If location has changed, reinitialize set
+        SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
+        Log.d("Photo Chooser", "updating weights");
+
+        // update weight of each photo with location, date, time
+        for (Photo photo : photos) {
+            photo.weight = 0;
+
+            // update time weight for each photo
+            if (sharedPreferences.getBoolean("location", true) && check.location) {
                 Log.d("Photo Chooser", "updating photos based on location");
-                List<Photo> locationlist = database.queryLocation(currLat, currLong);
-                if (locationlist != null)
-                    relevantPhotos.addAll(locationlist);
+                if (currLat != null && currLong != null && photo.longitude != null && photo.latitude != null)
+                    photo.weight += DatabaseManager.weighLocation(Double.valueOf(currLat),
+                            Double.valueOf(currLong),
+                            Double.valueOf(photo.latitude),
+                            Double.valueOf(photo.longitude));
+                else {  // not all photos, ignore location
+                    Log.d("Photo Chooser", "not consider location");
+                    check.location = false;
+                    return false;
+                }
             }
-            if (sharedPreferences.getBoolean("day", false)) {  // day of week is a factor
-                // If day of week has changed, reinitialize it
+
+            // update time weight for each photo
+            if (sharedPreferences.getBoolean("day", true) && check.day) {
                 Log.d("Photo Chooser", "updating photos based on day");
-                List<Photo> dayList = database.queryDayOfTheWeek(currDay);
-                if (dayList != null)
-                    relevantPhotos.addAll(dayList);
+                if (currDay != null && photo.getDayOfTheWeek() != null)
+                    photo.weight += DatabaseManager.weighDay(photo.getDayOfTheWeek(), currDay);
+                else {  // not all photos, ignore day
+                    Log.d("Photo Chooser", "not consider day");
+                    check.day = false;
+                    return false;
+                }
             }
-            if (sharedPreferences.getBoolean("time", false)) { // time is a factor
-                // If time has changed, reinitialize set
+
+            // update time weight for each photo
+            if (sharedPreferences.getBoolean("time", true) && check.time) {
                 Log.d("Photo Chooser", "updating photos based on time");
-                List<Photo> hourList = database.queryHour(currHour);
-                if (hourList != null)
-                    relevantPhotos.addAll(hourList);
+                if (currHour != null && photo.getHour() != null)
+                    photo.weight += DatabaseManager.weighHour(Integer.valueOf(currHour), Integer.valueOf(photo.getHour()));
+                else {  // not all photos, ignore time
+                    Log.d("Photo Chooser", "not consider time");
+                    check.time = false;
+                    return false;
+                }
             }
         }
-        // reinitialize set if there are any changes
-        if (!relevantPhotos.isEmpty())
-            dejaPhotos.initializeSet(relevantPhotos);
 
-        // 85% chance for location, day of week, and time to to be relevant
-        return (new Random(System.currentTimeMillis()).nextInt(100) < 85) ? dejaPhotos.next() : randomNext();
+        // successful update
+        return true;
     }
 
     /**

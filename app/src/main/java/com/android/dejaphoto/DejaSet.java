@@ -26,7 +26,7 @@ public class DejaSet {
 
                 //  First photo with more relevant location, day of week, and  time
                 if (o1.weight != o2.weight)
-                    return o1.weight - o2.weight;
+                    return Math.round(Math.round(o1.weight - o2.weight));
                 //  One photo has karma while the other doesn't
                 else if (o1.karma != o2.karma)
                     return (o1.karma) ? 1 : -1;
@@ -47,16 +47,6 @@ public class DejaSet {
         Log.d("Deja Set", "Clearing previous existings photo set");
         // clear current set
         set.clear();
-
-        // reset weight to 0
-        for (Photo photo : photoList) {
-            photo.weight = 0;
-        }
-
-        // increment weight of photos that are relevant
-        for (Photo photo : photoList) {
-            photo.weight++;
-        }
 
         Log.d("Deja Set", "Inserting photos into set");
         // insert photos into BST
