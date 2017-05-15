@@ -54,6 +54,12 @@ public class PhotoChooser implements Chooser<Photo> {
         return (dejaMode = (sharedPreferences.getBoolean("dejavu", true))) ? dejaNext(context) : randomNext();
     }
 
+    private static class Check {
+        boolean location;
+        boolean day;
+        boolean time;
+    }
+
     /**
      * Returns the next photo based on relevant info.
      *
@@ -66,54 +72,21 @@ public class PhotoChooser implements Chooser<Photo> {
 
         Log.d("Photo Chooser", "Using Deja Algorithm to select next photo");
 
-        List relevantPhotos = new ArrayList<Photo>();
-        SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
+        Check check = new Check();
+        check.location = check.day = check.time = true;
 
-        String currLat = UpdateLocationTime.getCurrentLat();
-        String currLong = UpdateLocationTime.getCurrentLong();
-        String currDay = UpdateLocationTime.getCurrentDay();
-        String currHour = UpdateLocationTime.getCurrentTime();
-
-        //if (!prevLat.equals(currLat) || !prevLong.equals(currLong) || !prevDay.equals(currDay) || !prevHour.equals(currHour)) {
-
-        System.out.println(currLat + " " + currLong);
-
-        for (Photo photo : photos) {
-            photo.weight = 0;
-
-            if (sharedPreferences.getBoolean("location", true)) { // location is a factor
-                Log.d("Photo Chooser", "updating photos based on location");
-                if (currLat != null && currLong != null && photo.longitude != null && photo.latitude != null)
-                    photo.weight += DatabaseManager.weighLocation(Double.valueOf(currLat),
-                            Double.valueOf(currLong),
-                            Double.valueOf(photo.latitude),
-                            Double.valueOf(photo.longitude));
-            }
-
-            if (sharedPreferences.getBoolean("day", true)) {  // day of week is a factor
-                Log.d("Photo Chooser", "updating photos based on day");
-                System.out.println(photo.getDayOfTheWeek());
-                if (currDay != null && photo.getDayOfTheWeek() != null)
-                    photo.weight += DatabaseManager.weighDay(photo.getDayOfTheWeek(), currDay);
-            }
-
-            if (sharedPreferences.getBoolean("time", true)) { // time is a factor
-                Log.d("Photo Chooser", "updating photos based on time");
-                if (currHour != null && photo.getHour() != null)
-                    photo.weight += DatabaseManager.weighHour(Integer.valueOf(currHour), Integer.valueOf(photo.getHour()));
-            }
-        }
+        while (!updateWeights(context, check));
 
         Collections.sort(photos, new Comparator<Photo>() {
             @Override
             public int compare(Photo o1, Photo o2) {
                 // Photos are the same; duplicates
-                if ((o1.location + o1.datetime).equals(o2.location + o2.datetime))
+                if ((o1.photo).equals(o2.photo))
                     return 0;
 
                 //  First photo with more relevant location, day of week, and  time
                 if (o1.weight != o2.weight)
-                    return Math.round(Math.round(o1.weight - o2.weight));
+                    return Double.compare(o1.weight, o2.weight);
                     //  One photo has karma while the other doesn't
                 else if (o1.karma != o2.karma)
                     return (o1.karma) ? 1 : -1;
@@ -122,9 +95,74 @@ public class PhotoChooser implements Chooser<Photo> {
                     return (o1.getRecency() > o2.getRecency()) ? 1 : -1;
             }
         });
-        //}
 
         return photos.get(photos.size() - 1);
+    }
+
+    /**
+     * Updates weights of all photos
+     *
+     * @param context current context
+     * @param check what to check
+     * @return successful or not
+     */
+    private boolean updateWeights(Context context, Check check) {
+
+        // current information
+        String currLat = UpdateLocationTime.getCurrentLat();
+        String currLong = UpdateLocationTime.getCurrentLong();
+        String currDay = UpdateLocationTime.getCurrentDay();
+        String currHour = UpdateLocationTime.getCurrentTime();
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences("settings", MODE_PRIVATE);
+        Log.d("Photo Chooser", "updating weights");
+
+        // update weight of each photo with location, date, time
+        for (Photo photo : photos) {
+            photo.weight = 0;
+
+            // update time weight for each photo
+            if (sharedPreferences.getBoolean("location", true) && check.location) {
+                Log.d("Photo Chooser", "updating photos based on location");
+                if (currLat != null && currLong != null && photo.longitude != null && photo.latitude != null)
+                    photo.weight += DatabaseManager.weighLocation(Double.valueOf(currLat),
+                            Double.valueOf(currLong),
+                            Double.valueOf(photo.latitude),
+                            Double.valueOf(photo.longitude));
+                else {  // not all photos, ignore location
+                    Log.d("Photo Chooser", "not consider location");
+                    check.location = false;
+                    return false;
+                }
+            }
+
+            // update time weight for each photo
+            if (sharedPreferences.getBoolean("day", true) && check.day) {
+                Log.d("Photo Chooser", "updating photos based on day");
+                if (currDay != null && photo.getDayOfTheWeek() != null)
+                    photo.weight += DatabaseManager.weighDay(photo.getDayOfTheWeek(), currDay);
+                else {  // not all photos, ignore day
+                    Log.d("Photo Chooser", "not consider day");
+                    check.day = false;
+                    return false;
+                }
+            }
+
+            // update time weight for each photo
+            if (sharedPreferences.getBoolean("time", true) && check.time) {
+                Log.d("Photo Chooser", "updating photos based on time");
+                if (currHour != null && photo.getHour() != null)
+                    photo.weight += DatabaseManager.weighHour(Integer.valueOf(currHour), Integer.valueOf(photo.getHour()));
+                else {  // not all photos, ignore time
+                    Log.d("Photo Chooser", "not consider time");
+                    check.time = false;
+                    return false;
+                }
+            }
+        }
+
+        // successful update
+        return true;
     }
 
     /**
@@ -134,7 +172,6 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     private Photo randomNext() {
         Log.d("Photo Chooser", "Using random algorithm to select next photo");
-        System.out.println("FUCK");
         return (photos.size() > 0) ? photos.get(new Random(System.currentTimeMillis()).nextInt(photos.size())) : null;
     }
 

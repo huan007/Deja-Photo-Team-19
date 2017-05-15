@@ -47,12 +47,12 @@ public class UpdateLocationTime {
     //Returns a string describing users current zip code
     public static String getCurrentLat()
     {//return string value
-        return String.valueOf(MainActivity.returnLatitude());
+        return String.valueOf(MainActivity.latitude);
     }
 
     public static String getCurrentLong()
     {//return string value
-        return String.valueOf(MainActivity.returnLong());
+        return String.valueOf(MainActivity.longitude);
     }
 
 

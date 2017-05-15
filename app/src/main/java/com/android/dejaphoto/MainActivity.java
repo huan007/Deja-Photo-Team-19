@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
@@ -93,6 +94,32 @@ public class MainActivity extends AppCompatActivity
                         5);
             }
         }
+
+        android.location.LocationListener locationListener = new android.location.LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        String locationProvider = LocationManager.GPS_PROVIDER;
+        locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
     }
 
     @Override
@@ -166,11 +193,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         checkPermission();
+        System.out.println("location changed");
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
         if (mCurrentLocation != null) {
-            returnLatitude();
-            returnLong();
+            latitude = returnLatitude();
+            longitude = returnLong();
 
         }
     }
@@ -184,7 +212,6 @@ public class MainActivity extends AppCompatActivity
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     123);
         } else {
-            System.out.println("location upate");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
@@ -199,10 +226,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static double returnLatitude() {
+        System.out.println(mCurrentLocation.getLatitude());
         return ((mCurrentLocation != null) ? (latitude = mCurrentLocation.getLatitude()) : 999);
     }
 
     public static double returnLong() {
+        System.out.println(mCurrentLocation.getLongitude());
         return ((mCurrentLocation != null) ? (longitude = mCurrentLocation.getLongitude()) : 999);
     }
 
