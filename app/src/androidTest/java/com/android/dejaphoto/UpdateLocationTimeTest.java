@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * Created by chuck on 5/13/17.
+ * Testing getting users current location, time of day, day of week
  */
 @RunWith(AndroidJUnit4.class)
 public class UpdateLocationTimeTest {
