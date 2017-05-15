@@ -1,10 +1,7 @@
 package com.android.dejaphoto;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,10 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -27,15 +22,14 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
+
 
 public class MainActivity extends AppCompatActivity
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
@@ -56,7 +50,7 @@ public class MainActivity extends AppCompatActivity
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
 
-        //Begining a location update request, setting interval to every 10 seconds
+        //Beginning a location update request, setting interval to every 10 seconds
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(10000);
@@ -97,7 +91,9 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+
         android.location.LocationListener locationListener = new android.location.LocationListener() {
+            // Check if location has changed
             @Override
             public void onLocationChanged(Location location) {
                 latitude = location.getLatitude();
@@ -119,6 +115,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         };
+        // Get updated Location
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         String locationProvider = LocationManager.GPS_PROVIDER;
         locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
@@ -131,6 +128,7 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handling action bar item clicks
@@ -144,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    //Implementing google's location API interfaces
+    // Implementing google's location API interfaces
     @Override
     public void onConnected(Bundle bundle) {
         LatLng latLng;
@@ -202,7 +200,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Ask user for permission to acceess their location
+    //Ask user for permission to access their location
     public void checkPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -220,11 +218,13 @@ public class MainActivity extends AppCompatActivity
     protected void startLocationUpdates() {
         checkPermission();
     }
+
     //getter method for current latitude
     public static double returnLatitude() {
         System.out.println(mCurrentLocation.getLatitude());
         return ((mCurrentLocation != null) ? (latitude = mCurrentLocation.getLatitude()) : 999);
     }
+
     //getter method for current longitude
     public static double returnLong() {
         System.out.println(mCurrentLocation.getLongitude());
@@ -236,6 +236,7 @@ public class MainActivity extends AppCompatActivity
         mGoogleApiClient.connect();
         super.onStart();
     }
+
     //disconnect from location services on stop
     protected void onStop() {
 
@@ -249,7 +250,7 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
-    // For getting permission from user to access photos -- Phillip
+    // For getting permission from user to access photos
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -274,9 +275,6 @@ public class MainActivity extends AppCompatActivity
     //Alarm class for updating app GUI
     public static class PrefsFragment extends PreferenceFragment {
 
-        AlarmManager alarmManager;
-        PendingIntent pending;
-
         @Override
         public void onCreate(Bundle saveInstanceState) {
             super.onCreate(saveInstanceState);
@@ -285,10 +283,8 @@ public class MainActivity extends AppCompatActivity
             final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            final Context cont = getContext();
 
-
-            // update homescreen automatically at a rate specified by the user
+            // update home-screen automatically at a rate specified by the user
             final Handler refresh = new Handler();
             refresh.postDelayed(new Runnable() {
                 @Override
@@ -309,7 +305,6 @@ public class MainActivity extends AppCompatActivity
             findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    int interval = Integer.valueOf((String) newValue);
                     editor.putInt("interval", Integer.valueOf((String) newValue));
                     editor.apply();
                     Log.d("interval value", "change to " + newValue);
@@ -372,10 +367,6 @@ public class MainActivity extends AppCompatActivity
                     return true;
                 }
             });
-
-
         }
-
     }
-
 }

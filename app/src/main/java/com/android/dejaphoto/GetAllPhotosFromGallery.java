@@ -21,36 +21,39 @@ import java.util.Scanner;
  * Created by Phillip on 5/3/17.
  */
 
+/**
+ * GetAllPhotosFromGallery is a class responsible for populating a database (stored as a list) of
+ * Photo objects. This database is populated using the photos in the default Android gallery.
+ */
 public class GetAllPhotosFromGallery {
     File directory;
     List<Photo> images;
 
+    // Constructor for class
     GetAllPhotosFromGallery() {
         directory = null;
         images = null;
     }
 
+    // Stores list of Photo objects
     public List<Photo> getImages() {
         return images;
     }
 
+    // Creates a Photo object for each file in the directory
     public GetAllPhotosFromGallery(File directoryName, Context context, GeoApiContext geoContext) {
         directory = directoryName;
-
-
 
         images = new ArrayList<Photo>();
 
             if(directory.isDirectory() == true) {
-
                 for (File file : directory.listFiles()) {
-
-
                 if (file.isFile()) {
                     try {
                         // Get bitmap
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getApplicationContext().getContentResolver(), Uri.fromFile(file));
 
+                        // Create Photo object
                         Photo photo = new Photo();
                         photo.photo = bitmap;
 
@@ -75,6 +78,7 @@ public class GetAllPhotosFromGallery {
 
                             double lat = convertDMStoDouble(photo.latitude, isNorth);
                             double longtitude = convertDMStoDouble(photo.longitude, isEast);
+
                             //Update lat and long
                             photo.latitude = String.valueOf(lat);
                             photo.longitude = String.valueOf(longtitude);
@@ -88,7 +92,7 @@ public class GetAllPhotosFromGallery {
                         images.add(photo);
 
                     } catch (Exception e) {
-                        // Not handled well
+                        // Log error
                         e.printStackTrace();
                     }
                 }
@@ -97,6 +101,7 @@ public class GetAllPhotosFromGallery {
 
     }
 
+    // Converts given DMS to Double
     public static double convertDMStoDouble(String raw, boolean isPositive)
     {
         Scanner rawScanner = new Scanner(raw).useDelimiter(",");

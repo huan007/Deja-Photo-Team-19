@@ -23,12 +23,20 @@ public class DatabaseManager {
     HashMap<String, List<Photo>> locationMap;
     int size;
 
+    /**
+     * Default constructor
+     */
     public DatabaseManager() {
         initialize();
     }
 
-    //Put photos into the database
-    public DatabaseManager(List<Photo> photoList) {
+
+    /**
+     * Initialize database based on input list of photos
+     * @param photoList list of photos to store
+     */
+    public DatabaseManager(List<Photo> photoList)
+    {
         initialize();
         update(photoList);
     }

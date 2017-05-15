@@ -184,6 +184,15 @@ public class PhotoEditor {
         return this;
     }
 
+    /**
+     * Get street address at specified longtiude and latitude
+     *
+     * @param context   current state of application
+     * @param latitude  distance north or south of equator
+     * @param longitude distance west or east of equator
+     * @return  address at specified longitude and latitude
+     * @throws IOException
+     */
     private String getAddress(Context context, double latitude, double longitude) throws IOException {
         return new Geocoder(context, Locale.getDefault())
                 .getFromLocation(latitude, longitude, 1)
