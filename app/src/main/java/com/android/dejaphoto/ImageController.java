@@ -50,6 +50,11 @@ public class ImageController {
             @Override
             public void run() {
                 Log.d("ImageController", "changing wallpaper");
+                // https://developer.android.com/topic/performance/graphics/load-bitmap.html
+                // https://github.com/bumptech/glide
+                //
+                // First link Android documentation telling us to use Glide library.
+                // Second link Glide library source.
                 Glide.with(currentContext)
                         .load(default_background ? R.drawable.apple : background.getImageUri(currentContext))   // load background
                         .asBitmap()                                                                             // as bitmap
