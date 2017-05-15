@@ -222,7 +222,7 @@ public class DatabaseManager {
 
     /**
      * Get distance in meters between 2 coordinates.
-     * Found online on Stackoverflow.
+     * Found online on https://stackoverflow.com/questions/8049612/calculating-distance-between-two-geographic-locations
      *
      * @param lat_a latitude a
      * @param lng_a longitude a
