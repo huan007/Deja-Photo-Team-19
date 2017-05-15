@@ -1,17 +1,12 @@
 package com.android.dejaphoto;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 
@@ -20,13 +15,12 @@ import android.content.Intent;
 import android.widget.Toast;
 
 
-import java.io.File;
-//import com.android.dejaphoto.SettingsActivity;
 
 /**
  * Implementation of App Widget functionality.
  */
 public class AppWidget extends AppWidgetProvider {
+    // Strings of actions
     public static String settingsAction = "openSettings";
     public static String nextAction = "nextPhoto";
     public static String previousAction = "previousPhoto";
@@ -34,12 +28,10 @@ public class AppWidget extends AppWidgetProvider {
     public static String releaseAction = "release";
 
 
-    ImageController controller;
-     PhotoQueue<Photo> queue;
+    PhotoQueue<Photo> queue;    // queue storing photos
 
     DejaService mService;
     boolean mBound = false;
-
 
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
@@ -109,8 +101,7 @@ public class AppWidget extends AppWidgetProvider {
         // Might add relevant functionality for when widget is disabled in next iteration
 
         //unbind if necessary
-        if (mBound)
-        {
+        if (mBound) {
             context.unbindService(mConnection);
             mBound = false;
         }
@@ -122,16 +113,14 @@ public class AppWidget extends AppWidgetProvider {
         Log.d("App Widget", "onReceive()");
         super.onReceive(context, intent);
         //Starting next/prev button functionality
-        if (queue != null)
-        {
+        if (queue != null) {
             Log.d("App Widget", "Queue is not null");
-        }
-        else
+        } else
             Log.d("App Widget", "Queue is NULL");
         //Next photo intent
         if (intent.getAction().equals(nextAction)) {
             //TODO
-            Log.d("App Widget","nextAction is called");
+            Log.d("App Widget", "nextAction is called");
 
             //Start the service
             Intent serviceIntent = new Intent(context, DejaService.class);
@@ -143,7 +132,7 @@ public class AppWidget extends AppWidgetProvider {
         //Previous button intent
         if (intent.getAction().equals(previousAction)) {
             //TODO
-            Log.d("App Widget","previousAction is called");
+            Log.d("App Widget", "previousAction is called");
             //Start the service
             Intent serviceIntent = new Intent(context, DejaService.class);
             serviceIntent.putExtra(DejaService.actionFlag, DejaService.previousAction);
@@ -152,17 +141,15 @@ public class AppWidget extends AppWidgetProvider {
             //mService.runPrevious();
         }
         //Karma button intent
-        if (intent.getAction().equals(karmaAction))
-        {
-            Log.d("AppWidget","karmaAction is called");
+        if (intent.getAction().equals(karmaAction)) {
+            Log.d("AppWidget", "karmaAction is called");
             Intent serviceIntent = new Intent(context, DejaService.class);
             serviceIntent.putExtra(DejaService.actionFlag, DejaService.karmaAction);
             context.startService(serviceIntent);
         }
         //Release button intent
-        if (intent.getAction().equals(releaseAction))
-        {
-            Log.d("AppWidget","releaseAction is called");
+        if (intent.getAction().equals(releaseAction)) {
+            Log.d("AppWidget", "releaseAction is called");
             Intent serviceIntent = new Intent(context, DejaService.class);
             serviceIntent.putExtra(DejaService.actionFlag, DejaService.releaseAction);
             context.startService(serviceIntent);
@@ -170,7 +157,7 @@ public class AppWidget extends AppWidgetProvider {
         Log.d("App Widget", "End onReceive()");
     }
 
-    //implementing background service
+    // implementing background service
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {

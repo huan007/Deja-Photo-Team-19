@@ -1,8 +1,5 @@
 package com.android.dejaphoto;
 
-import android.location.Location;
-import android.util.FloatMath;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -18,17 +15,23 @@ import java.util.TreeSet;
  * location/time of day/day of week. Creates a list of relevant photos to display on homescreen
  */
 public class DatabaseManager {
-    HashMap<String, List<Photo>> dayMap;
-    HashMap<String, List<Photo>> timeMap;
-    HashMap<String, List<Photo>> locationMap;
-    int size;
+    HashMap<String, List<Photo>> dayMap;        // hashtable of photos based on day of week
+    HashMap<String, List<Photo>> timeMap;       // hashtable of photos based on time
+    HashMap<String, List<Photo>> locationMap;   // hashtable of photos based on location
+    int size;   // size of photo database
 
+    /**
+     * Default constructor
+     */
     public DatabaseManager() {
         initialize();
     }
 
 
-    //Put photos into the database
+    /**
+     * Initialize database based on input list of photos
+     * @param photoList list of photos to store
+     */
     public DatabaseManager(List<Photo> photoList)
     {
         initialize();

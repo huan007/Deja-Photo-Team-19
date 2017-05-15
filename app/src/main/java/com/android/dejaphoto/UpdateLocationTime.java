@@ -3,14 +3,6 @@ import java.util.Calendar;
 import java.util.Locale;
 
 
-import com.google.maps.GeoApiContext;
-import com.google.maps.GeocodingApi;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.GeocodingResult;
-import com.google.maps.model.LatLng;
-
-import java.io.IOException;
-
 /**
  * Class creates functionality to get users current location, time of day, and day of the week.
  */
