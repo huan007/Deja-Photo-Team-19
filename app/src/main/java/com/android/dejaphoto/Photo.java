@@ -85,7 +85,7 @@ public class Photo {
     Bitmap photo;
     boolean karma;
     boolean release;
-    int weight;
+    double weight;
 
     // Release photo
     public void releasePhoto(){ release = true; }
@@ -124,7 +124,9 @@ public class Photo {
                 return null;
             }
         }
-        else return null;
+        else {
+            return null;
+        }
     }
 
     // Returns the hour the photo was taken

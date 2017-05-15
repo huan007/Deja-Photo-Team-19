@@ -1,5 +1,8 @@
 package com.android.dejaphoto;
 
+import android.location.Location;
+import android.util.FloatMath;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -20,10 +23,10 @@ public class DatabaseManager {
     HashMap<String, List<Photo>> locationMap;
     int size;
 
-    public DatabaseManager()
-    {
+    public DatabaseManager() {
         initialize();
     }
+
 
     //Put photos into the database
     public DatabaseManager(List<Photo> photoList)
@@ -35,8 +38,9 @@ public class DatabaseManager {
     public List<Photo> queryDayOfTheWeek(String dow)
     {
         if (dow != null) {
-            List <Photo> photoList = dayMap.get(dow);
+            List<Photo> photoList = dayMap.get(dow);
             return photoList;
+
         }
         else return null;
     }
@@ -45,11 +49,12 @@ public class DatabaseManager {
     {
         if (hour != null)
         {
+
             List<Photo> photoList = timeMap.get(hour);
             return photoList;
-        }
-        else return null;
+        } else return null;
     }
+
     //get photos related to current location
     public List<Photo> queryLocation(String latitude, String longitude)
     {
@@ -65,8 +70,7 @@ public class DatabaseManager {
                 }
             });
 
-            for (Photo photo : locationMap.get("Normal"))
-            {//Since we do have location, we will compare in the normal set
+            for (Photo photo : locationMap.get("Normal")) {//Since we do have location, we will compare in the normal set
 
                 //Use the distance formula to calculate the differences
                 double latDifference = Math.pow(latDouble - new Double(photo.latitude), 2);
@@ -86,9 +90,11 @@ public class DatabaseManager {
         else return locationMap.get("Unknown");
     }
 
+
     //Method to initialize hash maps with photos from default camera album
     public void initialize()
     {
+
         dayMap = new HashMap<String, List<Photo>>(5);
         timeMap = new HashMap<String, List<Photo>>(5);
         locationMap = new HashMap<String, List<Photo>>(5);
@@ -105,8 +111,7 @@ public class DatabaseManager {
         dayMap.put("Unknown", new LinkedList<Photo>());
 
         //Add containers to timeMap
-        for(int i = 1; i < 25; i++)
-        {
+        for (int i = 1; i < 25; i++) {
             SimpleDateFormat hourFormat = new SimpleDateFormat("kk");
             try {
                 Date myDate = hourFormat.parse(Integer.toString(i));
@@ -127,6 +132,7 @@ public class DatabaseManager {
     {
         for (Photo photo : photoList)
         {//Parse each photo and put it into appropriate container
+
             //Put in dayMap
             List<Photo> dayContainer;
             List<Photo> timeContainer;
@@ -134,25 +140,20 @@ public class DatabaseManager {
 
             //Put photo in appropriate dayContainer
             String dow = photo.getDayOfTheWeek();
-            if (dow != null)
-            {
+            if (dow != null) {
                 dayContainer = dayMap.get(dow);
                 dayContainer.add(photo);
-            }
-            else
-            {//No information about DOW
+            } else {//No information about DOW
                 dayContainer = dayMap.get("Unknown");
                 dayContainer.add(photo);
             }
 
             //Put photo in appropriate timeContainer
             String hour = photo.getHour();
-            if (hour != null){
+            if (hour != null) {
                 timeContainer = timeMap.get(hour);
                 timeContainer.add(photo);
-            }
-            else
-            {//No information about the time
+            } else {//No information about the time
                 timeContainer = timeMap.get("Unknown");
                 timeContainer.add(photo);
             }
@@ -160,13 +161,10 @@ public class DatabaseManager {
             //Put photo in appropriate locationContainer
             String latitude = photo.getLatitude();
             String longitude = photo.getLongitude();
-            if (latitude != null && longitude != null)
-            {
+            if (latitude != null && longitude != null) {
                 locationContainer = locationMap.get("Normal");
                 locationContainer.add(photo);
-            }
-            else
-            {//No information about the location
+            } else {//No information about the location
                 locationContainer = locationMap.get("Unknown");
                 locationContainer.add(photo);
             }
@@ -175,11 +173,69 @@ public class DatabaseManager {
             size++;
         }
     }
+
     //getter method for size of photo database
     public int size()
     {
         return size;
     }
 
+    public static double weighLocation(double currLat, double currLng, double photoLat, double photoLng) {
+        double results = meterDistanceBetweenPoints(currLat, currLng, photoLat, photoLng);
+        //System.out.println("inLoc: " + photoLat + " " + photoLng + "\t\t" + results);
+        double weight = (results == 0) ? 1 : 300.0 / results;
+        return (weight > 1) ? 1 : weight;
+    }
+
+    public static double weighDay(String currDay, String photoDay) {
+        int photoNormalized = Math.abs(dayToInt(photoDay) - dayToInt(currDay));
+        double weight = (photoNormalized == 0) ? 1 : 0.75 / photoNormalized;
+        return (weight > 1) ? 1 : weight;
+    }
+
+    public static double weighHour(int currHour, int photoHour) {
+        int photoNormalized = Math.abs(photoHour - currHour);
+        System.out.println(currHour + " " + photoHour);
+        double weight = (photoNormalized == 0) ? 1 : 2.0 / photoNormalized;
+        return (weight > 1) ? 1 : weight;
+    }
+
+    private static double meterDistanceBetweenPoints(double lat_a, double lng_a, double lat_b, double lng_b) {
+        double pk = (float) (180.f/Math.PI);
+
+        double a1 = lat_a / pk;
+        double a2 = lng_a / pk;
+        double b1 = lat_b / pk;
+        double b2 = lng_b / pk;
+
+        double t1 = Math.cos(a1)*Math.cos(a2)*Math.cos(b1)*Math.cos(b2);
+        double t2 = Math.cos(a1)*Math.sin(a2)*Math.cos(b1)*Math.sin(b2);
+        double t3 = Math.sin(a1)*Math.sin(b1);
+        double tt = Math.acos(t1 + t2 + t3);
+
+        return 6366000*tt;
+    }
+
+    private static int dayToInt(String day) {
+        if (day.equalsIgnoreCase("sunday"))
+            return 0;
+
+        if (day.equalsIgnoreCase("monday"))
+            return 1;
+
+        if (day.equalsIgnoreCase("tuesday"))
+            return 2;
+
+        if (day.equalsIgnoreCase("wednesday"))
+            return 3;
+
+        if (day.equalsIgnoreCase("thursday"))
+            return 4;
+
+        if (day.equalsIgnoreCase("friday"))
+            return 5;
+
+        return 6;
+    }
 
 }
