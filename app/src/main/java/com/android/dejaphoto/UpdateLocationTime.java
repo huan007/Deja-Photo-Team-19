@@ -12,7 +12,7 @@ import com.google.maps.model.LatLng;
 import java.io.IOException;
 
 /**
- * Created by chuck on 5/13/17.
+ * Class creates functionality to get users current location, time of day, and day of the week.
  */
 
 public class UpdateLocationTime {
@@ -44,12 +44,12 @@ public class UpdateLocationTime {
         return currDay;
     }
 
-    //Returns a string describing users current zip code
+    //Returns a string describing users current latitude
     public static String getCurrentLat()
     {//return string value
         return String.valueOf(MainActivity.latitude);
     }
-
+    //Returns a string describing users current longitude
     public static String getCurrentLong()
     {//return string value
         return String.valueOf(MainActivity.longitude);

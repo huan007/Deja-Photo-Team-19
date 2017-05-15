@@ -92,7 +92,6 @@ public class GetAllPhotosFromGallery {
                         e.printStackTrace();
                     }
                 }
-
                 }
             }
 
