@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.TreeSet;
 
 /**
- * Created by Cyrax on 5/11/2017.
+ * Creates a photo database comprised of three hashmaps that photos on phone are loaded into.
+ * Has functionality for queering the hash maps and getting photos relevant to current user
+ * location/time of day/day of week. Creates a list of relevant photos to display on homescreen
  */
-
 public class DatabaseManager {
     HashMap<String, List<Photo>> dayMap;
     HashMap<String, List<Photo>> timeMap;
@@ -24,23 +25,22 @@ public class DatabaseManager {
         initialize();
     }
 
+    //Put photos into the database
     public DatabaseManager(List<Photo> photoList)
     {
-        //Put photos into the database
         initialize();
         update(photoList);
     }
-
+    //get photos related to current day of the week
     public List<Photo> queryDayOfTheWeek(String dow)
     {
         if (dow != null) {
             List <Photo> photoList = dayMap.get(dow);
             return photoList;
         }
-
         else return null;
     }
-
+    //get photos related to current hour
     public List<Photo> queryHour(String hour)
     {
         if (hour != null)
@@ -50,7 +50,7 @@ public class DatabaseManager {
         }
         else return null;
     }
-
+    //get photos related to current location
     public List<Photo> queryLocation(String latitude, String longitude)
     {
         if (latitude != null && longitude != null)
@@ -82,10 +82,11 @@ public class DatabaseManager {
             //Return the sorted collection as a list
             return new LinkedList<Photo>(results);
         }
-        //If no info, then return the unknown set
+        //If no info, then return the unknown set of photos with no information
         else return locationMap.get("Unknown");
     }
 
+    //Method to initialize hash maps with photos from default camera album
     public void initialize()
     {
         dayMap = new HashMap<String, List<Photo>>(5);
@@ -121,6 +122,7 @@ public class DatabaseManager {
         locationMap.put("Normal", new LinkedList<Photo>());
     }
 
+    //add any new photos taken with camera into hashmaps
     public void update(List<Photo> photoList)
     {
         for (Photo photo : photoList)
@@ -173,7 +175,7 @@ public class DatabaseManager {
             size++;
         }
     }
-
+    //getter method for size of photo database
     public int size()
     {
         return size;

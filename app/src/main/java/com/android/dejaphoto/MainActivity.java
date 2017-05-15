@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity
 
     // Create an instance of GoogleAPIClient.
     GoogleApiClient mGoogleApiClient;
-    //LocationRequest mLocationRequest;
 
+    //Location static variables to access from other classes
     public static Location mCurrentLocation;
     public static double latitude;
     public static double longitude;
@@ -55,12 +55,14 @@ public class MainActivity extends AppCompatActivity
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
 
 
+        //Begining a location update request, setting interval to every 10 seconds
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(10);
-        mLocationRequest.setFastestInterval(10);
-        //fusedLocationProviderApi = LocationServices.FusedLocationApi;
-        //adding APIs to the client
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(10000);
+
+
+        //adding location APIs to the client
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new Builder(this)
                     .addConnectionCallbacks(this)
@@ -75,13 +77,13 @@ public class MainActivity extends AppCompatActivity
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
+            // Show an explanation
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
+                // this thread waiting for the user's response. After the user
                 // sees the explanation, try again to request the permission.
             } else {
                 // No explanation needed, we can request the permission.
@@ -95,21 +97,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handling action bar item clicks
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        //no inspection Simplifiable If Statement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -117,24 +117,22 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    //Trying to figure out how to implement Googles location API interfaces
+    //Implementing google's location API interfaces
     @Override
     public void onConnected(Bundle bundle) {
         LatLng latLng;
-
 
         //don't call startLocationUpdates if mGoogleApiClient is not connected:
         if (mGoogleApiClient.isConnected()) {
             startLocationUpdates();
         }
-
-        // Get last known recent location.
+        // Get last known, most recent location.
         checkPermission();
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
         // Note that this can be NULL if last location isn't already known.
         if (mCurrentLocation != null) {
-            // Print current location if not null
+            // log current location if not null
             Log.d("DEBUG", "current location: " + mCurrentLocation.toString());
             latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 
@@ -142,12 +140,9 @@ public class MainActivity extends AppCompatActivity
             longitude = mCurrentLocation.getLongitude();
             Log.d("Latitude and Longtitude", "current location: " + latLng.toString());
         }
-
-
-        String latString = Double.toString(latitude);
-        Toast.makeText(this, "here is Lat" + latString, Toast.LENGTH_SHORT).show();
     }
 
+    //Handle connection being suspended. Toast message to user
     @Override
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
@@ -157,28 +152,32 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    //Handle connection failing. Toast message to user
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this, "Connection Failed", Toast.LENGTH_SHORT).show();
 
     }
 
+    //Called on location change - update static lat/long variables
     @Override
     public void onLocationChanged(Location location) {
+        //getting last known location again
         checkPermission();
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
+        //updating lat/long variables
         if (mCurrentLocation != null) {
             returnLatitude();
             returnLong();
-
         }
     }
 
+    //Ask user for permission to acceess their location
     public void checkPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                ) {//Can add more as per requirement
+                ) {
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -191,17 +190,13 @@ public class MainActivity extends AppCompatActivity
 
     //Start getting regular location updates with low power interval
     protected void startLocationUpdates() {
-
         checkPermission();
-        //Thread.dumpStack();
-
-
     }
-
+    //getter method for current latitude
     public static double returnLatitude() {
         return ((mCurrentLocation != null) ? (latitude = mCurrentLocation.getLatitude()) : 999);
     }
-
+    //getter method for current longitude
     public static double returnLong() {
         return ((mCurrentLocation != null) ? (longitude = mCurrentLocation.getLongitude()) : 999);
     }
@@ -211,7 +206,6 @@ public class MainActivity extends AppCompatActivity
         mGoogleApiClient.connect();
         super.onStart();
     }
-
     //disconnect from location services on stop
     protected void onStop() {
 
@@ -240,17 +234,14 @@ public class MainActivity extends AppCompatActivity
                     Log.d("MainActivity", "Started Service");
 
                 } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // permission denied, handle silently
                 }
                 return;
             }
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
+    //Alarm class for updating app GUI
     public static class PrefsFragment extends PreferenceFragment {
 
         AlarmManager alarmManager;
