@@ -44,10 +44,13 @@ public class MainActivity extends AppCompatActivity
     LocationRequest mLocationRequest;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
+
+
 
 
         //Beginning a location update request, setting interval to every 10 seconds
