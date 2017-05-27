@@ -29,6 +29,12 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
+        <activity android:name=".LoginActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,7 +57,7 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".LoginActivity"></activity>
+
     </application>
 
 </manifest>
