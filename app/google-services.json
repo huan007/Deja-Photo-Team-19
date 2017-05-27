@@ -1,35 +1,35 @@
 {
   "project_info": {
-    "project_number": "769627028067",
-    "firebase_url": "https://deja-photo-team-19.firebaseio.com",
-    "project_id": "deja-photo-team-19",
-    "storage_bucket": "deja-photo-team-19.appspot.com"
+    "project_number": "45709257200",
+    "firebase_url": "https://deja-demo.firebaseio.com",
+    "project_id": "deja-demo",
+    "storage_bucket": "deja-demo.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:769627028067:android:41cabffdd2db9746",
+        "mobilesdk_app_id": "1:45709257200:android:41cabffdd2db9746",
         "android_client_info": {
           "package_name": "com.android.dejaphoto"
         }
       },
       "oauth_client": [
         {
-          "client_id": "769627028067-lc48l78hdo5buhkepmg44ebsk6trhktf.apps.googleusercontent.com",
+          "client_id": "45709257200-3h8drmr0kn6nv6rhebfm1qvupvob2e5d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.android.dejaphoto",
-            "certificate_hash": "98e7d7e20566610495d72ec9b8fad48e2be2a15b"
+            "certificate_hash": "af81b0b3105e8ef932ab37518c28533f2de0be91"
           }
         },
         {
-          "client_id": "769627028067-40nc7cf90r4qg2ctggcijhmjj359ogg1.apps.googleusercontent.com",
+          "client_id": "45709257200-dqb5lekks224ludj46vkcrt0ls5fdh4e.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAZNXt7sauk23i30d0d5mcruDUCrR7_PJ8"
+          "current_key": "AIzaSyBnDa0YAahjZDIfTcnj63NGYtF3VeHIZVM"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "769627028067-40nc7cf90r4qg2ctggcijhmjj359ogg1.apps.googleusercontent.com",
+              "client_id": "45709257200-dqb5lekks224ludj46vkcrt0ls5fdh4e.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

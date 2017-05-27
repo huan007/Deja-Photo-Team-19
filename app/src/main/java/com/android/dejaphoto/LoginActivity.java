@@ -77,7 +77,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == RC_SIGN_IN){
+            statusTextView.setText("Attempting to login...");
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            int statusCode = result.getStatus().getStatusCode();
+            Log.d(TAG, "StatusCode: " + statusCode);
             handleSignInResult(result);
         }
     }
@@ -86,7 +89,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(TAG, "handleSignInResult;" + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
-            statusTextView.setText("Hellow, " + acct.getDisplayName());
+            statusTextView.setText("Hello, " + acct.getDisplayName());
         }else{
 
         }
