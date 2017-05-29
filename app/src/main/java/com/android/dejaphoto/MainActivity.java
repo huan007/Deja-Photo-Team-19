@@ -286,7 +286,6 @@ public class MainActivity extends AppCompatActivity
             final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-
             // update home-screen automatically at a rate specified by the user
             final Handler refresh = new Handler();
             refresh.postDelayed(new Runnable() {
@@ -303,6 +302,42 @@ public class MainActivity extends AppCompatActivity
                     refresh.postDelayed(this, sharedPreferences.getInt("interval", 300) * 1000);
                 }
             }, sharedPreferences.getInt("interval", 300) * 1000);
+
+            // set button click listener for camera
+            findPreference("camera").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Toast.makeText(getContext(), "camera", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+
+            // set button click listener for album_main
+            findPreference("album_main").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Toast.makeText(getContext(), "album_main", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+
+            // set button click listener for album_copied
+            findPreference("album_copied").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Toast.makeText(getContext(), "album_copied", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+
+            // set button click listener for album_friends
+            findPreference("album_friends").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Toast.makeText(getContext(), "album_friends", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
 
             // set button change listener for Interval Setting
             findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {

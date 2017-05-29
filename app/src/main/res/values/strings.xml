@@ -4,8 +4,21 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Main App -->
-    <string name="settings_general">General</string>
-    <string name="settings_deja">Deja Vu Mode</string>
+    <string name="albums">Albums</string>
+
+    <string name="camera_title">Camera</string>
+    <string name="camera_summary">Take photos that go directly into the DejaPhoto album</string>
+
+    <string name="album_main_title">DejaPhoto</string>
+    <string name="album_main_summary">The album that stores photos that were taken in the app</string>
+
+    <string name="album_copied_title">DejaPhotoCopied</string>
+    <string name="album_copied_summary">The album that stores photos that were copied from other albums</string>
+
+    <string name="album_friends_title">DejaPhotoFriends</string>
+    <string name="album_friends_summary">The album that stores photos that came from friends</string>
+
+    <string name="settings">Settings</string>
 
     <string name="interval_title">Refresh Interval</string>
     <string name="interval_summary">Enter update frequency in seconds</string>
