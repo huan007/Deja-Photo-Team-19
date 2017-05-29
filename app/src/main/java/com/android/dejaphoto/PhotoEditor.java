@@ -42,6 +42,16 @@ public class PhotoEditor {
      * @return PhotoEditor object
      */
     public static PhotoEditor start(Photo photo, Bitmap bitmap) {
+        // if null then create blank photo
+        if (photo == null) {
+            Bitmap background = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(background);
+            canvas.drawRGB(0, 0, 0);
+
+            photo = new Photo();
+            bitmap = background;
+        }
+
         return new PhotoEditor(photo, bitmap);
     }
 
@@ -72,8 +82,9 @@ public class PhotoEditor {
         Canvas canvas = new Canvas(background);
         canvas.drawRGB(0, 0, 0);
         bitmap = resize(width, height, fit);
-        int x = ((bitmap.getHeight() / bitmap.getWidth()) < (height / width)) ? 0 : (width / 2) - (bitmap.getWidth() / 2);
-        int y = ((bitmap.getHeight() / bitmap.getWidth()) < (height / width)) ? (height / 2) - (bitmap.getHeight() / 2) : 0;
+        boolean horizontal = (((double) bitmap.getHeight()) / bitmap.getWidth()) < (((double) height) / width);
+        int x = (horizontal) ? 0 : (width / 2) - (bitmap.getWidth() / 2);
+        int y = (horizontal) ? (height / 2) - (bitmap.getHeight() / 2) : 0;
         canvas.drawBitmap(bitmap, x, y, paint);
 
         bitmap = background;
@@ -119,8 +130,9 @@ public class PhotoEditor {
         if (width <=0 || height <= 0)
             return -1;
 
+        // fit width if photo is more square than screen otherwise fit height
         float scale;
-        if ((bitmap.getHeight() / bitmap.getWidth()) < (height / width))
+        if ((((double) bitmap.getHeight()) / bitmap.getWidth()) < (((double) height) / width))
             scale = fit ? (float) width / bitmap.getWidth() : (float) height / bitmap.getHeight();
         else
             scale = fit ? (float) height / bitmap.getHeight() : (float) width / bitmap.getWidth();

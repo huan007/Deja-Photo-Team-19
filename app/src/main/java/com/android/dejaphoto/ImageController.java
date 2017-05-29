@@ -37,13 +37,10 @@ public class ImageController {
     /**
      * Change the wallpaper to specified photo.
      */
-    public void displayImage(Photo photo) {
+    public void displayImage(final Photo photo) {
         // get size of display
         final Point size = new Point();
         ((WindowManager) currentContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
-
-        final boolean default_background = (photo == null);
-        final Photo background = (default_background ? new Photo() : photo);
 
         // prep and resize the photo using Glide image library
         Runnable runnable = new Runnable() {
@@ -56,16 +53,16 @@ public class ImageController {
                 // First link Android documentation telling us to use Glide library.
                 // Second link Glide library source.
                 Glide.with(currentContext)
-                        .load(default_background ? R.drawable.apple : background.getImageUri(currentContext))   // load background
+                        .load((photo == null) ? R.drawable.apple : photo.getImageUri(currentContext))   // load background
                         .asBitmap()                                                                             // as bitmap
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                                 try {
-                                    wallpaperManager.setBitmap(PhotoEditor.start(background, resource)          // modify bitmap
-                                            .fitScreen(size.x, size.y, !default_background)                     // fit to screen
+                                    wallpaperManager.setBitmap(PhotoEditor.start(photo, resource)          // modify bitmap
+                                            .fitScreen(size.x, size.y, true)                                    // fit to screen
                                             .appendLocation(currentContext)                                     // add location
-                                            .addText((default_background) ? "No Photos in Gallery" : "")        // add error
+                                            .addText((photo == null) ? "No Photos in Gallery" : "")        // add error
                                             .finish());                                                         // set wallpaper
                                     Log.d("ImageController", "change wallpaper successful");
                                 } catch (IOException e) {

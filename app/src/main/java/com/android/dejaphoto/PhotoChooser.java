@@ -185,7 +185,16 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     private Photo randomNext() {
         Log.d("Photo Chooser", "Using random algorithm to select next photo");
-        return (photos.size() > 0) ? photos.get(new Random(System.currentTimeMillis()).nextInt(photos.size())) : null;
+
+        List<Photo> unreleased = new ArrayList<>();
+        for (Photo photo : photos)
+            if (!photo.release)
+                unreleased.add(photo);
+
+        if (unreleased.isEmpty())
+            return null;
+
+        return unreleased.get(new Random(System.currentTimeMillis()).nextInt(unreleased.size()));
     }
 
     /**
