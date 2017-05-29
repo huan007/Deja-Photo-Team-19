@@ -44,13 +44,10 @@ public class MainActivity extends AppCompatActivity
     LocationRequest mLocationRequest;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
-
-
 
 
         //Beginning a location update request, setting interval to every 10 seconds
@@ -74,12 +71,14 @@ public class MainActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // Show an explanation
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) &&
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response. After the user
                 // sees the explanation, try again to request the permission.
@@ -89,39 +88,11 @@ public class MainActivity extends AppCompatActivity
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION},
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.CAMERA},
                         5);
             }
         }
-
-
-        android.location.LocationListener locationListener = new android.location.LocationListener() {
-            // Check if location has changed
-            @Override
-            public void onLocationChanged(Location location) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-        // Get updated Location
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        String locationProvider = LocationManager.GPS_PROVIDER;
-        locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
     }
 
 
@@ -259,24 +230,56 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case 5: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Start DejaService
                     Intent intent = new Intent(MainActivity.this, DejaService.class);
                     startService(intent);
                     Log.d("MainActivity", "Started Service");
-
-                } else {
-                    // permission denied, handle silently
                 }
-                return;
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    android.location.LocationListener locationListener = new android.location.LocationListener() {
+                        // Check if location has changed
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+                        }
+
+                        @Override
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+                        }
+
+                        @Override
+                        public void onProviderEnabled(String provider) {
+                        }
+
+                        @Override
+                        public void onProviderDisabled(String provider) {
+                        }
+                    };
+
+                    // Get updated Location
+                    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                    String locationProvider = LocationManager.GPS_PROVIDER;
+                    locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
+                }
             }
         }
     }
 
     //Alarm class for updating app GUI
     public static class PrefsFragment extends PreferenceFragment {
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            switch (requestCode) {
+                case DejaCamera.REQUEST_IMAGE_CAPTURE:
+                    DejaCamera.exitCamera();
+                    break;
+            }
+        }
 
         @Override
         public void onCreate(Bundle saveInstanceState) {
@@ -304,10 +307,12 @@ public class MainActivity extends AppCompatActivity
             }, sharedPreferences.getInt("interval", 300) * 1000);
 
             // set button click listener for camera
+            final PreferenceFragment fragment = this;
             findPreference("camera").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Toast.makeText(getContext(), "camera", Toast.LENGTH_SHORT).show();
+                    Log.d("camera", "starting camera");
+                    DejaCamera.startCamera(fragment, getContext());
                     return true;
                 }
             });
@@ -316,7 +321,7 @@ public class MainActivity extends AppCompatActivity
             findPreference("album_main").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Toast.makeText(getContext(), "album_main", Toast.LENGTH_SHORT).show();
+                    Log.d("album_main", "entering album");
                     return true;
                 }
             });
@@ -325,7 +330,7 @@ public class MainActivity extends AppCompatActivity
             findPreference("album_copied").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Toast.makeText(getContext(), "album_copied", Toast.LENGTH_SHORT).show();
+                    Log.d("album_copied", "entering album");
                     return true;
                 }
             });
@@ -334,7 +339,7 @@ public class MainActivity extends AppCompatActivity
             findPreference("album_friends").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Toast.makeText(getContext(), "album_friends", Toast.LENGTH_SHORT).show();
+                    Log.d("album_friends", "entering album");
                     return true;
                 }
             });
