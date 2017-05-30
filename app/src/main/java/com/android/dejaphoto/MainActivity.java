@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.SwitchPreference;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -379,6 +380,7 @@ public class MainActivity extends AppCompatActivity
             });
 
             // set button change listener for Location Setting
+            findPreference("location").setEnabled(((SwitchPreference) findPreference("dejavu")).isChecked());
             findPreference("location").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -390,6 +392,7 @@ public class MainActivity extends AppCompatActivity
             });
 
             // set button change listener for Day of Week Setting
+            findPreference("day").setEnabled(((SwitchPreference) findPreference("dejavu")).isChecked());
             findPreference("day").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -401,12 +404,40 @@ public class MainActivity extends AppCompatActivity
             });
 
             // set button change listener for Time of Day Setting
+            findPreference("time").setEnabled(((SwitchPreference) findPreference("dejavu")).isChecked());
             findPreference("time").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     editor.putBoolean("time", (Boolean) newValue);
                     editor.apply();
                     Log.d("time", newValue.toString());
+                    return true;
+                }
+            });
+
+            // set button change listener for Show Your Photo Setting
+            findPreference("own").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d("own", newValue.toString());
+                    return true;
+                }
+            });
+
+            // set button change listener for Show Friends Photo Setting
+            findPreference("friends").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d("own", newValue.toString());
+                    return true;
+                }
+            });
+
+            // set button change listener for Share You Photo Setting
+            findPreference("share").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d("share", newValue.toString());
                     return true;
                 }
             });

@@ -72,13 +72,13 @@ public class DejaSetTest {
         // karma = true
         Photo first = new Photo();
         first.location = "first";
-        first.karma = true;
+        first.karma = 1;
         photos.add(first);
 
         // karma = false
         Photo second = new Photo();
         second.location = "second";
-        second.karma = false;
+        second.karma = 0;
         photos.add(second);
 
         set.initializeSet(photos);

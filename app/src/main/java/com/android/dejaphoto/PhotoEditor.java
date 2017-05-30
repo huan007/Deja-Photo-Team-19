@@ -5,10 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -16,6 +18,8 @@ import java.util.Locale;
  */
 public class PhotoEditor {
 
+    public static final double BOTTOM_MARGIN = 0.75;
+    public static final double SIDE_MARGIN = 0.05;
     private Photo photo;
     private Bitmap bitmap;
 
@@ -66,7 +70,7 @@ public class PhotoEditor {
         Log.d("PhotoEditor", "fitting photo to screen");
 
         // incorrect params
-        if (width <=0 || height <= 0)
+        if (width <= 0 || height <= 0)
             return this;
 
         // create blank canvas
@@ -104,7 +108,7 @@ public class PhotoEditor {
         Log.d("PhotoEditor", "resizing photo with fit = " + fit);
 
         // incorrect params
-        if (width <=0 || height <= 0)
+        if (width <= 0 || height <= 0)
             return null;
 
         // get scale factor to match screen size
@@ -127,7 +131,7 @@ public class PhotoEditor {
      */
     public float getScale(int width, int height, boolean fit) {
         // incorrect params
-        if (width <=0 || height <= 0)
+        if (width <= 0 || height <= 0)
             return -1;
 
         // fit width if photo is more square than screen otherwise fit height
@@ -156,16 +160,38 @@ public class PhotoEditor {
         String location = getAddress(context, Double.valueOf(photo.latitude), Double.valueOf(photo.longitude));
 
         // if no such location return normal photo
-        if (location == null)
+        if (location == null && photo.location == null)
             return this;
 
-        Log.i("PhotoEditor", "Location appended to photo is " + location);
+        Log.i("PhotoEditor", "Location appended to photo is " + ((photo.location == null) ? location : photo.location));
         // add location to bottom-left of photo
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTextSize((float) (canvas.getWidth() * 0.05));
-        canvas.drawText(location, (float) (canvas.getWidth() * 0.05), (float) (canvas.getHeight() * 0.75), paint);
+        canvas.drawText((photo.location == null) ? location : photo.location,
+                (float) (canvas.getWidth() * SIDE_MARGIN),
+                (float) (canvas.getHeight() * BOTTOM_MARGIN),
+                paint);
+
+        return this;
+    }
+    /**
+     * Adds karma of photo to bottom-right corner
+     *
+     * @return edited photo
+     */
+    public PhotoEditor appendKarma() {
+        Log.i("PhotoEditor", "Karma appended to photo is " + photo.karma);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize((float) (canvas.getWidth() * 0.05));
+        paint.setTextAlign(Paint.Align.RIGHT);
+        canvas.drawText("Karma: " + photo.karma,
+                (float) (canvas.getWidth() * (1 - 2*SIDE_MARGIN)),
+                (float) (canvas.getHeight() * BOTTOM_MARGIN),
+                paint);
 
         return this;
     }
@@ -202,14 +228,12 @@ public class PhotoEditor {
      * @param context   current state of application
      * @param latitude  distance north or south of equator
      * @param longitude distance west or east of equator
-     * @return  address at specified longitude and latitude
+     * @return address at specified longitude and latitude
      * @throws IOException
      */
     private String getAddress(Context context, double latitude, double longitude) throws IOException {
-        return new Geocoder(context, Locale.getDefault())
-                .getFromLocation(latitude, longitude, 1)
-                .get(0)
-                .getAddressLine(0);
+        List<Address> addresses = new Geocoder(context, Locale.getDefault()).getFromLocation(latitude, longitude, 1);
+        return (addresses.isEmpty()) ? null : addresses.get(0).getAddressLine(0);
     }
 
     /**

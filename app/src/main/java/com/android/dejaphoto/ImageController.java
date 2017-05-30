@@ -3,7 +3,6 @@ package com.android.dejaphoto;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -54,16 +53,17 @@ public class ImageController {
                 // Second link Glide library source.
                 Glide.with(currentContext)
                         .load((photo == null) ? R.drawable.apple : photo.getImageUri(currentContext))   // load background
-                        .asBitmap()                                                                             // as bitmap
+                        .asBitmap()                                                                     // as bitmap
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                                 try {
-                                    wallpaperManager.setBitmap(PhotoEditor.start(photo, resource)          // modify bitmap
-                                            .fitScreen(size.x, size.y, true)                                    // fit to screen
-                                            .appendLocation(currentContext)                                     // add location
-                                            .addText((photo == null) ? "No Photos in Gallery" : "")        // add error
-                                            .finish());                                                         // set wallpaper
+                                    wallpaperManager.setBitmap(PhotoEditor.start(photo, resource)       // modify bitmap
+                                            .fitScreen(size.x, size.y, true)                            // fit to screen
+                                            .appendLocation(currentContext)                             // add location
+                                            .appendKarma()                                              // add karma
+                                            .addText((photo == null) ? "No Photos in Gallery" : "")     // add error
+                                            .finish());                                                 // set wallpaper
                                     Log.d("ImageController", "change wallpaper successful");
                                 } catch (IOException e) {
                                     Log.d("ImageController", "change wallpaper unsuccessful");

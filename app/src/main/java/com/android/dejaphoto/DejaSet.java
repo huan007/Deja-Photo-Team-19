@@ -4,8 +4,6 @@ import android.util.Log;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.PriorityQueue;
 import java.util.TreeSet;
 
 /**
@@ -32,7 +30,7 @@ public class DejaSet {
                     return Math.round(Math.round(o1.weight - o2.weight));
                 //  One photo has karma while the other doesn't
                 else if (o1.karma != o2.karma)
-                    return (o1.karma) ? 1 : -1;
+                    return (o1.karma != 0) ? 1 : -1;
                 // More recent photo is greater
                 else
                     return (o1.getRecency() > o2.getRecency()) ? 1 : -1;
