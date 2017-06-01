@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
@@ -28,6 +29,10 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -286,6 +291,53 @@ public class MainActivity extends AppCompatActivity
         public void onCreate(Bundle saveInstanceState) {
             super.onCreate(saveInstanceState);
             addPreferencesFromResource(R.xml.preferences);
+
+            // Listener for user adding new friends
+            EditTextPreference friendsPref = (EditTextPreference) findPreference("add_friend");
+            friendsPref.setDefaultValue("");
+            friendsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                    List<Object> newFriends = new ArrayList<>();
+                    String friendEmail = FirebaseManager.createID((String) newValue);
+                    SharedPreferences user = getContext().getSharedPreferences("user", MODE_PRIVATE);
+                    String userEmail = user.getString("email", null);
+
+                    // Check that email entered is of proper format
+                    //  http://howtodoinjava.com/regex/java-regex-validate-email-address/
+                    String emailRegex = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+                    if (!((String) newValue).matches(emailRegex)) {
+                        Toast.makeText(getContext(), "Re-enter proper email address format", Toast.LENGTH_LONG).show();
+                        return false;
+                    }
+                    // Check that email entered is not the email of current user
+                    else if (userEmail.equals(friendEmail)) {
+                        Toast.makeText(getContext(), "Cannot add yourself as a friend", Toast.LENGTH_LONG).show();
+                        return false;
+                    }
+                    // Add email of new friend
+                    Log.d("New Friend Receiver", "Email is : " + newValue);
+                    newFriends.add(friendEmail);
+                    FirebaseManager.updateFriends(userEmail, newFriends);
+                    return true;
+                }
+            });
+            /*
+            final SharedPreferences friendsPreferences = getContext().getSharedPreferences("add_friend", MODE_PRIVATE);
+            SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+                @Override
+                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { // Add friend to firebase
+
+                    List<Object> newFriends = new ArrayList<>();
+                    newFriends.add(FirebaseManager.createID(key));
+                    SharedPreferences user = getContext().getSharedPreferences("user", MODE_PRIVATE);
+
+                    Log.d("New Friend Receiver", "Email is : " + key);
+                    FirebaseManager.updateFriends(user.getString("email", ""), newFriends);
+                }
+            };
+            friendsPreferences.registerOnSharedPreferenceChangeListener(listener); */
 
             final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
