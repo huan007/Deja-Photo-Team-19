@@ -1,7 +1,7 @@
 package com.android.dejaphoto;
 
 import android.content.Intent;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -26,6 +25,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,6 +34,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+
 
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
@@ -115,10 +116,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             statusTextView.setText("Hello, " + acct.getDisplayName());
 
             //Change Activity
-            Intent intent = new Intent (this, InteractiveActivity.class);
+            Intent intent = new Intent (this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("UID", acct);
             startActivity(intent);
+
+            // store email inside shared preference
+            SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
+            editor.putString("email", FirebaseManager.createID(acct.getEmail()));
+            editor.apply();
+
             finish();
         }else{
 
