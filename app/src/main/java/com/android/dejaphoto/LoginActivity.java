@@ -26,6 +26,17 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+
+
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
 
     SignInButton signInButton;
@@ -33,6 +44,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     TextView statusTextView;
     GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth;
+
+    //Reference pointing to user's designated space on database where user can access their friends
+    private DatabaseReference userRef;
+
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
@@ -97,6 +112,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             GoogleSignInAccount acct = result.getSignInAccount();
             //Authenticate with firebase
             firebaseAuthWithGoogle(acct);
+            getUserDatabaseReference(acct);
             statusTextView.setText("Hello, " + acct.getDisplayName());
 
             //Change Activity
@@ -136,6 +152,59 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         }
                     }
                 });
+    }
+
+    public void getUserDatabaseReference(GoogleSignInAccount acct)
+    {
+        //Try to get reference. If return null then that mean new-user, then we create a new reference
+        userRef = FirebaseDatabase.getInstance().getReference().child(acct.getId());
+
+        //Handle new-user
+        if (userRef == null)
+        {
+            userRef = createUserDatabaseReference(acct);
+        }
+
+        //Populate User Object
+        final User[] dejaUser = new User[1];
+
+        ValueEventListener dejaUserListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                dejaUser[0] = dataSnapshot.getValue(User.class);
+                Log.d(TAG, "Attempted to retrieve User's data");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        userRef.addListenerForSingleValueEvent(dejaUserListener);
+
+        if (userRef != null)
+            Log.d(TAG, "Connected to User Database!");
+
+        if (dejaUser[0] == null) {
+            Log.d(TAG, "Failed to retrieve User's Information");
+            //Make new user object in database
+            LinkedList<Object> friendList = new LinkedList<>();
+            HashMap<String, Object> photoList = new HashMap();
+            friendList.add(acct.getId());
+            photoList.put("Empty Photo", "Null");
+            userRef.setValue(new User(friendList, photoList));
+            //userRef.child("friends").child("0").removeValue();
+            //userRef.child("photos").child("Photo 1").removeValue();
+            Log.d(TAG, "Created new User in Database!");
+        }
+    }
+
+    private DatabaseReference createUserDatabaseReference(GoogleSignInAccount acct) {
+        DatabaseReference rootRef  = FirebaseDatabase.getInstance().getReference();
+        rootRef.child(acct.getId()).setValue(new User(new LinkedList<Object>(), new HashMap<String, Object>()));
+        Log.d(TAG, "Created new User in Database!");
+        return rootRef.child(acct.getId());
     }
 
     @Override
