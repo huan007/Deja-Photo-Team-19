@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.android.dejaphoto.InteractiveActivity"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="110pt"
+        android:layout_height="20pt"
+        android:layout_gravity="center"
+        android:hint="Enter a message"/>
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/messageText"
+        android:layout_width="110pt"
+        android:layout_height="wrap_content"
+        android:hint="Previous Messages"
+        android:layout_gravity="center"/>
+
+</LinearLayout>
