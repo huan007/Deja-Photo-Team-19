@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.google.android.gms.nearby.messages.internal.Update;
 import com.google.maps.GeoApiContext;
 
 import java.util.ArrayList;
@@ -93,7 +92,7 @@ public class PhotoChooser implements Chooser<Photo> {
                     return Double.compare(o1.weight, o2.weight);
                     //  one photo has karma while the other doesn't
                 else if (o1.karma != o2.karma)
-                    return (o1.karma) ? 1 : -1;
+                    return (o1.karma != 0) ? 1 : -1;
                     // more recent photo is greater
                 else
                     return (o1.getRecency() > o2.getRecency()) ? 1 : -1;
@@ -185,7 +184,16 @@ public class PhotoChooser implements Chooser<Photo> {
      */
     private Photo randomNext() {
         Log.d("Photo Chooser", "Using random algorithm to select next photo");
-        return (photos.size() > 0) ? photos.get(new Random(System.currentTimeMillis()).nextInt(photos.size())) : null;
+
+        List<Photo> unreleased = new ArrayList<>();
+        for (Photo photo : photos)
+            if (!photo.release)
+                unreleased.add(photo);
+
+        if (unreleased.isEmpty())
+            return null;
+
+        return unreleased.get(new Random(System.currentTimeMillis()).nextInt(unreleased.size()));
     }
 
     /**

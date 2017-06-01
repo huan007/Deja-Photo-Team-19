@@ -4,11 +4,30 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Main App -->
-    <string name="settings_general">General</string>
-    <string name="settings_deja">Deja Vu Mode</string>
+    <string name="albums_title">Albums</string>
+    <string name="albums_summary">View your albums</string>
+
+    <string name="camera_title">Camera</string>
+    <string name="camera_summary">Take photos that go directly into the DejaPhoto album</string>
+
+    <string name="album_main_title">DejaPhoto</string>
+    <string name="album_main_summary">The album that stores photos that were taken in the app</string>
+
+    <string name="album_copied_title">DejaPhotoCopied</string>
+    <string name="album_copied_summary">The album that stores photos that were copied from other albums</string>
+
+    <string name="album_friends_title">DejaPhotoFriends</string>
+    <string name="album_friends_summary">The album that stores photos that came from friends</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_summary">Set your settings</string>
+
+    <string name="general">General</string>
 
     <string name="interval_title">Refresh Interval</string>
     <string name="interval_summary">Enter update frequency in seconds</string>
+
+    <string name="dejavu">Deja Vu</string>
 
     <string name="dejavu_title">Deja Vu Mode</string>
     <string name="dejavu_summary">Displays photos that remind you of past times and locales</string>
@@ -21,6 +40,17 @@
 
     <string name="time_title">Prefer Time of Day</string>
     <string name="time_summary">Prefer photos taken during same time of day</string>
+
+    <string name="social">Social</string>
+
+    <string name="own_title">View your Photos</string>
+    <string name="own_summary">View your photos or not</string>
+
+    <string name="friends_title">View Friends\' Photos</string>
+    <string name="friends_summary">View friends\' photos or not</string>
+
+    <string name="share_title">Share your Photos</string>
+    <string name="share_summary">Share your photos or not</string>
 
 
     <!-- Strings related to Widget -->

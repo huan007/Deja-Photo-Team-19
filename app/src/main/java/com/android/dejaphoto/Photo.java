@@ -50,19 +50,16 @@ public class Photo {
     }
 
     public void setZipCode(GeoApiContext context, LatLng location) {
-        if (location != null)
-        {
+        if (location != null) {
             //Begin to parse location into zipcode string
             try {
                 GeocodingResult results[] = GeocodingApi.reverseGeocode(context, location).await();
                 AddressComponent[] components = results[0].addressComponents;
                 int i = 0;
-                for (AddressComponent component : components)
-                {//Find the zip
+                for (AddressComponent component : components) {//Find the zip
                     //Get the types of the component
                     AddressComponentType[] types = component.types;
-                    for (AddressComponentType type : types)
-                    {//If the component is the zip code, then make it the zip code
+                    for (AddressComponentType type : types) {//If the component is the zip code, then make it the zip code
                         if (type.equals(AddressComponentType.POSTAL_CODE))
                             zipCode = results[0].addressComponents[i].longName;
                     }
@@ -76,22 +73,35 @@ public class Photo {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-
-        else zipCode = null;
+        } else zipCode = null;
     }
 
     String zipCode;
     Bitmap photo;
-    boolean karma;
+    int karma;
+    boolean karmaSet;
     boolean release;
     double weight;
 
+    public Photo() {
+        location = null;
+        karma = 0;
+        karmaSet = false;
+    }
+
     // Release photo
-    public void releasePhoto(){ release = true; }
+    public void releasePhoto() {
+        location = null;
+        release = true;
+    }
 
     // Sets karma value
-    public void setKarma(){ karma = true; }
+    public void setKarma() {
+        if (!karmaSet) {
+            ++karma;
+            karmaSet = true;
+        }
+    }
 
     // Returns the location value for the photo
     public String getLocation() {
@@ -109,8 +119,7 @@ public class Photo {
     }
 
     // Returns the day of the week the photo was taken
-    public String getDayOfTheWeek()
-    {
+    public String getDayOfTheWeek() {
         if (datetime != null) {
             SimpleDateFormat rawFormat = new SimpleDateFormat("yyyy:MM:dd");
             SimpleDateFormat dowFormat = new SimpleDateFormat("EEEE");
@@ -123,45 +132,36 @@ public class Photo {
                 e.printStackTrace();
                 return null;
             }
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     // Returns the hour the photo was taken
-    public String getHour()
-    {
-        if (datetime != null)
-        {
+    public String getHour() {
+        if (datetime != null) {
             SimpleDateFormat rawFormat = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss");
             SimpleDateFormat hourFormat = new SimpleDateFormat("kk");
-            try
-            {
+            try {
                 Date rawDate = rawFormat.parse(datetime);
                 String hour = hourFormat.format(rawDate);
                 return hour;
-            }
-            catch (ParseException e)
-            {
+            } catch (ParseException e) {
                 e.printStackTrace();
                 return null;
             }
-        }
-        else return null;
+        } else return null;
     }
 
 
     public long getRecency() {
-        if (datetime != null)
-        {
+        if (datetime != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss");
             try {
                 Date rawDate = dateFormat.parse(datetime);
-                long unixTime = (long) rawDate.getTime()/1000;
+                long unixTime = (long) rawDate.getTime() / 1000;
                 return unixTime;
-            } catch (ParseException e)
-            {
+            } catch (ParseException e) {
                 e.printStackTrace();
                 return 0;
             }
@@ -212,7 +212,6 @@ public class Photo {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), photo, "Title", null);
         return Uri.parse(path);
     }
-
 
 
 }

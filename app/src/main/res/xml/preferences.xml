@@ -1,46 +1,102 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="DejaPhoto">
 
-    <PreferenceCategory android:title="@string/settings_general">
+    <Preference
+        android:key="camera"
+        android:summary="@string/camera_summary"
+        android:title="@string/camera_title" />
 
-        <EditTextPreference
-            android:capitalize="words"
-            android:defaultValue="300"
-            android:inputType="number"
-            android:key="interval"
-            android:maxLines="1"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:summary="@string/interval_summary"
-            android:title="@string/interval_title" />
+    <PreferenceScreen
+        android:summary="@string/albums_summary"
+        android:title="@string/albums_title">
 
-    </PreferenceCategory>
+        <Preference
+            android:key="album_main"
+            android:summary="@string/album_main_summary"
+            android:title="@string/album_main_title" />
 
-    <PreferenceCategory android:title="@string/settings_deja">
+        <Preference
+            android:key="album_copied"
+            android:summary="@string/album_copied_summary"
+            android:title="@string/album_copied_title" />
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="dejavu"
-            android:summary="@string/dejavu_summary"
-            android:title="@string/dejavu_title" />
+        <Preference
+            android:key="album_friends"
+            android:summary="@string/album_friends_summary"
+            android:title="@string/album_friends_title" />
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="location"
-            android:summary="@string/location_summary"
-            android:title="@string/location_title" />
+    </PreferenceScreen>
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="day"
-            android:summary="@string/day_summary"
-            android:title="@string/day_title" />
+    <PreferenceScreen
+        android:summary="@string/settings_summary"
+        android:title="@string/settings_title">
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="time"
-            android:summary="@string/time_summary"
-            android:title="@string/day_title" />
+        <PreferenceCategory android:title="@string/general">
 
-    </PreferenceCategory>
+            <EditTextPreference
+                android:capitalize="words"
+                android:defaultValue="300"
+                android:inputType="number"
+                android:key="interval"
+                android:maxLines="1"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                android:summary="@string/interval_summary"
+                android:title="@string/interval_title" />
+
+        </PreferenceCategory>
+
+        <PreferenceCategory android:title="@string/dejavu">
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="dejavu"
+                android:summary="@string/dejavu_summary"
+                android:title="@string/dejavu_title" />
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="location"
+                android:summary="@string/location_summary"
+                android:title="@string/location_title" />
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="day"
+                android:summary="@string/day_summary"
+                android:title="@string/day_title" />
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="time"
+                android:summary="@string/time_summary"
+                android:title="@string/day_title" />
+
+        </PreferenceCategory>
+
+        <PreferenceCategory
+            android:title="@string/social">
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="own"
+                android:summary="@string/own_summary"
+                android:title="@string/own_title"/>
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="friends"
+                android:summary="@string/friends_summary"
+                android:title="@string/friends_title"/>
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="share"
+                android:summary="@string/share_summary"
+                android:title="@string/share_title"/>
+
+        </PreferenceCategory>
+
+    </PreferenceScreen>
 
 </PreferenceScreen>

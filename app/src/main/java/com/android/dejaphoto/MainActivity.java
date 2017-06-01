@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.SwitchPreference;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -44,13 +45,10 @@ public class MainActivity extends AppCompatActivity
     LocationRequest mLocationRequest;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
-
-
 
 
         //Beginning a location update request, setting interval to every 10 seconds
@@ -74,12 +72,14 @@ public class MainActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // Show an explanation
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
                     ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) &&
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response. After the user
                 // sees the explanation, try again to request the permission.
@@ -89,39 +89,11 @@ public class MainActivity extends AppCompatActivity
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION},
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.CAMERA},
                         5);
             }
         }
-
-
-        android.location.LocationListener locationListener = new android.location.LocationListener() {
-            // Check if location has changed
-            @Override
-            public void onLocationChanged(Location location) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-        // Get updated Location
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        String locationProvider = LocationManager.GPS_PROVIDER;
-        locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
     }
 
 
@@ -259,18 +231,41 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case 5: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Start DejaService
                     Intent intent = new Intent(MainActivity.this, DejaService.class);
                     startService(intent);
                     Log.d("MainActivity", "Started Service");
-
-                } else {
-                    // permission denied, handle silently
                 }
-                return;
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    android.location.LocationListener locationListener = new android.location.LocationListener() {
+                        // Check if location has changed
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+                        }
+
+                        @Override
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+                        }
+
+                        @Override
+                        public void onProviderEnabled(String provider) {
+                        }
+
+                        @Override
+                        public void onProviderDisabled(String provider) {
+                        }
+                    };
+
+                    // Get updated Location
+                    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                    String locationProvider = LocationManager.GPS_PROVIDER;
+                    locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
+                }
             }
         }
     }
@@ -279,13 +274,21 @@ public class MainActivity extends AppCompatActivity
     public static class PrefsFragment extends PreferenceFragment {
 
         @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            switch (requestCode) {
+                case DejaCamera.REQUEST_IMAGE_CAPTURE:
+                    DejaCamera.exitCamera();
+                    break;
+            }
+        }
+
+        @Override
         public void onCreate(Bundle saveInstanceState) {
             super.onCreate(saveInstanceState);
             addPreferencesFromResource(R.xml.preferences);
 
             final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
-
 
             // update home-screen automatically at a rate specified by the user
             final Handler refresh = new Handler();
@@ -303,6 +306,44 @@ public class MainActivity extends AppCompatActivity
                     refresh.postDelayed(this, sharedPreferences.getInt("interval", 300) * 1000);
                 }
             }, sharedPreferences.getInt("interval", 300) * 1000);
+
+            // set button click listener for camera
+            final PreferenceFragment fragment = this;
+            findPreference("camera").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("camera", "starting camera");
+                    DejaCamera.startCamera(fragment, getContext());
+                    return true;
+                }
+            });
+
+            // set button click listener for album_main
+            findPreference("album_main").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("album_main", "entering album");
+                    return true;
+                }
+            });
+
+            // set button click listener for album_copied
+            findPreference("album_copied").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("album_copied", "entering album");
+                    return true;
+                }
+            });
+
+            // set button click listener for album_friends
+            findPreference("album_friends").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("album_friends", "entering album");
+                    return true;
+                }
+            });
 
             // set button change listener for Interval Setting
             findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -339,6 +380,7 @@ public class MainActivity extends AppCompatActivity
             });
 
             // set button change listener for Location Setting
+            findPreference("location").setEnabled(((SwitchPreference) findPreference("dejavu")).isChecked());
             findPreference("location").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -350,6 +392,7 @@ public class MainActivity extends AppCompatActivity
             });
 
             // set button change listener for Day of Week Setting
+            findPreference("day").setEnabled(((SwitchPreference) findPreference("dejavu")).isChecked());
             findPreference("day").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -361,12 +404,40 @@ public class MainActivity extends AppCompatActivity
             });
 
             // set button change listener for Time of Day Setting
+            findPreference("time").setEnabled(((SwitchPreference) findPreference("dejavu")).isChecked());
             findPreference("time").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     editor.putBoolean("time", (Boolean) newValue);
                     editor.apply();
                     Log.d("time", newValue.toString());
+                    return true;
+                }
+            });
+
+            // set button change listener for Show Your Photo Setting
+            findPreference("own").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d("own", newValue.toString());
+                    return true;
+                }
+            });
+
+            // set button change listener for Show Friends Photo Setting
+            findPreference("friends").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d("own", newValue.toString());
+                    return true;
+                }
+            });
+
+            // set button change listener for Share You Photo Setting
+            findPreference("share").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d("share", newValue.toString());
                     return true;
                 }
             });
