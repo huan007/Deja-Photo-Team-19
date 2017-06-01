@@ -16,7 +16,18 @@ public class FirebaseManager {
     static final FirebaseDatabase database = FirebaseDatabase.getInstance();
     static final DatabaseReference reference = database.getReference();
 
+    public static String createID(String email) {
+        return email.replace('.', '_')
+                .replace('#', '_')
+                .replace('$', '_')
+                .replace('[', '_')
+                .replace(']', '_');
+    }
+
     public static void makeUser(final String user, final List<Object> friends, final Map<String, Object> photos) {
+        if (user == null)
+            return;
+
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -31,6 +42,9 @@ public class FirebaseManager {
     }
 
     public static void updateFriends(final String user, final List<Object> friends) {
+        if (user == null)
+            return;
+
         final List<Object> oldFriends = new ArrayList<>();
         reference.child(user).child("friends")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -52,6 +66,9 @@ public class FirebaseManager {
     }
 
     public static void updatePhotos(String user, Map<String, Object> photos) {
+        if (user == null)
+            return;
+
         reference.child(user).child("photos").updateChildren(photos);
     }
 
