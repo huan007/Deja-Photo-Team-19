@@ -1,5 +1,7 @@
 package com.android.dejaphoto;
 
+import com.google.firebase.database.DatabaseReference;
+
 import java.util.List;
 
 /**
@@ -56,6 +58,14 @@ public interface FirebaseDatabaseAdapterInterface {
     public boolean removePhotoEntry(Photo photo);
 
     /**
+     * Get handle to requested user's photo list. Used to create Listeners
+     * @param email E-mail address of specified user
+     * @return returns a reference to specified user's photo list. Returns NULL if user doesn't
+     * exist
+     */
+    public DatabaseReference getUserPhotoReference(String email);
+
+    /**
      * Add new friend using email
      * @param email E-mail address of the new friend. Used to identify the friend
      * @return returns TRUE if new friend entry is created. FALSE if not.
@@ -75,4 +85,12 @@ public interface FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if friend is successfully removed. FALSE if the friend is not there.
      */
     public boolean removeFreindEntryByEmail(String email);
+
+    /**
+     * Get handle to specified user's friend list. Used to create Listeners
+     * @param email E-mail address of the specified user
+     * @return returns a reference to specified user's friend list. Returns NULL if the user doesn't
+     * exist
+     */
+    public boolean getUserFriendReference(String email);
 }
