@@ -3,6 +3,7 @@ package com.android.dejaphoto;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
@@ -11,6 +12,9 @@ import android.util.Log;
 import com.google.maps.GeoApiContext;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Long running service that updates photos according to widget button clicks.
@@ -22,12 +26,16 @@ public class DejaService extends Service {
     public static final String releaseAction = "RELEASE";
     public static final String actionFlag = "ACTION_FLAG";
     public static final String karmaAction = "KARMA";
+    public static final String copyAction = "COPY";
 
     GeoApiContext geoContext;
 
     ImageController controller;
     PhotoQueue<Photo> queue;
+    Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied;
     private IBinder mBinder = new MyBinder();
+    Uri data;
+    String name;
 
     /**
      * Thread to execute widget action.
@@ -48,6 +56,8 @@ public class DejaService extends Service {
             this.action = action;
         }
 
+
+
         /**
          * Chooses action to run.
          */
@@ -65,7 +75,44 @@ public class DejaService extends Service {
                     release();
                 if (action.equals(refreshAction))
                     refresh();
+                if(action.equals(copyAction))
+                    copyToAlbum();
             }
+        }
+
+        public void copyToAlbum()
+        {
+            OutputStream out = null;
+            try
+            {
+                File file = new File(dejaPhotoCopied.getFile() + name);
+                file.createNewFile();
+                out = new FileOutputStream(file);
+                InputStream in = getContentResolver().openInputStream(data);
+                int b = 0;
+                while(b != -1)
+                {
+                    b = in.read();
+                    out.write(b);
+                }
+                out.close();
+            }
+            catch (Exception e)
+            {
+                Log.e("DejaCopy", e.toString());
+            }
+
+
+            /*Log.e("DejaCopy", file.getAbsolutePath() + "   " + dejaPhotoCopied.getFile().getAbsolutePath());
+            try
+            {
+                FileUtils.copyFileToDirectory(file, dejaPhotoCopied.getFile());
+            }
+            catch(Exception e)
+            {
+                Log.e("DejaCopy", "Problem with FileUtils in copyToAlbum: " + e.toString());
+            }*/
+
         }
 
         /**
@@ -174,6 +221,7 @@ public class DejaService extends Service {
         Log.d("DejaService", "onStart()");
         String action = intent.getStringExtra(actionFlag);
 
+
         // starts corresponding action
         if (action != null) {
             Log.d("DejaService", "Action received: " + action);
@@ -187,6 +235,13 @@ public class DejaService extends Service {
                 runRelease();
             if (action.equals(refreshAction))
                 runRefresh();
+            if (action.equals(copyAction))
+            {
+                Log.e("DejaCopy", "Get extras (the file)");
+                data = (Uri) intent.getExtras().get("File");
+                name = (String) intent.getExtras().get("Name");
+                runCopy();
+            }
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -213,7 +268,68 @@ public class DejaService extends Service {
         //Get GeoAPI context
         geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
 
-        //Get list of pictures
+        File appDirectory = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto");
+        boolean appDirCreated;
+        if (!appDirectory.exists()) {
+            appDirCreated = appDirectory.mkdirs();
+        }
+
+
+        File dejaPhotoAlbumFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
+        if (!dejaPhotoAlbumFile.exists()) {
+            dejaPhotoAlbumFile.mkdirs();
+        }
+        dejaPhotoAlbum = new Album(dejaPhotoAlbumFile, false);
+
+
+        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
+        if (!dejaPhotoFriendsFile.exists()) {
+            dejaPhotoFriendsFile.mkdirs();
+
+        }
+        dejaPhotoFriends = new Album(dejaPhotoAlbumFile);
+
+
+        File dejaPhotoCopiedFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoCopied");
+        if (!dejaPhotoCopiedFile.exists()) {
+            dejaPhotoCopiedFile.mkdirs();
+
+        }
+        dejaPhotoCopied = new Album(dejaPhotoCopiedFile);
+
+
+        GetAllPhotosFromGallery dejaGallery, friendsGallery, copiedGallery;
+
+        //Get list of picture
+        // Check whether to include albums
+       /* if (dejaPhotoAlbum.includePhotos)
+        {
+            dejaGallery = new GetAllPhotosFromGallery(dejaPhotoAlbum.directoryFile, context, geoContext);
+        }
+        // To get code in photochooser line to work for now
+        else
+            dejaGallery = null;
+
+        if (dejaPhotoFriends.includePhotos)
+        {
+            friendsGallery = new GetAllPhotosFromGallery(dejaPhotoFriends.directoryFile, context, geoContext);
+        }
+        if (dejaPhotoCopied.includePhotos)
+        {
+            copiedGallery = new GetAllPhotosFromGallery(dejaPhotoCopied.directoryFile, context, geoContext);
+        }
+
+        // TODO needs to change to support multiple albums
+        // Album object has boolean for whether to include photos
+        PhotoChooser chooser = new PhotoChooser(dejaGallery.getImages(), geoContext);
+        queue = new PhotoQueue<>(chooser);
+        controller.displayImage(queue.next(getApplicationContext()));*/
+
+
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
         GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context, geoContext);
 
@@ -261,5 +377,16 @@ public class DejaService extends Service {
         Thread worker = new Thread(new DejaThread(queue, refreshAction));
         worker.start();
     }
+
+    /*
+    * Start copy action
+    */
+    public void runCopy()
+    {
+        Thread worker = new Thread(new DejaThread(queue, copyAction));
+        worker.start();
+    }
+
+
 
 }
