@@ -8,6 +8,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -46,12 +47,14 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Used to get user's info stored in database every time user log in
      *
-     * @param email E-mail address of the user requested
+     * @param name E-mail address of the user requested
      * @return User object that is stored on the Database. Will return NULL if the user requested
      * does not exist
      */
     @Override
-    public User getUserFromDatabase(String email) {
+    public User getUserFromDatabase(String name) {
+
+        DatabaseReference specifiedUser = rootDir.child(name);
 
         final User[] currUser = new User[1];
 
@@ -67,8 +70,7 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
             }
         };
 
-        currUserDir.addListenerForSingleValueEvent(userListener);
-
+        specifiedUser.addListenerForSingleValueEvent(userListener);
 
         return currUser[0];
     }
@@ -76,16 +78,16 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Create a new user entry in the database
      *
-     * @param email   E-mail address of the new user
+     * @param name   E-mail address of the new user
      * @param newUser User object that need to be injected into database. Contains list of friends
      *                and list of photos
      * @return
      */
     @Override
-    public boolean createNewUser(String email, User newUser) {
+    public boolean createNewUser(String name, User newUser) {
 
         User currUser;
-        if((currUser = getUserFromDatabase(email)) != null){return false;}
+        if((currUser = getUserFromDatabase(name)) != null){return false;}
 
         currUserDir.setValue(newUser);
 
@@ -95,14 +97,14 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Return a list of photos shared by the specified user
      *
-     * @param email E-mail address of the specified user
+     * @param name E-mail address of the specified user
      * @return List of photos shared by the user
      */
     @Override
-    public List<Photo> getListOfPhotoFromUser(String email) {
+    public List<Photo> getListOfPhotoFromUser(String name) {
 
         final List<Photo> photoList = new ArrayList<Photo>();
-        rootDir.child(email).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+        rootDir.child(name).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
@@ -155,6 +157,30 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public boolean checkPhotoEntry(Photo photo) {
+        final Photo passPhoto = photo;
+
+
+        final List<Photo> photoList = new ArrayList<Photo>();
+        currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    photoList.add(snapshot.getValue(Photo.class));
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        for(int i = 0; i < photoList.size(); i++) {
+            if (passPhoto == photoList.get(i)) {
+                return true;
+            }
+
+        }
         return false;
     }
 
@@ -166,63 +192,159 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public boolean removePhotoEntry(Photo photo) {
+
+        final Photo passPhoto = photo;
+
+
+        final List<Photo> photoList = new ArrayList<Photo>();
+        currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    photoList.add(snapshot.getValue(Photo.class));
+                }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+        for(int i = 0; i < photoList.size(); i++) {
+            if (passPhoto == photoList.get(i)) {
+                photoList.remove(i);
+                return true;
+            }
+        }
         return false;
     }
 
     /**
      * Get handle to requested user's photo list. Used to create Listeners
      *
-     * @param email E-mail address of specified user
+     * @param name E-mail address of specified user
      * @return returns a reference to specified user's photo list. Returns NULL if user doesn't
      * exist
      */
     @Override
-    public DatabaseReference getUserPhotoReference(String email) {
-        return null;
+    public DatabaseReference getUserPhotoReference(String name) {
+
+        return  rootDir.child(name).child("photos");
     }
 
     /**
      * Add new friend using email
      *
-     * @param email E-mail address of the new friend. Used to identify the friend
+     * @param name E-mail address of the new friend. Used to identify the friend
      * @return returns TRUE if new friend entry is created. FALSE if not.
      */
     @Override
-    public boolean addNewFriendEntryByEmail(String email) {
-        return false;
+    public boolean addNewFriendEntryByName(String name) {
+        if (name == null)
+            return false;
+
+        final String passName = name;
+
+        final List<Object> oldFriends = new ArrayList<>();
+        currUserDir.child("friends")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            oldFriends.add(snapshot.getValue());
+
+                        oldFriends.add(passName);
+                        currUserDir.child("friends")
+                                .setValue(new ArrayList<>(new HashSet<>(oldFriends)));
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        return true;
     }
 
     /**
      * Check whether the friend exist in the current user's friend list
      *
-     * @param email E-mail address of the friend. Used to identify the friend
+     * @param name E-mail address of the friend. Used to identify the friend
      * @return returns TRUE if friend is in the user's friend list. FALSE if not.
      */
     @Override
-    public boolean checkFriendEntryByEmail(String email) {
+    public boolean checkFriendEntryByName(String name) {
+        if (name == null)
+            return false;
+
+        final String passName = name;
+
+        final List<Object> friends = new ArrayList<>();
+        currUserDir.child("friends")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            friends.add(snapshot.getValue());
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        for(int i = 0; i < friends.size(); i++){
+            if(name == friends.get(i)){return true;}
+
+        }
         return false;
     }
 
     /**
      * Remove friend from user's friend list
      *
-     * @param email E-mail address of the specified friend. Used to identify the friend
+     * @param name E-mail address of the specified friend. Used to identify the friend
      * @return returns TRUE if friend is successfully removed. FALSE if the friend is not there.
      */
     @Override
-    public boolean removeFreindEntryByEmail(String email) {
+    public boolean removeFriendEntryByName(String name) {
+
+        if (name == null)
+            return false;
+
+        final String passName = name;
+
+        final List<Object> friends = new ArrayList<>();
+        currUserDir.child("friends")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            friends.add(snapshot.getValue());
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        for(int i = 0; i < friends.size(); i++){
+            if(name == friends.get(i)){
+                friends.remove(i);
+                return true;
+            }
+        }
         return false;
     }
+
 
     /**
      * Get handle to specified user's friend list. Used to create Listeners
      *
-     * @param email E-mail address of the specified user
+     * @param name E-mail address of the specified user
      * @return returns a reference to specified user's friend list. Returns NULL if the user doesn't
      * exist
      */
     @Override
-    public boolean getUserFriendReference(String email) {
-        return false;
+    public DatabaseReference getUserFriendReference(String name) {
+
+        return currUserDir.child("friends");
     }
 }

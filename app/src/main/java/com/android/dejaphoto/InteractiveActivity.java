@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -103,7 +104,7 @@ public class InteractiveActivity extends AppCompatActivity {
     //getUserFromDatabase
     public void testGetUserFromDatabase(View view)
     {
-        String currUser = acct.getEmail();
+        String currUser =  FirebaseAuth.getInstance().getCurrentUser().getEmail();
         User result = database.getUserFromDatabase(currUser);
 
         if (result != null)
