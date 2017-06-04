@@ -1,6 +1,8 @@
 package com.android.dejaphoto;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -9,9 +11,28 @@ import java.util.List;
  */
 
 class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
-    private static final FirebaseDatabaseAdapter ourInstance = new FirebaseDatabaseAdapter();
+    private static FirebaseDatabaseAdapter ourInstance = new FirebaseDatabaseAdapter();
+
+    //Used to take care of Storage references
+    private static String currUserEmail;
+    private static DatabaseReference currUserDir;
+    private static DatabaseReference rootDir;
+
+    //Tag used for debug
+    private String debug_tag = "AdapterDatabase";
 
     static FirebaseDatabaseAdapter getInstance() {
+
+        //Using lazy instantiation
+        if (ourInstance == null)
+        {
+            ourInstance = new FirebaseDatabaseAdapter();
+
+            //Used to take care of Storage references
+            currUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            currUserDir = FirebaseDatabase.getInstance().getReference().child(currUserEmail);
+            rootDir = FirebaseDatabase.getInstance().getReference();
+        }
         return ourInstance;
     }
 
