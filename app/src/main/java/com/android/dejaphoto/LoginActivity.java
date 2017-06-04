@@ -36,8 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 
-
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     SignInButton signInButton;
     Button signOutButton;
@@ -59,7 +58,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         setContentView(R.layout.activity_login);
 
         //Get singleton Auth object
-        mAuth= FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -79,8 +78,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     @Override
-    public void onClick(View v){
-        switch(v.getId()){
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.sign_in_button:
                 signIn();
                 break;
@@ -90,16 +89,16 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-    private void signIn(){
+    private void signIn() {
         Intent sighInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(sighInIntent, RC_SIGN_IN);
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == RC_SIGN_IN){
+        if (requestCode == RC_SIGN_IN) {
             statusTextView.setText("Attempting to login...");
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             int statusCode = result.getStatus().getStatusCode();
@@ -107,8 +106,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             handleSignInResult(result);
         }
 
-        if (requestCode == FILE_SELECT_CODE )
-        {
+        if (requestCode == FILE_SELECT_CODE) {
             Log.e("DejaCopy", "File select code");
 
             if (resultCode == RESULT_OK) {
@@ -137,7 +135,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
                 String filename = data.getData().getLastPathSegment();
                 String mimeType[] = (getContentResolver().getType(data.getData())).split("/");
-                String filetype = mimeType[mimeType.length-1];
+                String filetype = mimeType[mimeType.length - 1];
                 Log.e("DejaCopy", "File name: " + filename + "." + filetype);
                 Intent intent = new Intent(this, DejaService.class);
                 intent.putExtra("File", data.getData());
@@ -148,7 +146,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
 
                 startService(intent);
-                }
+            }
         }
         //super.onActivityResult(requestCode, resultCode, data);
     }
@@ -163,17 +161,21 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             statusTextView.setText("Hello, " + acct.getDisplayName());
 
             //Change Activity
-            Intent intent = new Intent (this, MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
             // store email inside shared preference
             SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
-            editor.putString("email", FirebaseManager.createID(acct.getEmail()));
+            editor.putString("email", FirebaseService.createID(acct.getEmail()));
             editor.apply();
 
+            // Start DejaService
+            Intent firebaseIntent = new Intent(LoginActivity.this, FirebaseService.class);
+            startService(firebaseIntent);
+
             finish();
-        }else{
+        } else {
 
         }
     }
@@ -186,14 +188,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful())
-                        {
+                        if (task.isSuccessful()) {
                             //Authentication success
                             Log.d(TAG, "firebaseAuthWithGoogle:Success");
-                        }
-
-                        else
-                        {
+                        } else {
                             //Failed to authenticate
                             Log.d(TAG, "firebaseAuthWithGoogle:Failed");
                         }
@@ -201,14 +199,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 });
     }
 
-    public void getUserDatabaseReference(GoogleSignInAccount acct)
-    {
+    public void getUserDatabaseReference(GoogleSignInAccount acct) {
         //Try to get reference. If return null then that mean new-user, then we create a new reference
         userRef = FirebaseDatabase.getInstance().getReference().child(acct.getId());
 
         //Handle new-user
-        if (userRef == null)
-        {
+        if (userRef == null) {
             userRef = createUserDatabaseReference(acct);
         }
 
@@ -236,31 +232,24 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (dejaUser[0] == null) {
             Log.d(TAG, "Failed to retrieve User's Information");
             //Make new user object in database
-            LinkedList<Object> friendList = new LinkedList<>();
-            HashMap<String, Object> photoList = new HashMap();
-            friendList.add(acct.getId());
-            photoList.put("Empty Photo", "Null");
-            userRef.setValue(new User(friendList, photoList));
-            //userRef.child("friends").child("0").removeValue();
-            //userRef.child("photos").child("Photo 1").removeValue();
+            FirebaseService.makeUser(FirebaseService.createID(acct.getEmail()));
             Log.d(TAG, "Created new User in Database!");
         }
     }
 
     private DatabaseReference createUserDatabaseReference(GoogleSignInAccount acct) {
-        DatabaseReference rootRef  = FirebaseDatabase.getInstance().getReference();
-        rootRef.child(acct.getId()).setValue(new User(new LinkedList<Object>(), new HashMap<String, Object>()));
+        FirebaseService.makeUser(FirebaseService.createID(acct.getEmail()));
         Log.d(TAG, "Created new User in Database!");
-        return rootRef.child(acct.getId());
+        return FirebaseDatabase.getInstance().getReference().child(acct.getId());
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult){
+    public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onconnectionFailed:" + connectionResult);
 
     }
 
-    private void signOut(){
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(@NonNull Status status) {
@@ -269,8 +258,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
     }
 
-    void button1(View view)
-    {
+    void button1(View view) {
         Log.e("DejaPhoto", "button1");
         /*Intent intent = new Intent();
         // Show only images, no videos or anything else
