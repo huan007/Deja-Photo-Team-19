@@ -25,9 +25,9 @@ public interface FirebaseDatabaseAdapterInterface {
      * @param email E-mail address of the new user
      * @param newUser User object that need to be injected into database. Contains list of friends
      *                and list of photos
-     * @return
+     * @return boolean, true if user was added, false if user already in database
      */
-    public User createNewUser(String email, User newUser);
+    public boolean createNewUser(String email, User newUser);
 
     /**
      * Return a list of photos shared by the specified user

@@ -1,9 +1,13 @@
 package com.android.dejaphoto;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,7 +52,25 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public User getUserFromDatabase(String email) {
-        return null;
+
+        final User[] currUser = new User[1];
+
+        ValueEventListener userListener = new ValueEventListener(){
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot){
+                currUser[0] = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+
+        currUserDir.addListenerForSingleValueEvent(userListener);
+
+
+        return currUser[0];
     }
 
     /**
@@ -60,8 +82,14 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return
      */
     @Override
-    public User createNewUser(String email, User newUser) {
-        return null;
+    public boolean createNewUser(String email, User newUser) {
+
+        User currUser;
+        if((currUser = getUserFromDatabase(email)) != null){return false;}
+
+        currUserDir.setValue(newUser);
+
+        return true;
     }
 
     /**
@@ -72,7 +100,22 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public List<Photo> getListOfPhotoFromUser(String email) {
-        return null;
+
+        final List<Photo> photoList = new ArrayList<Photo>();
+        rootDir.child(email).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    photoList.add(snapshot.getValue(Photo.class));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return photoList;
     }
 
     /**
@@ -83,7 +126,25 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public boolean addNewPhotoEntry(Photo newPhoto) {
-        return false;
+        final Photo passPhoto = newPhoto;
+        final List<Photo> photoList = new ArrayList<Photo>();
+        currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    photoList.add(snapshot.getValue(Photo.class));
+                    photoList.add(passPhoto);
+
+
+                currUserDir.child("photos").setValue(photoList);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return true;
     }
 
     /**
