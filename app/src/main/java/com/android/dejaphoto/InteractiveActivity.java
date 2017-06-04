@@ -26,6 +26,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import static com.android.dejaphoto.R.drawable.apple;
 import static com.android.dejaphoto.R.drawable.ic_chevron_left_black_48dp;
@@ -37,6 +39,7 @@ public class InteractiveActivity extends AppCompatActivity {
     int numOfMessages = 0;
     final String databaseURL = "https://deja-demo.firebaseio.com/";
     FirebaseStorageAdapterInterface storage = FirebaseStorageAdapter.getInstance();
+    FirebaseDatabaseAdapterInterface database = FirebaseDatabaseAdapter.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,5 +98,37 @@ public class InteractiveActivity extends AppCompatActivity {
                 view.setText(download.toString());
             }
         });
+    }
+
+    //getUserFromDatabase
+    public void testGetUserFromDatabase(View view)
+    {
+        String currUser = acct.getEmail();
+        User result = database.getUserFromDatabase(currUser);
+
+        if (result != null)
+            Toast.makeText(this, "User exists!", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "User DOESN'T exist!", Toast.LENGTH_LONG).show();
+
+    }
+
+    //CreateNewUser
+    public void testCreateUser(View view){
+
+        LinkedList<Object> friendList = new LinkedList<>();
+        HashMap<String, Object> photoList = new HashMap();
+        friendList.add(acct.getId());
+        photoList.put("Empty Photo", "Null");
+
+        User newUser = new User(friendList, photoList);
+        boolean checkResult = database.createNewUser("vmperkin@ucsd.edu", newUser);
+
+        if (checkResult == false)
+            Toast.makeText(this, "User already exists in database!", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "New User Created!", Toast.LENGTH_LONG).show();
+
+
     }
 }
