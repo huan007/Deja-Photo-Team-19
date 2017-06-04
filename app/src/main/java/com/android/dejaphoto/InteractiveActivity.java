@@ -28,6 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import static com.android.dejaphoto.R.drawable.apple;
 import static com.android.dejaphoto.R.drawable.ic_chevron_left_black_48dp;
@@ -116,9 +117,9 @@ public class InteractiveActivity extends AppCompatActivity {
     //CreateNewUser
     public void testCreateUser(View view){
 
-        LinkedList<Object> friendList = new LinkedList<>();
+        Map<String, Object> friendList = new HashMap<>();
         HashMap<String, Object> photoList = new HashMap();
-        friendList.add(acct.getId());
+        friendList.put(acct.getId(), 0);
         photoList.put("Empty Photo", "Null");
 
         User newUser = new User(friendList, photoList);
