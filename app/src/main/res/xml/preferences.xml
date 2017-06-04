@@ -1,6 +1,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="DejaPhoto">
 
+    <EditTextPreference
+        android:key="add_friend"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="Enter email of friend"
+        android:title="Add Friends" />
+
     <Preference
         android:key="camera"
         android:summary="@string/camera_summary"

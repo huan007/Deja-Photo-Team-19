@@ -1,14 +1,21 @@
 package com.android.dejaphoto;
 
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -16,6 +23,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.File;
+
+import static com.android.dejaphoto.R.drawable.apple;
+import static com.android.dejaphoto.R.drawable.ic_chevron_left_black_48dp;
 
 public class InteractiveActivity extends AppCompatActivity {
     //Account object of the current user
@@ -23,6 +36,7 @@ public class InteractiveActivity extends AppCompatActivity {
     DatabaseReference userRef;
     int numOfMessages = 0;
     final String databaseURL = "https://deja-demo.firebaseio.com/";
+    FirebaseStorageAdapterInterface storage = FirebaseStorageAdapter.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +49,7 @@ public class InteractiveActivity extends AppCompatActivity {
                 .build();
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
+        storage = FirebaseStorageAdapter.getInstance();
 
         if (acct != null) {
             Toast.makeText(this, "UID is correctly passed", Toast.LENGTH_SHORT).show();
@@ -50,21 +65,35 @@ public class InteractiveActivity extends AppCompatActivity {
 
 
     //On clicks
-    public void send(View view)
+    public void testCheckFile(View view)
     {
-        //Get unique database location for the user
-        EditText newMessage = (EditText) findViewById(R.id.editText);
-        DatabaseReference nextMessageDatabase = FirebaseDatabase.getInstance().getReference()
-                .child(acct.getId())
-                .child("Messages")
-                .child(String.valueOf(numOfMessages));
-        nextMessageDatabase.setValue(newMessage.getText());
+        boolean result = storage.checkPhotoExistInCurrentUser("Nothing.jpg");
+        if (result == true)
+            Toast.makeText(this, "File exist!", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "File DOESN'T exist!", Toast.LENGTH_LONG).show();
+    }
 
-        //Update the number of message
-        DatabaseReference numOfMessageDatabase = FirebaseDatabase.getInstance().getReference()
-                .child(acct.getId())
-                .child("numOfMessage");
-        numOfMessages++;
-        numOfMessageDatabase.setValue(numOfMessages);
+    public void testUploadFile(View view)
+    {
+        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        //Path to file
+        Uri uri = Uri.parse("android.resource://"+ getPackageName()+ "/raw/apple.jpg");
+        File file = new File(uri.getPath());
+        boolean isAFile = file.isFile();
+        UploadTask task = storage.uploadPhotoFile(file);
+
+        task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(InteractiveActivity.this, "Finished Uploading!", Toast.LENGTH_SHORT).show();
+                TextView view = (TextView) findViewById(R.id.textView);
+                @SuppressWarnings("VisibleForTests") Uri download = taskSnapshot.getDownloadUrl();
+                view.setText(download.toString());
+            }
+        });
     }
 }
