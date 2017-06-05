@@ -5,18 +5,18 @@ import java.util.Map;
 
 public class User {
 
-    List<Object> friends;
+    Map<String, Object> friends;
     Map<String, Object> photos;
 
     public User() {
     }
 
-    public User(List<Object> friends, Map<String, Object> photos) {
+    public User(Map<String, Object> friends, Map<String, Object> photos) {
         this.friends = friends;
         this.photos = photos;
     }
 
-    public List<Object> getFriends() {
+    public Map<String, Object> getFriends() {
         return friends;
     }
 

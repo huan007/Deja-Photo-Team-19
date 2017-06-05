@@ -70,21 +70,21 @@ public interface FirebaseDatabaseAdapterInterface {
      * @param email E-mail address of the new friend. Used to identify the friend
      * @return returns TRUE if new friend entry is created. FALSE if not.
      */
-    public boolean addNewFriendEntryByEmail(String email);
+    public boolean addNewFriendEntryByName(String email);
 
     /**
      * Check whether the friend exist in the current user's friend list
      * @param email E-mail address of the friend. Used to identify the friend
      * @return returns TRUE if friend is in the user's friend list. FALSE if not.
      */
-    public boolean checkFriendEntryByEmail(String email);
+    public boolean checkFriendEntryByName(String email);
 
     /**
      * Remove friend from user's friend list
      * @param email E-mail address of the specified friend. Used to identify the friend
      * @return returns TRUE if friend is successfully removed. FALSE if the friend is not there.
      */
-    public boolean removeFreindEntryByEmail(String email);
+    public boolean removeFriendEntryByName(String email);
 
     /**
      * Get handle to specified user's friend list. Used to create Listeners
@@ -92,5 +92,5 @@ public interface FirebaseDatabaseAdapterInterface {
      * @return returns a reference to specified user's friend list. Returns NULL if the user doesn't
      * exist
      */
-    public boolean getUserFriendReference(String email);
+    public DatabaseReference getUserFriendReference(String email);
 }

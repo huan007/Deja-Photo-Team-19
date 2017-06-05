@@ -32,7 +32,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -299,10 +301,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
 
-                    List<Object> newFriends = new ArrayList<>();
-                    String friendEmail = FirebaseManager.createID((String) newValue);
-                    SharedPreferences user = getContext().getSharedPreferences("user", MODE_PRIVATE);
-                    String userEmail = user.getString("email", null);
+                    String friendEmail = FirebaseService.createID((String) newValue);
+                    String userEmail = getContext().getSharedPreferences("user", MODE_PRIVATE).getString("email", null);
 
                     // Check that email entered is of proper format
                     //  http://howtodoinjava.com/regex/java-regex-validate-email-address/
@@ -315,29 +315,22 @@ public class MainActivity extends AppCompatActivity
                     else if (userEmail.equals(friendEmail)) {
                         Toast.makeText(getContext(), "Cannot add yourself as a friend", Toast.LENGTH_LONG).show();
                         return false;
+                    } else if (FirebaseDatabaseAdapter.getInstance().getUserFromDatabase(friendEmail) == null) {
+                        Toast.makeText(getContext(), "Friend is not DejaPhoto user", Toast.LENGTH_LONG).show();
+                        return false;
                     }
+
                     // Add email of new friend
                     Log.d("New Friend Receiver", "Email is : " + newValue);
-                    newFriends.add(friendEmail);
-                    FirebaseManager.updateFriends(userEmail, newFriends);
+
+                    Intent serviceIntent = new Intent(getContext(), FirebaseService.class);
+                    serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_FRIEND);
+                    serviceIntent.putExtra(FirebaseService.FRIEND, friendEmail);
+                    getContext().startService(serviceIntent);
+
                     return true;
                 }
             });
-            /*
-            final SharedPreferences friendsPreferences = getContext().getSharedPreferences("add_friend", MODE_PRIVATE);
-            SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-                @Override
-                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { // Add friend to firebase
-
-                    List<Object> newFriends = new ArrayList<>();
-                    newFriends.add(FirebaseManager.createID(key));
-                    SharedPreferences user = getContext().getSharedPreferences("user", MODE_PRIVATE);
-
-                    Log.d("New Friend Receiver", "Email is : " + key);
-                    FirebaseManager.updateFriends(user.getString("email", ""), newFriends);
-                }
-            };
-            friendsPreferences.registerOnSharedPreferenceChangeListener(listener); */
 
             final SharedPreferences sharedPreferences = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -490,6 +483,9 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     Log.d("share", newValue.toString());
+                    Intent serviceIntent = new Intent(getContext(), FirebaseService.class);
+                    serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.REMOVE_PHOTOS);
+                    getContext().startService(serviceIntent);
                     return true;
                 }
             });

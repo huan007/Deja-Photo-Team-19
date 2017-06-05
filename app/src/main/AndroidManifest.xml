@@ -29,7 +29,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
@@ -57,7 +57,12 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".InteractiveActivity"></activity>
+        <activity android:name=".InteractiveActivity" />
+
+        <service
+            android:name=".FirebaseService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

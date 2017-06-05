@@ -8,6 +8,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -53,6 +54,8 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     @Override
     public User getUserFromDatabase(String email) {
 
+        DatabaseReference specifiedUser = rootDir.child(email);
+
         final User[] currUser = new User[1];
 
         ValueEventListener userListener = new ValueEventListener(){
@@ -67,8 +70,7 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
             }
         };
 
-        currUserDir.addListenerForSingleValueEvent(userListener);
-
+        specifiedUser.addListenerForSingleValueEvent(userListener);
 
         return currUser[0];
     }
@@ -155,6 +157,30 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public boolean checkPhotoEntry(Photo photo) {
+        final Photo passPhoto = photo;
+
+
+        final List<Photo> photoList = new ArrayList<Photo>();
+        currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    photoList.add(snapshot.getValue(Photo.class));
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        for(int i = 0; i < photoList.size(); i++) {
+            if (passPhoto == photoList.get(i)) {
+                return true;
+            }
+
+        }
         return false;
     }
 
@@ -166,6 +192,29 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public boolean removePhotoEntry(Photo photo) {
+
+        final Photo passPhoto = photo;
+
+
+        final List<Photo> photoList = new ArrayList<Photo>();
+        currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    photoList.add(snapshot.getValue(Photo.class));
+                }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+        for(int i = 0; i < photoList.size(); i++) {
+            if (passPhoto == photoList.get(i)) {
+                photoList.remove(i);
+                return true;
+            }
+        }
         return false;
     }
 
@@ -178,7 +227,8 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      */
     @Override
     public DatabaseReference getUserPhotoReference(String email) {
-        return null;
+
+        return  rootDir.child(email).child("photos");
     }
 
     /**
@@ -188,8 +238,31 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if new friend entry is created. FALSE if not.
      */
     @Override
-    public boolean addNewFriendEntryByEmail(String email) {
-        return false;
+    public boolean addNewFriendEntryByName(String email) {
+        if (email == null)
+            return false;
+
+        final String passName = email;
+
+        final List<Object> oldFriends = new ArrayList<>();
+        currUserDir.child("friends")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            oldFriends.add(snapshot.getValue());
+
+                        oldFriends.add(passName);
+                        currUserDir.child("friends")
+                                .setValue(new ArrayList<>(new HashSet<>(oldFriends)));
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        return true;
     }
 
     /**
@@ -199,7 +272,29 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if friend is in the user's friend list. FALSE if not.
      */
     @Override
-    public boolean checkFriendEntryByEmail(String email) {
+    public boolean checkFriendEntryByName(String email) {
+        if (email == null)
+            return false;
+
+        final String passName = email;
+
+        final List<Object> friends = new ArrayList<>();
+        currUserDir.child("friends")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            friends.add(snapshot.getValue());
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        for(int i = 0; i < friends.size(); i++){
+            if(email == friends.get(i)){return true;}
+
+        }
         return false;
     }
 
@@ -210,9 +305,35 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if friend is successfully removed. FALSE if the friend is not there.
      */
     @Override
-    public boolean removeFreindEntryByEmail(String email) {
+    public boolean removeFriendEntryByName(String email) {
+
+        if (email == null)
+            return false;
+
+        final String passName = email;
+
+        final List<Object> friends = new ArrayList<>();
+        currUserDir.child("friends")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            friends.add(snapshot.getValue());
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        for(int i = 0; i < friends.size(); i++){
+            if(email == friends.get(i)){
+                friends.remove(i);
+                return true;
+            }
+        }
         return false;
     }
+
 
     /**
      * Get handle to specified user's friend list. Used to create Listeners
@@ -222,7 +343,8 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * exist
      */
     @Override
-    public boolean getUserFriendReference(String email) {
-        return false;
+    public DatabaseReference getUserFriendReference(String email) {
+
+        return currUserDir.child("friends");
     }
 }
