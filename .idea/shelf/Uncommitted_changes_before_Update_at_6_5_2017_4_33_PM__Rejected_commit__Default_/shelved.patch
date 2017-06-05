@@ -1,0 +1,112 @@
+Index: app/src/main/java/com/android/dejaphoto/DejaService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/DejaService.java	(revision 63c8490e77317f2a4131701c9ba207ac738f45dc)
++++ app/src/main/java/com/android/dejaphoto/DejaService.java	(revision )
+@@ -56,8 +56,6 @@
+             this.action = action;
+         }
+ 
+-
+-
+         /**
+          * Chooses action to run.
+          */
+@@ -75,46 +73,9 @@
+                     release();
+                 if (action.equals(refreshAction))
+                     refresh();
+-                if(action.equals(copyAction))
+-                    copyToAlbum();
+             }
+         }
+ 
+-        public void copyToAlbum()
+-        {
+-            OutputStream out = null;
+-            try
+-            {
+-                File file = new File(dejaPhotoCopied.getFile() + name);
+-                file.createNewFile();
+-                out = new FileOutputStream(file);
+-                InputStream in = getContentResolver().openInputStream(data);
+-                int b = 0;
+-                while(b != -1)
+-                {
+-                    b = in.read();
+-                    out.write(b);
+-                }
+-                out.close();
+-            }
+-            catch (Exception e)
+-            {
+-                Log.e("DejaCopy", e.toString());
+-            }
+-
+-
+-            /*Log.e("DejaCopy", file.getAbsolutePath() + "   " + dejaPhotoCopied.getFile().getAbsolutePath());
+-            try
+-            {
+-                FileUtils.copyFileToDirectory(file, dejaPhotoCopied.getFile());
+-            }
+-            catch(Exception e)
+-            {
+-                Log.e("DejaCopy", "Problem with FileUtils in copyToAlbum: " + e.toString());
+-            }*/
+-
+-        }
+-
+         /**
+          * Updates wallpaper with next photo.
+          */
+@@ -383,10 +344,47 @@
+     */
+     public void runCopy()
+     {
+-        Thread worker = new Thread(new DejaThread(queue, copyAction));
++        Thread worker = new Thread(new DejaCopyThread(copyAction));
+         worker.start();
+     }
+ 
++    public class DejaCopyThread implements Runnable
++    {
++        String action;
+ 
++        public DejaCopyThread(String action)
++        {
++            this.action = action;
++        }
++
++        public void run()
++        {
++            if(action.equals(copyAction))
++                copyToAlbum();
++        }
++
++        public void copyToAlbum()
++        {
++            OutputStream out = null;
++            try
++            {
++                File file = new File(dejaPhotoCopied.getFile() + name);
++                file.createNewFile();
++                out = new FileOutputStream(file);
++                InputStream in = getContentResolver().openInputStream(data);
++                int b = 0;
++                while(b != -1)
++                {
++                    b = in.read();
++                    out.write(b);
++                }
++                out.close();
++            }
++            catch (Exception e)
++            {
++                Log.e("DejaCopy", e.toString());
++            }
++        }
++    }
+ 
+ }
