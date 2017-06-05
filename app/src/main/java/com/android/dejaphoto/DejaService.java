@@ -32,7 +32,7 @@ public class DejaService extends Service {
 
     ImageController controller;
     PhotoQueue<Photo> queue;
-    Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied;
+    public Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied;
     private IBinder mBinder = new MyBinder();
     Uri data;
     String name;
