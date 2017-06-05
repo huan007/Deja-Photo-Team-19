@@ -16,7 +16,7 @@ import java.util.List;
  */
 
 class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
-    private static FirebaseDatabaseAdapter ourInstance = new FirebaseDatabaseAdapter();
+    private static FirebaseDatabaseAdapter ourInstance = null;
 
     //Used to take care of Storage references
     private static String currUserEmail;
@@ -47,14 +47,14 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Used to get user's info stored in database every time user log in
      *
-     * @param name E-mail address of the user requested
+     * @param email E-mail address of the user requested
      * @return User object that is stored on the Database. Will return NULL if the user requested
      * does not exist
      */
     @Override
-    public User getUserFromDatabase(String name) {
+    public User getUserFromDatabase(String email) {
 
-        DatabaseReference specifiedUser = rootDir.child(name);
+        DatabaseReference specifiedUser = rootDir.child(email);
 
         final User[] currUser = new User[1];
 
@@ -78,16 +78,16 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Create a new user entry in the database
      *
-     * @param name   E-mail address of the new user
+     * @param email   E-mail address of the new user
      * @param newUser User object that need to be injected into database. Contains list of friends
      *                and list of photos
      * @return
      */
     @Override
-    public boolean createNewUser(String name, User newUser) {
+    public boolean createNewUser(String email, User newUser) {
 
         User currUser;
-        if((currUser = getUserFromDatabase(name)) != null){return false;}
+        if((currUser = getUserFromDatabase(email)) != null){return false;}
 
         currUserDir.setValue(newUser);
 
@@ -97,14 +97,14 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Return a list of photos shared by the specified user
      *
-     * @param name E-mail address of the specified user
+     * @param email E-mail address of the specified user
      * @return List of photos shared by the user
      */
     @Override
-    public List<Photo> getListOfPhotoFromUser(String name) {
+    public List<Photo> getListOfPhotoFromUser(String email) {
 
         final List<Photo> photoList = new ArrayList<Photo>();
-        rootDir.child(name).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+        rootDir.child(email).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
@@ -221,28 +221,28 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Get handle to requested user's photo list. Used to create Listeners
      *
-     * @param name E-mail address of specified user
+     * @param email E-mail address of specified user
      * @return returns a reference to specified user's photo list. Returns NULL if user doesn't
      * exist
      */
     @Override
-    public DatabaseReference getUserPhotoReference(String name) {
+    public DatabaseReference getUserPhotoReference(String email) {
 
-        return  rootDir.child(name).child("photos");
+        return  rootDir.child(email).child("photos");
     }
 
     /**
      * Add new friend using email
      *
-     * @param name E-mail address of the new friend. Used to identify the friend
+     * @param email E-mail address of the new friend. Used to identify the friend
      * @return returns TRUE if new friend entry is created. FALSE if not.
      */
     @Override
-    public boolean addNewFriendEntryByName(String name) {
-        if (name == null)
+    public boolean addNewFriendEntryByName(String email) {
+        if (email == null)
             return false;
 
-        final String passName = name;
+        final String passName = email;
 
         final List<Object> oldFriends = new ArrayList<>();
         currUserDir.child("friends")
@@ -268,15 +268,15 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Check whether the friend exist in the current user's friend list
      *
-     * @param name E-mail address of the friend. Used to identify the friend
+     * @param email E-mail address of the friend. Used to identify the friend
      * @return returns TRUE if friend is in the user's friend list. FALSE if not.
      */
     @Override
-    public boolean checkFriendEntryByName(String name) {
-        if (name == null)
+    public boolean checkFriendEntryByName(String email) {
+        if (email == null)
             return false;
 
-        final String passName = name;
+        final String passName = email;
 
         final List<Object> friends = new ArrayList<>();
         currUserDir.child("friends")
@@ -292,7 +292,7 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
                 });
 
         for(int i = 0; i < friends.size(); i++){
-            if(name == friends.get(i)){return true;}
+            if(email == friends.get(i)){return true;}
 
         }
         return false;
@@ -301,16 +301,16 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Remove friend from user's friend list
      *
-     * @param name E-mail address of the specified friend. Used to identify the friend
+     * @param email E-mail address of the specified friend. Used to identify the friend
      * @return returns TRUE if friend is successfully removed. FALSE if the friend is not there.
      */
     @Override
-    public boolean removeFriendEntryByName(String name) {
+    public boolean removeFriendEntryByName(String email) {
 
-        if (name == null)
+        if (email == null)
             return false;
 
-        final String passName = name;
+        final String passName = email;
 
         final List<Object> friends = new ArrayList<>();
         currUserDir.child("friends")
@@ -326,7 +326,7 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
                 });
 
         for(int i = 0; i < friends.size(); i++){
-            if(name == friends.get(i)){
+            if(email == friends.get(i)){
                 friends.remove(i);
                 return true;
             }
@@ -338,12 +338,12 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
     /**
      * Get handle to specified user's friend list. Used to create Listeners
      *
-     * @param name E-mail address of the specified user
+     * @param email E-mail address of the specified user
      * @return returns a reference to specified user's friend list. Returns NULL if the user doesn't
      * exist
      */
     @Override
-    public DatabaseReference getUserFriendReference(String name) {
+    public DatabaseReference getUserFriendReference(String email) {
 
         return currUserDir.child("friends");
     }

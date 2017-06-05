@@ -14,27 +14,27 @@ public interface FirebaseDatabaseAdapterInterface {
 
     /**
      * Used to get user's info stored in database every time user log in
-     * @param name E-mail address of the user requested
+     * @param email E-mail address of the user requested
      * @return User object that is stored on the Database. Will return NULL if the user requested
      * does not exist
      */
-    public User getUserFromDatabase(String name);
+    public User getUserFromDatabase(String email);
 
     /**
      * Create a new user entry in the database
-     * @param name E-mail address of the new user
+     * @param email E-mail address of the new user
      * @param newUser User object that need to be injected into database. Contains list of friends
      *                and list of photos
      * @return boolean, true if user was added, false if user already in database
      */
-    public boolean createNewUser(String name, User newUser);
+    public boolean createNewUser(String email, User newUser);
 
     /**
      * Return a list of photos shared by the specified user
-     * @param name E-mail address of the specified user
+     * @param email E-mail address of the specified user
      * @return List of photos shared by the user
      */
-    public List<Photo> getListOfPhotoFromUser(String name);
+    public List<Photo> getListOfPhotoFromUser(String email);
 
     /**
      * Extract information from Photo object and create a new entry in current user's list of photo
@@ -59,38 +59,38 @@ public interface FirebaseDatabaseAdapterInterface {
 
     /**
      * Get handle to requested user's photo list. Used to create Listeners
-     * @param name E-mail address of specified user
+     * @param email E-mail address of specified user
      * @return returns a reference to specified user's photo list. Returns NULL if user doesn't
      * exist
      */
-    public DatabaseReference getUserPhotoReference(String name);
+    public DatabaseReference getUserPhotoReference(String email);
 
     /**
      * Add new friend using email
-     * @param name E-mail address of the new friend. Used to identify the friend
+     * @param email E-mail address of the new friend. Used to identify the friend
      * @return returns TRUE if new friend entry is created. FALSE if not.
      */
-    public boolean addNewFriendEntryByName(String name);
+    public boolean addNewFriendEntryByName(String email);
 
     /**
      * Check whether the friend exist in the current user's friend list
-     * @param name E-mail address of the friend. Used to identify the friend
+     * @param email E-mail address of the friend. Used to identify the friend
      * @return returns TRUE if friend is in the user's friend list. FALSE if not.
      */
-    public boolean checkFriendEntryByName(String name);
+    public boolean checkFriendEntryByName(String email);
 
     /**
      * Remove friend from user's friend list
-     * @param name E-mail address of the specified friend. Used to identify the friend
+     * @param email E-mail address of the specified friend. Used to identify the friend
      * @return returns TRUE if friend is successfully removed. FALSE if the friend is not there.
      */
-    public boolean removeFriendEntryByName(String name);
+    public boolean removeFriendEntryByName(String email);
 
     /**
      * Get handle to specified user's friend list. Used to create Listeners
-     * @param name E-mail address of the specified user
+     * @param email E-mail address of the specified user
      * @return returns a reference to specified user's friend list. Returns NULL if the user doesn't
      * exist
      */
-    public DatabaseReference getUserFriendReference(String name);
+    public DatabaseReference getUserFriendReference(String email);
 }
