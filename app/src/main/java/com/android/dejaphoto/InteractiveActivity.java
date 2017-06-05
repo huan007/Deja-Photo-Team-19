@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,8 +39,8 @@ public class InteractiveActivity extends AppCompatActivity {
     DatabaseReference userRef;
     int numOfMessages = 0;
     final String databaseURL = "https://deja-demo.firebaseio.com/";
-    FirebaseStorageAdapterInterface storage = FirebaseStorageAdapter.getInstance();
-    FirebaseDatabaseAdapterInterface database = FirebaseDatabaseAdapter.getInstance();
+    FirebaseStorageAdapterInterface storage;
+    FirebaseDatabaseAdapterInterface database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,7 @@ public class InteractiveActivity extends AppCompatActivity {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         storage = FirebaseStorageAdapter.getInstance();
+        this.database = FirebaseDatabaseAdapter.getInstance();
 
         if (acct != null) {
             Toast.makeText(this, "UID is correctly passed", Toast.LENGTH_SHORT).show();
@@ -103,7 +105,7 @@ public class InteractiveActivity extends AppCompatActivity {
     //getUserFromDatabase
     public void testGetUserFromDatabase(View view)
     {
-        String currUser = acct.getEmail();
+        String currUser = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         User result = database.getUserFromDatabase(currUser);
 
         if (result != null)
@@ -118,11 +120,11 @@ public class InteractiveActivity extends AppCompatActivity {
 
         LinkedList<Object> friendList = new LinkedList<>();
         HashMap<String, Object> photoList = new HashMap();
-        friendList.add(acct.getId());
+        friendList.add("Nothing");
         photoList.put("Empty Photo", "Null");
 
         User newUser = new User(friendList, photoList);
-        boolean checkResult = database.createNewUser("vmperkin@ucsd.edu", newUser);
+        boolean checkResult = database.createNewUser("Perkins", newUser);
 
         if (checkResult == false)
             Toast.makeText(this, "User already exists in database!", Toast.LENGTH_LONG).show();

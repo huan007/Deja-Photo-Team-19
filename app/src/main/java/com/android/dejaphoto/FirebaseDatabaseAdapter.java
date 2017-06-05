@@ -15,7 +15,7 @@ import java.util.List;
  */
 
 class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
-    private static FirebaseDatabaseAdapter ourInstance = new FirebaseDatabaseAdapter();
+    private static FirebaseDatabaseAdapter ourInstance = null;
 
     //Used to take care of Storage references
     private static String currUserEmail;
@@ -33,7 +33,7 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
             ourInstance = new FirebaseDatabaseAdapter();
 
             //Used to take care of Storage references
-            currUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            currUserEmail = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
             currUserDir = FirebaseDatabase.getInstance().getReference().child(currUserEmail);
             rootDir = FirebaseDatabase.getInstance().getReference();
         }
