@@ -1,0 +1,578 @@
+Index: app/src/main/java/com/android/dejaphoto/Album.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/Album.java	(revision )
++++ app/src/main/java/com/android/dejaphoto/Album.java	(revision )
+@@ -0,0 +1,31 @@
++package com.android.dejaphoto;
++
++import java.io.File;
++
++/**
++ * Created by Anna on 5/26/2017.
++ */
++
++public class Album extends AbstractAlbum {
++
++    // By default we're setting includePhotos to true, but this should ultimately be based on user settings
++
++    Album()
++    {
++        directoryFile = null;
++        includePhotos = true;
++    }
++
++    Album(File file, boolean value)
++    {
++        directoryFile = file;
++        includePhotos = value;
++    }
++
++    Album(File file)
++    {
++        directoryFile = file;
++        includePhotos = true;
++    }
++
++}
+Index: app/src/main/res/layout/activity_login.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_login.xml	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/res/layout/activity_login.xml	(revision )
+@@ -1,30 +1,38 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+-    tools:context="com.android.dejaphoto.LoginActivity">
+-    
+-    <LinearLayout
+-        android:layout_width="match_parent"
+-        android:layout_height="match_parent"
++    tools:context="com.android.dejaphoto.LoginActivity"
+-        android:orientation="vertical">
++    android:orientation="vertical">
++
+-        <TextView
+-            android:id="@+id/status_textview"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
++    <TextView
++        android:id="@+id/status_textview"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
+-            android:text=""/>
++        android:text="Not Signed in" />
++
+     <com.google.android.gms.common.SignInButton
+         android:id="@+id/sign_in_button"
+         android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"/>
++        android:layout_height="wrap_content" />
++
+-        <Button
++    <Button
++        android:id="@+id/sign_out_button"
+-            android:layout_width="110dp"
+-            android:layout_height="wrap_content"
++        android:layout_width="110dp"
++        android:layout_height="wrap_content"
+-            android:text="Sign Out"
+-            android:id="@+id/sign_out_button"
+-            />
+-    </LinearLayout>
++        android:text="Sign Out" />
+ 
+-</android.support.constraint.ConstraintLayout>
++    <Button
++        android:id="@+id/buttonPhotoPicker"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:onClick="button1"
++        android:text="Photopicker" />
++
++    <ImageView
++        android:id="@+id/photo"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent" />
++</LinearLayout>
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/AndroidManifest.xml	(revision )
+@@ -29,6 +29,12 @@
+             android:name=".MainActivity"
+             android:label="@string/app_name"
+             android:theme="@style/AppTheme.NoActionBar">
++
++        </activity>
++
++        <activity android:name=".LoginActivity"
++            android:label="@string/app_name"
++            android:theme="@style/AppTheme.NoActionBar">>
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
+ 
+@@ -51,7 +57,7 @@
+             android:enabled="true"
+             android:exported="true" />
+ 
+-        <activity android:name=".LoginActivity"></activity>
++
+     </application>
+ 
+ </manifest>
+\ No newline at end of file
+Index: app/src/main/java/com/android/dejaphoto/AbstractAlbum.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/AbstractAlbum.java	(revision )
++++ app/src/main/java/com/android/dejaphoto/AbstractAlbum.java	(revision )
+@@ -0,0 +1,34 @@
++package com.android.dejaphoto;
++
++import java.io.File;
++
++/**
++ * Created by Anna on 5/26/2017.
++ */
++
++public abstract class AbstractAlbum
++{
++    File directoryFile;
++    boolean includePhotos; // should be set based on user settings
++
++    public File getFile()
++    {
++        return directoryFile;
++    }
++
++    public void setFile(File file)
++    {
++        directoryFile = file;
++    }
++
++    public boolean getIncludePhotos()
++    {
++        return includePhotos;
++    }
++
++    public void setIncludePhotos(boolean value)
++    {
++        includePhotos = value;
++    }
++
++}
+\ No newline at end of file
+Index: app/src/main/java/com/android/dejaphoto/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/LoginActivity.java	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/java/com/android/dejaphoto/LoginActivity.java	(revision )
+@@ -1,12 +1,24 @@
+ package com.android.dejaphoto;
+ 
++import android.app.Activity;
++import android.content.ContentResolver;
++import android.content.Context;
++import android.content.CursorLoader;
+ import android.content.Intent;
++import android.database.Cursor;
++import android.graphics.Bitmap;
++import android.net.Uri;
++import android.os.Build;
++import android.os.Environment;
++import android.provider.MediaStore;
+ import android.support.annotation.NonNull;
++import android.support.annotation.RequiresApi;
+ import android.support.v7.app.AppCompatActivity;
+ import android.os.Bundle;
+ import android.util.Log;
+ import android.view.View;
+ import android.widget.Button;
++import android.widget.ImageView;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+@@ -22,14 +34,28 @@
+ import com.google.firebase.auth.FirebaseAuth;
+ import com.google.firebase.database.FirebaseDatabase;
+ 
+-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnContextClickListener{
++import org.apache.commons.io.*;
+ 
++import java.io.File;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.OutputStream;
++import java.net.URI;
++import java.net.URL;
++
++import static java.security.AccessController.getContext;
++
++
++public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
++
+     SignInButton signInButton;
+     Button signOutButton;
+     TextView statusTextView;
+     GoogleApiClient mGoogleApiClient;
+     private static final String TAG = "SignInActivity";
+     private static final int RC_SIGN_IN = 9001;
++    private int PICK_IMAGE_REQUEST = 1;
++    private int FILE_SELECT_CODE = 0;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -70,20 +96,85 @@
+     }
+ 
+     @Override
+-    public void onActivityResutlt(int requestCode, int resultCode, Intent data){
++    public void onActivityResult(int requestCode, int resultCode, Intent data){
+         super.onActivityResult(requestCode, resultCode, data);
+ 
++
+         if(requestCode == RC_SIGN_IN){
++            statusTextView.setText("Attempting to login...");
+             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
++            int statusCode = result.getStatus().getStatusCode();
++            Log.d(TAG, "StatusCode: " + statusCode);
+             handleSignInResult(result);
+         }
++
++        /*if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
++
++            Uri uri = data.getData();
++
++            try {
++                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
++                // Log.d(TAG, String.valueOf(bitmap));
++
++
++                ImageView imageView = (ImageView) findViewById(R.id.photo);
++                imageView.setImageBitmap(bitmap);
++            } catch (IOException e) {
++                e.printStackTrace();
+-    }
++            }
++        }*/
+ 
++        if (requestCode == FILE_SELECT_CODE )
++        {
++            Log.e("DejaCopy", "File select code");
++
++            if (resultCode == RESULT_OK) {
++
++ /*                   // Get the Uri of the selected file
++                    Uri uri = data.getData();
++                    //String uristring = Environment.getExternalStorageDirectory() + "/" + data.getDataString();
++                String uristring = Environment.getExternalStorageDirectory() + "/com.android.providers.media.documents" + uri.getPath();
++                Log.d(TAG, "File Uri: " + uri.getPath());
++                    // Get the path
++                    Log.e("DejaCopy", uri.getPath());
++                    String path = uri.getPath();
++                    Log.d(TAG, "File Path: " + path);
++                    // Get the file instance
++
++                    File file = null;
++
++                    try {
++                        file = new File(uristring);
++                        Log.e("DejaCopy", "File created. " + file.getAbsolutePath());
++                    }
++                    catch (Exception e)
++                    {
++                        Log.e("DejaCopy", "Error!! " + e.toString());
++                    }*/
++
++                String filename = data.getData().getLastPathSegment();
++                String mimeType[] = (getContentResolver().getType(data.getData())).split("/");
++                String filetype = mimeType[mimeType.length-1];
++                Log.e("DejaCopy", "File name: " + filename + "." + filetype);
++                Intent intent = new Intent(this, DejaService.class);
++                intent.putExtra("File", data.getData());
++                intent.putExtra("Name", "/" + filename + "." + filetype);
++                intent.putExtra(DejaService.actionFlag, DejaService.copyAction);
++
++                Log.e("DejaCopy", "Intent created, starting service...");
++
++
++                startService(intent);
++                }
++        }
++        //super.onActivityResult(requestCode, resultCode, data);
++    }
++
+     private void handleSignInResult(GoogleSignInResult result) {
+         Log.d(TAG, "handleSignInResult;" + result.isSuccess());
+         if (result.isSuccess()) {
+             GoogleSignInAccount acct = result.getSignInAccount();
+-            statusTextView.setText("Hellow, " + acct.getDisplayName());
++            statusTextView.setText("Hello, " + acct.getDisplayName());
+         }else{
+ 
+         }
+@@ -104,8 +195,30 @@
+         });
+     }
+ 
+-    @Override
+-    public boolean onContextClick(View v) {
+-        return false;
++    void button1(View view)
++    {
++        Log.e("DejaPhoto", "button1");
++        /*Intent intent = new Intent();
++        // Show only images, no videos or anything else
++        intent.setType("image/*");
++        intent.setAction(Intent.ACTION_GET_CONTENT);
++        // Always show the chooser (if there are multiple options available)
++        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);*/
++
++        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
++        intent.setType("image/*");
++        intent.addCategory(Intent.CATEGORY_OPENABLE);
++
++        try {
++            startActivityForResult(
++                    Intent.createChooser(intent, "Select a File"),
++                    FILE_SELECT_CODE);
++        } catch (android.content.ActivityNotFoundException ex) {
++            // Potentially direct the user to the Market with a Dialog
++            Toast.makeText(this, "Please install a File Manager.",
++                    Toast.LENGTH_SHORT).show();
+-    }
++        }
++    }
++
++
+ }
+Index: app/src/main/java/com/android/dejaphoto/DejaService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/DejaService.java	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/java/com/android/dejaphoto/DejaService.java	(revision )
+@@ -3,6 +3,8 @@
+ import android.app.Service;
+ import android.content.Context;
+ import android.content.Intent;
++import android.graphics.Bitmap;
++import android.net.Uri;
+ import android.os.Binder;
+ import android.os.Environment;
+ import android.os.IBinder;
+@@ -10,7 +12,12 @@
+ 
+ import com.google.maps.GeoApiContext;
+ 
++import org.apache.commons.io.FileUtils;
++
+ import java.io.File;
++import java.io.FileOutputStream;
++import java.io.InputStream;
++import java.io.OutputStream;
+ 
+ /**
+  * Long running service that updates photos according to widget button clicks.
+@@ -22,12 +29,16 @@
+     public static final String releaseAction = "RELEASE";
+     public static final String actionFlag = "ACTION_FLAG";
+     public static final String karmaAction = "KARMA";
++    public static final String copyAction = "COPY";
+ 
+     GeoApiContext geoContext;
+ 
+     ImageController controller;
+     PhotoQueue<Photo> queue;
++    Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied;
+     private IBinder mBinder = new MyBinder();
++    Uri data;
++    String name;
+ 
+     /**
+      * Thread to execute widget action.
+@@ -48,6 +59,8 @@
+             this.action = action;
+         }
+ 
++
++
+         /**
+          * Chooses action to run.
+          */
+@@ -65,9 +78,46 @@
+                     release();
+                 if (action.equals(refreshAction))
+                     refresh();
++                if(action.equals(copyAction))
++                    copyToAlbum();
+             }
+         }
+ 
++        public void copyToAlbum()
++        {
++            OutputStream out = null;
++            try
++            {
++                File file = new File(dejaPhotoCopied.getFile() + name);
++                file.createNewFile();
++                out = new FileOutputStream(file);
++                InputStream in = getContentResolver().openInputStream(data);
++                int b = 0;
++                while(b != -1)
++                {
++                    b = in.read();
++                    out.write(b);
++                }
++                out.close();
++            }
++            catch (Exception e)
++            {
++                Log.e("DejaCopy", e.toString());
++            }
++
++
++            /*Log.e("DejaCopy", file.getAbsolutePath() + "   " + dejaPhotoCopied.getFile().getAbsolutePath());
++            try
++            {
++                FileUtils.copyFileToDirectory(file, dejaPhotoCopied.getFile());
++            }
++            catch(Exception e)
++            {
++                Log.e("DejaCopy", "Problem with FileUtils in copyToAlbum: " + e.toString());
++            }*/
++
++        }
++
+         /**
+          * Updates wallpaper with next photo.
+          */
+@@ -174,6 +224,7 @@
+         Log.d("DejaService", "onStart()");
+         String action = intent.getStringExtra(actionFlag);
+ 
++
+         // starts corresponding action
+         if (action != null) {
+             Log.d("DejaService", "Action received: " + action);
+@@ -187,7 +238,14 @@
+                 runRelease();
+             if (action.equals(refreshAction))
+                 runRefresh();
++            if (action.equals(copyAction))
++            {
++                Log.e("DejaCopy", "Get extras (the file)");
++                data = (Uri) intent.getExtras().get("File");
++                name = (String) intent.getExtras().get("Name");
++                runCopy();
+-        }
++            }
++        }
+ 
+         return super.onStartCommand(intent, flags, startId);
+     }
+@@ -213,7 +271,68 @@
+         //Get GeoAPI context
+         geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
+ 
+-        //Get list of pictures
++        File appDirectory = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto");
++        boolean appDirCreated;
++        if (!appDirectory.exists()) {
++            appDirCreated = appDirectory.mkdirs();
++        }
++
++
++        File dejaPhotoAlbumFile = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
++        if (!dejaPhotoAlbumFile.exists()) {
++            dejaPhotoAlbumFile.mkdirs();
++        }
++        dejaPhotoAlbum = new Album(dejaPhotoAlbumFile, false);
++
++
++        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
++        if (!dejaPhotoFriendsFile.exists()) {
++            dejaPhotoFriendsFile.mkdirs();
++
++        }
++        dejaPhotoFriends = new Album(dejaPhotoAlbumFile);
++
++
++        File dejaPhotoCopiedFile = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoCopied");
++        if (!dejaPhotoCopiedFile.exists()) {
++            dejaPhotoCopiedFile.mkdirs();
++
++        }
++        dejaPhotoCopied = new Album(dejaPhotoCopiedFile);
++
++
++        GetAllPhotosFromGallery dejaGallery, friendsGallery, copiedGallery;
++
++        //Get list of picture
++        // Check whether to include albums
++       /* if (dejaPhotoAlbum.includePhotos)
++        {
++            dejaGallery = new GetAllPhotosFromGallery(dejaPhotoAlbum.directoryFile, context, geoContext);
++        }
++        // To get code in photochooser line to work for now
++        else
++            dejaGallery = null;
++
++        if (dejaPhotoFriends.includePhotos)
++        {
++            friendsGallery = new GetAllPhotosFromGallery(dejaPhotoFriends.directoryFile, context, geoContext);
++        }
++        if (dejaPhotoCopied.includePhotos)
++        {
++            copiedGallery = new GetAllPhotosFromGallery(dejaPhotoCopied.directoryFile, context, geoContext);
++        }
++
++        // TODO needs to change to support multiple albums
++        // Album object has boolean for whether to include photos
++        PhotoChooser chooser = new PhotoChooser(dejaGallery.getImages(), geoContext);
++        queue = new PhotoQueue<>(chooser);
++        controller.displayImage(queue.next(getApplicationContext()));*/
++
++
+         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
+         GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context, geoContext);
+ 
+@@ -261,5 +380,16 @@
+         Thread worker = new Thread(new DejaThread(queue, refreshAction));
+         worker.start();
+     }
++
++    /*
++    * Start copy action
++    */
++    public void runCopy()
++    {
++        Thread worker = new Thread(new DejaThread(queue, copyAction));
++        worker.start();
++    }
++
++
+ 
+ }

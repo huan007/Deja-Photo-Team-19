@@ -1,0 +1,301 @@
+Index: app/src/main/java/com/android/dejaphoto/Album.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/Album.java	(revision )
++++ app/src/main/java/com/android/dejaphoto/Album.java	(revision )
+@@ -0,0 +1,31 @@
++package com.android.dejaphoto;
++
++import java.io.File;
++
++/**
++ * Created by Anna on 5/26/2017.
++ */
++
++public class Album extends AbstractAlbum {
++
++    // By default we're setting includePhotos to true, but this should ultimately be based on user settings
++
++    Album()
++    {
++        directoryFile = null;
++        includePhotos = true;
++    }
++
++    Album(File file, boolean value)
++    {
++        directoryFile = file;
++        includePhotos = value;
++    }
++
++    Album(File file)
++    {
++        directoryFile = file;
++        includePhotos = true;
++    }
++
++}
+Index: app/src/main/java/com/android/dejaphoto/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/MainActivity.java	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/java/com/android/dejaphoto/MainActivity.java	(revision )
+@@ -8,6 +8,7 @@
+ import android.location.Location;
+ import android.location.LocationManager;
+ import android.os.Bundle;
++import android.os.Environment;
+ import android.os.Handler;
+ import android.preference.Preference;
+ import android.preference.PreferenceFragment;
+@@ -28,6 +29,8 @@
+ 
+ import com.google.android.gms.maps.model.LatLng;
+ 
++import java.io.File;
++
+ import static com.google.android.gms.common.api.GoogleApiClient.*;
+ 
+ 
+@@ -43,11 +46,10 @@
+     public static double longitude;
+     LocationRequest mLocationRequest;
+ 
+-
+-
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_login);
+         getFragmentManager().beginTransaction().replace(android.R.id.content, new PrefsFragment()).commit();
+ 
+ 
+@@ -122,6 +124,8 @@
+         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+         String locationProvider = LocationManager.GPS_PROVIDER;
+         locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
++
++
+     }
+ 
+ 
+Index: app/src/main/res/layout/activity_login.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_login.xml	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/res/layout/activity_login.xml	(revision )
+@@ -7,9 +7,12 @@
+     tools:context="com.android.dejaphoto.LoginActivity">
+     
+     <LinearLayout
+-        android:layout_width="match_parent"
+-        android:layout_height="match_parent"
+-        android:orientation="vertical">
++        android:layout_width="368dp"
++        android:layout_height="495dp"
++        android:orientation="vertical"
++        tools:layout_editor_absoluteY="8dp"
++        tools:layout_editor_absoluteX="8dp">
++
+         <TextView
+             android:id="@+id/status_textview"
+             android:layout_width="wrap_content"
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/AndroidManifest.xml	(revision )
+@@ -14,6 +14,7 @@
+     <uses-permission android:name="android.permission.INTERNET" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+ 
++
+     <!-- To auto-complete the email text field in the login form with the user's emails -->
+     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+     <uses-permission android:name="android.permission.READ_PROFILE" />
+\ No newline at end of file
+Index: app/src/main/java/com/android/dejaphoto/AbstractAlbum.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/AbstractAlbum.java	(revision )
++++ app/src/main/java/com/android/dejaphoto/AbstractAlbum.java	(revision )
+@@ -0,0 +1,34 @@
++package com.android.dejaphoto;
++
++import java.io.File;
++
++/**
++ * Created by Anna on 5/26/2017.
++ */
++
++public abstract class AbstractAlbum
++{
++    File directoryFile;
++    boolean includePhotos; // should be set based on user settings
++
++    public File getFile()
++    {
++        return directoryFile;
++    }
++
++    public void setFile(File file)
++    {
++        directoryFile = file;
++    }
++
++    public boolean getIncludePhotos()
++    {
++        return includePhotos;
++    }
++
++    public void setIncludePhotos(boolean value)
++    {
++        includePhotos = value;
++    }
++
++}
+\ No newline at end of file
+Index: app/src/main/java/com/android/dejaphoto/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/LoginActivity.java	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/java/com/android/dejaphoto/LoginActivity.java	(revision )
+@@ -22,7 +22,8 @@
+ import com.google.firebase.auth.FirebaseAuth;
+ import com.google.firebase.database.FirebaseDatabase;
+ 
+-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnContextClickListener{
++public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener //, View.OnContextClickListener
++{
+ 
+     SignInButton signInButton;
+     Button signOutButton;
+@@ -46,13 +47,13 @@
+ 
+         statusTextView = (TextView) findViewById(R.id.status_textview);
+         signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+-        signInButton.setOnClickListener(this);
++        //signInButton.setOnClickListener(this);
+ 
+         signOutButton = (Button) findViewById(R.id.sign_out_button);
+-        signOutButton.setOnClickListener(this);
++        //signOutButton.setOnClickListener(this);
+     }
+ 
+-    @Override
++    //@Override
+     public void onClick(View v){
+         switch(v.getId()){
+             case R.id.sign_in_button:
+@@ -69,7 +70,7 @@
+         startActivityForResult(sighInIntent, RC_SIGN_IN);
+     }
+ 
+-    @Override
++    //@Override
+     public void onActivityResutlt(int requestCode, int resultCode, Intent data){
+         super.onActivityResult(requestCode, resultCode, data);
+ 
+@@ -104,7 +105,7 @@
+         });
+     }
+ 
+-    @Override
++    //@Override
+     public boolean onContextClick(View v) {
+         return false;
+     }
+Index: app/src/main/java/com/android/dejaphoto/DejaService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/android/dejaphoto/DejaService.java	(revision 22926f56aa927094e1964464ca21440e4a5c4ae0)
++++ app/src/main/java/com/android/dejaphoto/DejaService.java	(revision )
+@@ -27,6 +27,7 @@
+ 
+     ImageController controller;
+     PhotoQueue<Photo> queue;
++    Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied;
+     private IBinder mBinder = new MyBinder();
+ 
+     /**
+@@ -213,11 +214,62 @@
+         //Get GeoAPI context
+         geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
+ 
+-        //Get list of pictures
+-        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
+-        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context, geoContext);
++        File appDirectory = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto");
++        boolean appDirCreated;
++        if (!appDirectory.exists()) {
++            appDirCreated = appDirectory.mkdirs();
++        }
+ 
+-        PhotoChooser chooser = new PhotoChooser(gallery.getImages(), geoContext);
++
++        File dejaPhotoAlbumFile = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
++        if (!dejaPhotoAlbumFile.exists()) {
++            dejaPhotoAlbumFile.mkdirs();
++
++            dejaPhotoAlbum = new Album(dejaPhotoAlbumFile);
++        }
++
++        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
++        if (!dejaPhotoFriendsFile.exists()) {
++            dejaPhotoFriendsFile.mkdirs();
++
++            dejaPhotoFriends = new Album(dejaPhotoAlbumFile);
++        }
++
++        File dejaPhotoCopiedFile = new File(Environment.getExternalStorageDirectory() +
++                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoCopied");
++        if (!dejaPhotoCopiedFile.exists()) {
++            dejaPhotoCopiedFile.mkdirs();
++
++            dejaPhotoCopied = new Album(dejaPhotoCopiedFile);
++        }
++
++        GetAllPhotosFromGallery dejaGallery, friendsGallery, copiedGallery;
++
++        //Get list of picture
++        // Check whether to include albums
++        if (dejaPhotoAlbum.includePhotos)
++        {
++            dejaGallery = new GetAllPhotosFromGallery(dejaPhotoAlbum.directoryFile, context, geoContext);
++        }
++        // To get code in photochooser line to work for now
++        else
++            dejaGallery = null;
++
++        if (dejaPhotoFriends.includePhotos)
++        {
++            friendsGallery = new GetAllPhotosFromGallery(dejaPhotoFriends.directoryFile, context, geoContext);
++        }
++        if (dejaPhotoCopied.includePhotos)
++        {
++            copiedGallery = new GetAllPhotosFromGallery(dejaPhotoCopied.directoryFile, context, geoContext);
++        }
++
++        // TODO needs to change to support multiple albums
++        // Album object has boolean for whether to include photos
++        PhotoChooser chooser = new PhotoChooser(dejaGallery.getImages(), geoContext);
+         queue = new PhotoQueue<>(chooser);
+         controller.displayImage(queue.next(getApplicationContext()));
+     }
