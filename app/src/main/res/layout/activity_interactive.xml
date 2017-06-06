@@ -58,5 +58,26 @@
         android:text="Create User"
         android:layout_gravity="center"
         android:onClick="testCreateUser"/>
+    <Button
+        android:id="@+id/addUserPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add User Photo"
+        android:layout_gravity="center"
+        android:onClick="testAddNewPhotoEntry"/>
+    <Button
+        android:id="@+id/getUserPhotoList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get Photo List"
+        android:layout_gravity="center"
+        android:onClick="testGetListOfPhotoFromUser"/>
+    <Button
+        android:id="@+id/checkPhotoEntry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Check User photo"
+        android:layout_gravity="center"
+        android:onClick="testCheckPhotoEntry"/>
 
 </LinearLayout>

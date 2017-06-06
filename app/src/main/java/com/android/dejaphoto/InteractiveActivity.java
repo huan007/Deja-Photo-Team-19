@@ -29,6 +29,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static com.android.dejaphoto.R.drawable.apple;
@@ -138,4 +139,49 @@ public class InteractiveActivity extends AppCompatActivity {
 
 
     }
+
+    //testing getListOfPhotoFromUser
+    public void testGetListOfPhotoFromUser(View view){
+
+
+        List<String> photoList;
+
+
+        photoList = database.getListOfPhotoFromUser("vmperkin@ucsd_edu");
+
+        if (photoList.size() == 0)
+            Toast.makeText(this, "User photoList size is 1", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "User photoList exists!", Toast.LENGTH_LONG).show();
+
+
+    }
+
+    //testing addNewPhotoEntry
+    public void testAddNewPhotoEntry(View view){
+
+        boolean check = database.addNewPhotoEntry("PictureOfDog");
+
+        if (check == true)
+            Toast.makeText(this, "Photo added to database!", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "Photo NOT added to database!", Toast.LENGTH_LONG).show();
+
+
+    }
+
+    //testing check photo entry
+    public void testCheckPhotoEntry(View view){
+
+
+        boolean check = database.checkPhotoEntry("PictureOfDog");
+
+        if (check != true)
+            Toast.makeText(this, "Picture of Dog found", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "Picture of Dog not found", Toast.LENGTH_LONG).show();
+
+
+    }
+
 }
