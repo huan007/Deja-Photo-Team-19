@@ -9,6 +9,11 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.LatLng;
 
@@ -41,24 +46,67 @@ public class GetAllPhotosFromGallery {
     }
 
     // Creates a Photo object for each file in the directory
-    public GetAllPhotosFromGallery(File directoryName, Context context, GeoApiContext geoContext) {
+    public GetAllPhotosFromGallery(File directoryName, final Context context, GeoApiContext geoContext) {
         directory = directoryName;
 
         images = new ArrayList<Photo>();
 
-            if(directory.isDirectory() == true) {
-                for (File file : directory.listFiles()) {
+        if (directory.isDirectory() == true) {
+            for (final File file : directory.listFiles()) {
                 if (file.isFile()) {
                     try {
                         // Get bitmap
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getApplicationContext().getContentResolver(), Uri.fromFile(file));
 
                         // Create Photo object
-                        Photo photo = new Photo();
+                        final Photo photo = new Photo();
                         photo.photo = bitmap;
+                        photo.name = file.getName();
+
+                        // update karma to firebase data
+                        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                        if (file.getAbsolutePath().contains("DejaPhotoFriends")) {
+                            database.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                                        if (!snapshot.getKey().equals(context.getSharedPreferences("user", Context.MODE_PRIVATE).getString("email", "")))
+                                           for (DataSnapshot snapshot1 : snapshot.child("photos").getChildren())
+                                               try {
+                                                   if (snapshot1.getKey().equals(file.getName()))
+                                                       photo.karma = (int) ((long) snapshot.getValue());
+                                               } catch (Exception e) {
+                                                   e.printStackTrace();
+                                               }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                }
+                            });
+                        } else {
+                            database.child(context.getSharedPreferences("user", Context.MODE_PRIVATE).getString("email", null))
+                                    .child("photos")
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                                                try {
+                                                    if (snapshot.getKey().equals(file.getName()))
+                                                        photo.karma = (int) ((long) snapshot.getValue());
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                        }
+                                    });
+                        }
 
                         // Get exif info
-                        ExifInterface exifInterface = (ExifInterface) new ExifInterface( file.getAbsolutePath() );
+                        ExifInterface exifInterface = (ExifInterface) new ExifInterface(file.getAbsolutePath());
                         photo.datetime = exifInterface.getAttribute(android.media.ExifInterface.TAG_DATETIME);
                         photo.latitude = exifInterface.getAttribute(android.media.ExifInterface.TAG_GPS_LATITUDE);
                         photo.longitude = exifInterface.getAttribute(android.media.ExifInterface.TAG_GPS_LONGITUDE);
@@ -84,8 +132,7 @@ public class GetAllPhotosFromGallery {
                             photo.longitude = String.valueOf(longtitude);
                             LatLng location = new LatLng(lat, longtitude);
                             photo.setZipCode(geoContext, location);
-                        }
-                        else
+                        } else
                             photo.setZipCode(geoContext, null);
 
 
@@ -96,33 +143,30 @@ public class GetAllPhotosFromGallery {
                         e.printStackTrace();
                     }
                 }
-                }
             }
+        }
 
     }
 
     // Converts given DMS to Double
-    public static double convertDMStoDouble(String raw, boolean isPositive)
-    {
+    public static double convertDMStoDouble(String raw, boolean isPositive) {
         Scanner rawScanner = new Scanner(raw).useDelimiter(",");
         double reverseDMS[] = new double[3];
         Log.d("Get Photo", "Raw: " + raw);
 
         //Get DMS individually
         int i = 0;
-        while (rawScanner.hasNext())
-        {
+        while (rawScanner.hasNext()) {
             String individual = rawScanner.next();
             Log.d("Get Photo", individual);
             Scanner individualScanner = new Scanner(individual).useDelimiter("/");
             Double value1 = new Double(individualScanner.next());
             Double value2 = new Double(individualScanner.next());
-            reverseDMS[i]  = value1/value2;
+            reverseDMS[i] = value1 / value2;
             i++;
         }
-        double result = reverseDMS[0] + (reverseDMS[1]/60) + (reverseDMS[2]/3600);
-        if (!isPositive)
-        {
+        double result = reverseDMS[0] + (reverseDMS[1] / 60) + (reverseDMS[2] / 3600);
+        if (!isPositive) {
             result = 0 - result;
         }
         Log.d("Get Photo", String.valueOf(result));

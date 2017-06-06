@@ -13,6 +13,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.security.AccessController.getContext;
+
 public class DejaCamera {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -96,9 +98,16 @@ public class DejaCamera {
         Log.d("deja camera", "moving photos");
         for (String path : paths) {
             File from = new File(path);
-            File to = new File(Environment.getExternalStorageDirectory(), from.getName());
+            File to = new File(Environment.getExternalStorageDirectory() +
+                    File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum", from.getName());
             to.delete();
             from.renameTo(to);
+
+            Intent serviceIntent = new Intent(context, FirebaseService.class);
+            serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_PHOTO);
+            serviceIntent.putExtra(FirebaseService.PHOTO, from.getName());
+            serviceIntent.putExtra(FirebaseService.KARMA, 0);
+            context.startService(serviceIntent);
         }
     }
 }
