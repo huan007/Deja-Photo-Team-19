@@ -132,4 +132,29 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
     public boolean checkPhotoExistInSpecifiedUser(String photoFileName) {
         return false;
     }
+
+    /**
+     * Remove all photos of the current User
+     *
+     * @return return TRUE if photos are deleted. FALSE if not.
+     */
+    @Override
+    public boolean removeAllPhotos() {
+        final boolean result[] = new boolean[1];
+
+        currUserDir.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(debug_tag, "Successfully deleted directory");
+                result[0] = true;
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(debug_tag, "Failed to delete directory");
+                result[0] = false;
+            }
+        });
+        return result[0];
+    }
 }

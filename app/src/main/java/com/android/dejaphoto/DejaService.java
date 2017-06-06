@@ -32,7 +32,7 @@ public class DejaService extends Service {
 
     ImageController controller;
     PhotoQueue<Photo> queue;
-    Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied;
+    public Album dejaPhotoAlbum, dejaPhotoFriends, dejaPhotoCopied, dejaPhotoDCIM;
     private IBinder mBinder = new MyBinder();
     Uri data;
     String name;
@@ -56,8 +56,6 @@ public class DejaService extends Service {
             this.action = action;
         }
 
-
-
         /**
          * Chooses action to run.
          */
@@ -75,44 +73,7 @@ public class DejaService extends Service {
                     release();
                 if (action.equals(refreshAction))
                     refresh();
-                if(action.equals(copyAction))
-                    copyToAlbum();
             }
-        }
-
-        public void copyToAlbum()
-        {
-            OutputStream out = null;
-            try
-            {
-                File file = new File(dejaPhotoCopied.getFile() + name);
-                file.createNewFile();
-                out = new FileOutputStream(file);
-                InputStream in = getContentResolver().openInputStream(data);
-                int b = 0;
-                while(b != -1)
-                {
-                    b = in.read();
-                    out.write(b);
-                }
-                out.close();
-            }
-            catch (Exception e)
-            {
-                Log.e("DejaCopy", e.toString());
-            }
-
-
-            /*Log.e("DejaCopy", file.getAbsolutePath() + "   " + dejaPhotoCopied.getFile().getAbsolutePath());
-            try
-            {
-                FileUtils.copyFileToDirectory(file, dejaPhotoCopied.getFile());
-            }
-            catch(Exception e)
-            {
-                Log.e("DejaCopy", "Problem with FileUtils in copyToAlbum: " + e.toString());
-            }*/
-
         }
 
         /**
@@ -297,10 +258,12 @@ public class DejaService extends Service {
                 File.separator + "DejaPhoto"+ File.separator + "DejaPhotoCopied");
         if (!dejaPhotoCopiedFile.exists()) {
             dejaPhotoCopiedFile.mkdirs();
-
         }
         dejaPhotoCopied = new Album(dejaPhotoCopiedFile);
 
+        File dejaPhotoDCIMFile = new File(Environment.DIRECTORY_DCIM + "/camera");
+
+        dejaPhotoDCIM = new Album(dejaPhotoDCIMFile);
 
         GetAllPhotosFromGallery dejaGallery, friendsGallery, copiedGallery;
 
@@ -383,10 +346,47 @@ public class DejaService extends Service {
     */
     public void runCopy()
     {
-        Thread worker = new Thread(new DejaThread(queue, copyAction));
+        Thread worker = new Thread(new DejaCopyThread(copyAction));
         worker.start();
     }
 
+    public class DejaCopyThread implements Runnable
+    {
+        String action;
 
+        public DejaCopyThread(String action)
+        {
+            this.action = action;
+        }
+
+        public void run()
+        {
+            if(action.equals(copyAction))
+                copyToAlbum();
+        }
+
+        public void copyToAlbum()
+        {
+            OutputStream out = null;
+            try
+            {
+                File file = new File(dejaPhotoCopied.getFile() + name);
+                file.createNewFile();
+                out = new FileOutputStream(file);
+                InputStream in = getContentResolver().openInputStream(data);
+                int b = 0;
+                while(b != -1)
+                {
+                    b = in.read();
+                    out.write(b);
+                }
+                out.close();
+            }
+            catch (Exception e)
+            {
+                Log.e("DejaCopy", e.toString());
+            }
+        }
+    }
 
 }

@@ -2,6 +2,7 @@ package com.android.dejaphoto;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
 
 import com.google.firebase.database.DataSnapshot;
@@ -10,6 +11,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,15 +42,15 @@ public class FirebaseService extends Service {
     /**
      * Removes all invalid characters from email.
      *
-     * @param email user email
+     * @param s user email
      * @return new ID
      */
-    public static String createID(String email) {
-        return email.replace('.', '_')
-                .replace('#', '_')
-                .replace('$', '_')
-                .replace('[', '_')
-                .replace(']', '_');
+    public static String validateName(String s) {
+        return s.replace('.', '~');
+    }
+
+    public static String unvalidateName(String s) {
+        return s.replace('~', '.');
     }
 
     /**
@@ -125,8 +127,12 @@ public class FirebaseService extends Service {
                     // check for difference in photos
                     for (final DataSnapshot snapshot : dataSnapshot.getChildren())
                         if (!snapshot.getKey().equals(NULL))
-                            if ((int)((long) snapshot.getValue()) != 0) {
-
+                            try {
+                                Photo photo = PhotoChooser.getPhoto(snapshot.getKey());
+                                if ((int) ((long) snapshot.getValue()) != photo.karma)
+                                    photo.karma = (int) ((long) snapshot.getValue());
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                 } else {
                     karmaChange = true;
@@ -135,7 +141,6 @@ public class FirebaseService extends Service {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }
@@ -151,7 +156,11 @@ public class FirebaseService extends Service {
                 addFriend(intent.getStringExtra(FRIEND));
                 break;
             case ADD_PHOTO:
-                addPhoto(intent.getStringExtra(PHOTO), Integer.valueOf(intent.getStringExtra(KARMA)));
+                try {
+                    addPhoto(intent.getStringExtra(PHOTO), intent.getIntExtra(KARMA, 0));
+                } catch (Exception e) {
+                    addPhoto(intent.getStringExtra(PHOTO), 0);
+                }
                 break;
             case REMOVE_PHOTOS:
                 removePhotos();
@@ -195,7 +204,7 @@ public class FirebaseService extends Service {
 
         // add photo to database
         Map<String, Object> photoMap = new HashMap<>();
-        photoMap.put(photo, karma);
+        photoMap.put(validateName(photo), Integer.valueOf(karma));
         database.child(user).child(PHOTOS).updateChildren(photoMap);
         karmaChange = false;
     }
@@ -229,15 +238,28 @@ public class FirebaseService extends Service {
                     for (final DataSnapshot snapshot : dataSnapshot.getChildren())
                         if (!snapshot.getKey().equals(NULL)) {
                             if (storage.checkPhotoExistInCurrentUser(snapshot.getKey())) {
-                                if ((int)((long) snapshot.getValue()) != 0) {
-
+                                try {
+                                    Photo photo = PhotoChooser.getPhoto(snapshot.getKey());
+                                    if ((int) ((long) snapshot.getValue()) != photo.karma)
+                                        photo.karma = (int) ((long) snapshot.getValue());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                             } else {
-                                FirebaseStorageAdapter.getInstance().downloadPhotoFromUser(friend, dataSnapshot.getKey());
+                                FirebaseStorageAdapter.getInstance().downloadPhotoFromUser(friend, unvalidateName(dataSnapshot.getKey()));
                             }
                         }
                 } else {
+                    File directory = new File(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
 
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                        if (directory.isDirectory())
+                            for (final File file : directory.listFiles())
+                                if (file.getName().equals(unvalidateName(snapshot.getKey()))) {
+                                    file.delete();
+                                    break;
+                                }
                 }
 
             }

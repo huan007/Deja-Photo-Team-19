@@ -29,12 +29,11 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.firebase.database.ValueEventListener;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -295,38 +294,51 @@ public class MainActivity extends AppCompatActivity
             addPreferencesFromResource(R.xml.preferences);
 
             // Listener for user adding new friends
-            EditTextPreference friendsPref = (EditTextPreference) findPreference("add_friend");
+            final EditTextPreference friendsPref = (EditTextPreference) findPreference("add_friend");
             friendsPref.setDefaultValue("");
             friendsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    friendsPref.setDefaultValue("");
+                    friendsPref.setText("");
 
-                    String friendEmail = FirebaseService.createID((String) newValue);
-                    String userEmail = getContext().getSharedPreferences("user", MODE_PRIVATE).getString("email", null);
+                    final String friendEmail = FirebaseService.validateName((String) newValue);
+                    final String userEmail = getContext().getSharedPreferences("user", MODE_PRIVATE).getString("email", null);
 
-                    // Check that email entered is of proper format
-                    //  http://howtodoinjava.com/regex/java-regex-validate-email-address/
-                    String emailRegex = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-                    if (!((String) newValue).matches(emailRegex)) {
-                        Toast.makeText(getContext(), "Re-enter proper email address format", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                    // Check that email entered is not the email of current user
-                    else if (userEmail.equals(friendEmail)) {
-                        Toast.makeText(getContext(), "Cannot add yourself as a friend", Toast.LENGTH_LONG).show();
-                        return false;
-                    } else if (FirebaseDatabaseAdapter.getInstance().getUserFromDatabase(friendEmail) == null) {
-                        Toast.makeText(getContext(), "Friend is not DejaPhoto user", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
+                    final Object newNewValue = newValue;
+                    final Context context = getContext();
+                    FirebaseDatabase.getInstance().getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            // Check that email entered is of proper format
+                            // http://howtodoinjava.com/regex/java-regex-validate-email-address/
+                            String emailRegex = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+                            if (!((String) newNewValue).matches(emailRegex)) {
+                                Toast.makeText(context, "Re-enter proper email address format", Toast.LENGTH_LONG).show();
+                            }
+                            // Check that email entered is not the email of current user
+                            else if (userEmail.equals(friendEmail)) {
+                                Toast.makeText(context, "Cannot add yourself as a friend", Toast.LENGTH_LONG).show();
+                            } else if (!dataSnapshot.hasChild(friendEmail)) {
+                                Toast.makeText(context, "Friend is not DejaPhoto user", Toast.LENGTH_LONG).show();
+                            } else {
 
-                    // Add email of new friend
-                    Log.d("New Friend Receiver", "Email is : " + newValue);
+                                // Add email of new friend
+                                Log.d("New Friend Receiver", "Email is : " + newNewValue);
 
-                    Intent serviceIntent = new Intent(getContext(), FirebaseService.class);
-                    serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_FRIEND);
-                    serviceIntent.putExtra(FirebaseService.FRIEND, friendEmail);
-                    getContext().startService(serviceIntent);
+                                Intent serviceIntent = new Intent(context, FirebaseService.class);
+                                serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_FRIEND);
+                                serviceIntent.putExtra(FirebaseService.FRIEND, friendEmail);
+                                context.startService(serviceIntent);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
 
                     return true;
                 }

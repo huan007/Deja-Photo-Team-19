@@ -1,6 +1,7 @@
 package com.android.dejaphoto;
 
 import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ public class InteractiveActivity extends AppCompatActivity {
     final String databaseURL = "https://deja-demo.firebaseio.com/";
     FirebaseStorageAdapterInterface storage;
     FirebaseDatabaseAdapterInterface database;
+    File testFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,7 @@ public class InteractiveActivity extends AppCompatActivity {
         }
         else
             Toast.makeText(this, "Unable to get UID", Toast.LENGTH_SHORT).show();
+
     }
 
 
@@ -86,11 +89,24 @@ public class InteractiveActivity extends AppCompatActivity {
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.VISIBLE);
 
+        File dejaPhotoAlbumFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
+        if (!dejaPhotoAlbumFile.exists()) {
+            Log.d("Interactive", "Path doesn't exist");
+        }
+        //Try to get a test file
+        for (File file : dejaPhotoAlbumFile.listFiles())
+        {
+            if (file.isFile()){
+                testFile = file;
+                break;
+            }
+        }
+
         //Path to file
-        Uri uri = Uri.parse("android.resource://"+ getPackageName()+ "/raw/apple.jpg");
-        File file = new File(uri.getPath());
-        boolean isAFile = file.isFile();
-        UploadTask task = storage.uploadPhotoFile(file);
+        //Uri uri = Uri.parse("android.resource://"+ getPackageName()+ "/raw/apple.jpg");
+        //File file = new File(uri.getPath());
+        boolean isAFile = testFile.isFile();
+        UploadTask task = storage.uploadPhotoFile(testFile);
 
         task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override

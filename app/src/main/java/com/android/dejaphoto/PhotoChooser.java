@@ -19,7 +19,7 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class PhotoChooser implements Chooser<Photo> {
 
-    List<Photo> photos;
+    static List<Photo> photos;
     DejaSet dejaPhotos;
     boolean dejaMode;
     GeoApiContext geoContext;
@@ -217,6 +217,14 @@ public class PhotoChooser implements Chooser<Photo> {
         boolean location;
         boolean day;
         boolean time;
+    }
+
+    public static Photo getPhoto(String name) {
+        for (Photo photo : photos)
+            if (photo.name.equals(name))
+                return photo;
+
+        return null;
     }
 
 }

@@ -39,6 +39,7 @@ import java.util.Locale;
 
 public class Photo {
 
+    String name;
     String location;
     String datetime;
     String latitude;
