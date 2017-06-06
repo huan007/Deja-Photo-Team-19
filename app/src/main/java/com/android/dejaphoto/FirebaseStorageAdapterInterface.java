@@ -47,4 +47,10 @@ public interface FirebaseStorageAdapterInterface {
      * @return returns TRUE if photo exists. FALSE if not.
      */
     public boolean checkPhotoExistInSpecifiedUser(String photoFileName);
+
+    /**
+     * Remove all photos of the current User
+     * @return return TRUE if photos are deleted. FALSE if not.
+     */
+    public boolean removeAllPhotos();
 }
