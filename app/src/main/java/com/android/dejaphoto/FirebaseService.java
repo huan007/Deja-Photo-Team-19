@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -15,6 +16,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Long runnning service that handles syncing with Firebase.
+ */
 public class FirebaseService extends Service {
 
     public static final String ACTION = "ACTION";
@@ -36,8 +40,7 @@ public class FirebaseService extends Service {
     private Map<String, ValueEventListener> listeners;
 
     private DatabaseReference database;
-    private FirebaseStorageAdapter storage;
-
+    private FirebaseStorageAdapterInterface storage;
 
     /**
      * Removes all invalid characters from email.
@@ -92,6 +95,7 @@ public class FirebaseService extends Service {
         listeners = new HashMap<>();
 
         // add listeners for current friends
+        Log.d("Firebase Service", "adding listener for current friends");
         database.child(user).child(FRIENDS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -105,6 +109,7 @@ public class FirebaseService extends Service {
         });
 
         // listen for new friends
+        Log.d("Firebase Service", "adding listener for new friends");
         database.child(user).child(FRIENDS).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -120,6 +125,7 @@ public class FirebaseService extends Service {
         });
 
         // listen for photo changes
+        Log.d("Firebase Service", "adding listener for own photo changes");
         database.child(user).child(PHOTOS).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -151,6 +157,7 @@ public class FirebaseService extends Service {
             return super.onStartCommand(intent, flags, startId);
 
         // run action
+        Log.d("Firebase Service", "starting action" + intent.getIntExtra(ACTION, -1));
         switch (intent.getIntExtra(ACTION, -1)) {
             case ADD_FRIEND:
                 addFriend(intent.getStringExtra(FRIEND));
@@ -180,6 +187,7 @@ public class FirebaseService extends Service {
             return;
 
         // add friend to user
+        Log.d("Firebase Service", "add friend to user");
         Map<String, Object> friendMap = new HashMap<>();
         friendMap.put(friend, NULL);
         database.child(user).child(FRIENDS).updateChildren(friendMap);
@@ -187,6 +195,7 @@ public class FirebaseService extends Service {
         listeners.put(friend, listenForPhotos(friend));
 
         // add user to friend
+        Log.d("Firebase Service", "add user to friend");
         friendMap = new HashMap<>();
         friendMap.put(user, NULL);
         database.child(friend).child(FRIENDS).updateChildren(friendMap);
@@ -203,9 +212,11 @@ public class FirebaseService extends Service {
             return;
 
         // add photo to database
+        Log.d("Firebase Service", "add photo to Firebase");
         Map<String, Object> photoMap = new HashMap<>();
         photoMap.put(validateName(photo), Integer.valueOf(karma));
         database.child(user).child(PHOTOS).updateChildren(photoMap);
+        storage.uploadPhotoFile(new Album().findMyPhoto(photo));
         karmaChange = false;
     }
 
@@ -214,6 +225,7 @@ public class FirebaseService extends Service {
      */
     private void removePhotos() {
         // remove photo and add default null value
+        Log.d("Firebase Service", "remove all photos from Firebase");
         database.child(user).child(PHOTOS).removeValue();
         final Map<String, Object> photos = new HashMap<>();
         photos.put(NULL, NULL);
@@ -232,13 +244,15 @@ public class FirebaseService extends Service {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // if friend has photos then check for difference
                 // else remove all friends' photos from user storage
-                if (dataSnapshot.hasChildren()) {
+                if (dataSnapshot.getChildrenCount() == 1) {
+                    Log.d("Firebase Service", "photo listener not empty");
                     // for each photo if photo exists and karma changed then get new karma value
                     // else download new photo
                     for (final DataSnapshot snapshot : dataSnapshot.getChildren())
                         if (!snapshot.getKey().equals(NULL)) {
                             if (storage.checkPhotoExistInCurrentUser(snapshot.getKey())) {
                                 try {
+                                    Log.d("Firebase Service", "photo listener update karma");
                                     Photo photo = PhotoChooser.getPhoto(snapshot.getKey());
                                     if ((int) ((long) snapshot.getValue()) != photo.karma)
                                         photo.karma = (int) ((long) snapshot.getValue());
@@ -246,10 +260,12 @@ public class FirebaseService extends Service {
                                     e.printStackTrace();
                                 }
                             } else {
+                                Log.d("Firebase Service", "photo listener download photo");
                                 FirebaseStorageAdapter.getInstance().downloadPhotoFromUser(friend, unvalidateName(dataSnapshot.getKey()));
                             }
                         }
                 } else {
+                    Log.d("Firebase Service", "photo listener empty");
                     File directory = new File(Environment.getExternalStorageDirectory() +
                             File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
 

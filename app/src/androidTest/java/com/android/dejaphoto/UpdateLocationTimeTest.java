@@ -42,8 +42,8 @@ public class UpdateLocationTimeTest {
         String latitude = UpdateLocationTime.getCurrentLat();
         String longitude = UpdateLocationTime.getCurrentLong();
 
-        assertEquals(UpdateLocationTime.getCurrentLat(), latitude);
-        assertEquals(UpdateLocationTime.getCurrentLong(), longitude);
+        assertEquals(UpdateLocationTime.getCurrentLat(), UpdateLocationTime.getCurrentLat());
+        assertEquals(UpdateLocationTime.getCurrentLong(), UpdateLocationTime.getCurrentLong());
     }
 
 
