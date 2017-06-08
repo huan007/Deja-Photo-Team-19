@@ -56,6 +56,9 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
      */
     @Override
     public UploadTask uploadPhotoFile(File photoFile) {
+        if (photoFile == null)
+            return null;
+
         //Start an upload task
         Uri fileUri = Uri.fromFile(photoFile);
         StorageReference targetReference = currUserDir.child(fileUri.getLastPathSegment());
