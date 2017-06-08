@@ -200,4 +200,16 @@ public class InteractiveActivity extends AppCompatActivity {
 
     }
 
+    //testing download photo from storage
+    public void testDownloadPhotoFromStorage(View view){
+
+    boolean downloaded = storage.downloadPhotoFromUser("vmperkin@ucsd.edu", "IMG_20170608_135233.jpg");
+
+        if (downloaded != true)
+            Toast.makeText(this, "Picture not downloaded", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "Picture downloaded!", Toast.LENGTH_LONG).show();
+
+    }
+
 }

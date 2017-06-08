@@ -1,19 +1,22 @@
 package com.android.dejaphoto;
 
 import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.io.IOException;
+
 
 /**
  * Created by Cyrax on 6/2/2017.
@@ -85,7 +88,39 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
      */
     @Override
     public boolean downloadPhotoFromUser(String email, String photoFileName) {
-        return false;
+
+     StorageReference downloadTarget = rootDir.child(email).child(photoFileName);
+
+        File localFile;
+
+        //String directory = Environment.getExternalStorageDirectory()+ File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends";
+
+        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
+
+        try {
+           // localFile = File.createTempFile(directory, "jpg");
+            localFile = File.createTempFile( photoFileName, ".jpg", dejaPhotoFriendsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        downloadTarget.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                Log.e(debug_tag, "Image downloaded!!!");
+                //Figure out how to move file to correct directory
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(debug_tag, "Image not Downloaded");
+
+            }
+        });
+
+        return true;
     }
 
     /**
