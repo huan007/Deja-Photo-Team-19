@@ -402,6 +402,15 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
+            // set button click listener for photo_picker
+            findPreference("photo_picker").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("photo_picker", "entering picker");
+                    return true;
+                }
+            });
+
             // set button change listener for Interval Setting
             findPreference("interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override

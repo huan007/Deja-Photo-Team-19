@@ -19,6 +19,9 @@
     <string name="album_friends_title">DejaPhotoFriends</string>
     <string name="album_friends_summary">The album that stores photos that came from friends</string>
 
+    <string name="photo_picker_title">Photo Picker</string>
+    <string name="photo_picker_summary">Move photos from other albums to DejaPhotoCopied album</string>
+
     <string name="settings_title">Settings</string>
     <string name="settings_summary">Set your settings</string>
 
