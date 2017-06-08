@@ -244,7 +244,7 @@ public class FirebaseService extends Service {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // if friend has photos then check for difference
                 // else remove all friends' photos from user storage
-                if (dataSnapshot.getChildrenCount() == 1) {
+                if (dataSnapshot.getChildrenCount() != 1) {
                     Log.d("Firebase Service", "photo listener not empty");
                     // for each photo if photo exists and karma changed then get new karma value
                     // else download new photo
@@ -261,7 +261,7 @@ public class FirebaseService extends Service {
                                 }
                             } else {
                                 Log.d("Firebase Service", "photo listener download photo");
-                                FirebaseStorageAdapter.getInstance().downloadPhotoFromUser(friend, unvalidateName(dataSnapshot.getKey()));
+                                FirebaseStorageAdapter.getInstance().downloadPhotoFromUser(unvalidateName(friend), unvalidateName(snapshot.getKey()));
                             }
                         }
                 } else {
