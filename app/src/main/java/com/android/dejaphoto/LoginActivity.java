@@ -158,7 +158,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             statusTextView.setText("Hello, " + acct.getDisplayName());
 
             //Change Activity
-            Intent intent = new Intent(this, InteractiveActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
