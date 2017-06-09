@@ -7,9 +7,16 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
@@ -19,12 +26,15 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import static com.android.dejaphoto.GetAllPhotosFromGallery.convertDMStoDouble;
 
 /**
  * Created by Phillip on 5/3/17.
@@ -212,6 +222,74 @@ public class Photo {
         photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), photo, "Title", null);
         return Uri.parse(path);
+    }
+
+    public Photo(final String friend, final String name, final Context context) {
+        GeoApiContext geoContext = geoContext = new GeoApiContext().setApiKey("AIzaSyBHsv-_IdOMfhpCpOoLRgOi9TrlzcI7PsM");
+
+        File file = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends", name);
+
+        if (file.exists()) {
+            try {
+                // Get bitmap
+                Bitmap bitmap = null;
+                bitmap = MediaStore.Images.Media.getBitmap(context.getApplicationContext().getContentResolver(), Uri.fromFile(file));
+
+                // Create Photo object
+                photo = bitmap;
+                this.name = name;
+                // update karma to firebase data
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                database.child(FirebaseService.validateName(friend)).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren())
+                            if (snapshot.getKey().equals(FirebaseService.validateName(name)))
+                                karma = (int) ((long) snapshot.getValue());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+
+                // Get exif info
+                ExifInterface exifInterface = null;
+                exifInterface = (ExifInterface) new ExifInterface(file.getAbsolutePath());
+                datetime = exifInterface.getAttribute(android.media.ExifInterface.TAG_DATETIME);
+                latitude = exifInterface.getAttribute(android.media.ExifInterface.TAG_GPS_LATITUDE);
+                longitude = exifInterface.getAttribute(android.media.ExifInterface.TAG_GPS_LONGITUDE);
+
+
+                if (latitude != null && longitude != null) {
+                    //Parse the sign of lat and long
+                    String latRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
+                    String longRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
+                    boolean isNorth = false;
+                    boolean isEast = false;
+
+                    if (latRef.equals("N"))
+                        isNorth = true;
+                    if (longRef.equals("E"))
+                        isEast = true;
+
+                    double lat = convertDMStoDouble(latitude, isNorth);
+                    double longtitude = convertDMStoDouble(longitude, isEast);
+
+                    //Update lat and long
+                    latitude = String.valueOf(lat);
+                    longitude = String.valueOf(longtitude);
+                    LatLng location = new LatLng(lat, longtitude);
+                    setZipCode(geoContext, location);
+                } else
+                    setZipCode(geoContext, null);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

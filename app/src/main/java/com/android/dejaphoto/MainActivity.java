@@ -7,7 +7,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -34,6 +36,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.io.File;
+import java.util.List;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -380,6 +385,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Log.d("album_main", "entering album");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    Uri uri = Uri.parse(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoAlbum" + File.separator);
+                    intent.setDataAndType(uri, "image/*");
+                    startActivity(Intent.createChooser(intent, "Open folder"));
                     return true;
                 }
             });
@@ -389,6 +399,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Log.d("album_copied", "entering album");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    Uri uri = Uri.parse(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoCopied" + File.separator);
+                    intent.setDataAndType(uri, "image/*");
+                    startActivity(Intent.createChooser(intent, "Open folder"));
                     return true;
                 }
             });
@@ -398,6 +413,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Log.d("album_friends", "entering album");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    Uri uri = Uri.parse(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends" + File.separator);
+                    intent.setDataAndType(uri, "image/*");
+                    startActivity(Intent.createChooser(intent, "Open folder"));
                     return true;
                 }
             });
@@ -486,6 +506,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     Log.d("own", newValue.toString());
+                    editor.putBoolean("own", (Boolean) newValue);
+                    editor.apply();
                     return true;
                 }
             });
@@ -494,7 +516,9 @@ public class MainActivity extends AppCompatActivity
             findPreference("friends").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    Log.d("own", newValue.toString());
+                    Log.d("friends", newValue.toString());
+                    editor.putBoolean("friends", (Boolean) newValue);
+                    editor.apply();
                     return true;
                 }
             });
@@ -504,6 +528,9 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     Log.d("share", newValue.toString());
+                    editor.putBoolean("share", (Boolean) newValue);
+                    editor.apply();
+
                     Intent serviceIntent = new Intent(getContext(), FirebaseService.class);
                     serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.REMOVE_PHOTOS);
                     getContext().startService(serviceIntent);

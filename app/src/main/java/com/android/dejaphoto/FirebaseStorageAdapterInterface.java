@@ -1,5 +1,7 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
+
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
@@ -25,7 +27,7 @@ public interface FirebaseStorageAdapterInterface {
      * @param photoFileName name of the requested photo file
      * @return returns TRUE if photo exists and downloaded. FALSE if not.
      */
-    public boolean downloadPhotoFromUser(String email, String photoFileName);
+    public boolean downloadPhotoFromUser(String email, String photoFileName, final Context context);
 
     /**
      * Remove the specified photo files from current user's storage

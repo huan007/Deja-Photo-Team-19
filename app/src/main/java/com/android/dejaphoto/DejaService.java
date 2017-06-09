@@ -27,6 +27,9 @@ public class DejaService extends Service {
     public static final String actionFlag = "ACTION_FLAG";
     public static final String karmaAction = "KARMA";
     public static final String copyAction = "COPY";
+    public static final String addPhoto = "ADD";
+    public static final String friend = "FRIEND";
+    public static final String photoFile = "PHOTO";
 
     GeoApiContext geoContext;
 
@@ -43,6 +46,7 @@ public class DejaService extends Service {
     public class DejaThread implements Runnable {
         PhotoQueue<Photo> photoQueue;
         String action;
+        String[] extra;
 
         /**
          * Default constructor.
@@ -50,10 +54,11 @@ public class DejaService extends Service {
          * @param queue  queue to use
          * @param action action to perform
          */
-        public DejaThread(PhotoQueue<Photo> queue, String action) {
+        public DejaThread(PhotoQueue<Photo> queue, String action, String... extra) {
             //Get queue from outside
             photoQueue = queue;
             this.action = action;
+            this.extra = extra;
         }
 
         /**
@@ -73,6 +78,9 @@ public class DejaService extends Service {
                     release();
                 if (action.equals(refreshAction))
                     refresh();
+                if (action.equals(addPhoto)) {
+                    addPhoto(extra[0], extra[1]);
+                }
             }
         }
 
@@ -105,8 +113,13 @@ public class DejaService extends Service {
          */
         public void karma() {
             Log.d("DejaService", "karma received");
-
-            photoQueue.getCurrentPhoto().setKarma();
+            Photo photo = photoQueue.getCurrentPhoto();
+            photo.setKarma();
+            Intent serviceIntent = new Intent(getBaseContext(), FirebaseService.class);
+            serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.UPDATE_KARMA);
+            serviceIntent.putExtra(FirebaseService.PHOTO, photo.name);
+            serviceIntent.putExtra(FirebaseService.KARMA, photo.karma);
+            getBaseContext().startService(serviceIntent);
         }
 
         /**
@@ -119,13 +132,22 @@ public class DejaService extends Service {
         }
 
         /**
-         * Refresh screen
+         * Refresh screen.
          */
         public void refresh() {
             Log.d("DejaService", "refresh called");
             Context context = getApplicationContext();
             queue.getChooser().refresh(context);
             controller.displayImage(queue.next(getApplicationContext()));
+        }
+
+        /**
+         * Add photo.
+         */
+        public void addPhoto(String friend, String photo) {
+            Log.d("DejaService", "addPhoto called");
+            Photo photo1 = new Photo(friend, photo, getBaseContext());
+            PhotoChooser.photos.add(photo1);
         }
     }
 
@@ -196,13 +218,14 @@ public class DejaService extends Service {
                 runRelease();
             if (action.equals(refreshAction))
                 runRefresh();
-            if (action.equals(copyAction))
-            {
+            if (action.equals(copyAction)) {
                 Log.e("DejaCopy", "Get extras (the file)");
                 data = (Uri) intent.getExtras().get("File");
                 name = (String) intent.getExtras().get("Name");
                 runCopy();
             }
+            if (action.equals(addPhoto))
+                runAddPhoto(intent.getStringExtra(friend), intent.getStringExtra(photoFile));
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -238,7 +261,7 @@ public class DejaService extends Service {
 
 
         File dejaPhotoAlbumFile = new File(Environment.getExternalStorageDirectory() +
-                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
+                File.separator + "DejaPhoto" + File.separator + "DejaPhotoAlbum");
         if (!dejaPhotoAlbumFile.exists()) {
             dejaPhotoAlbumFile.mkdirs();
         }
@@ -246,7 +269,7 @@ public class DejaService extends Service {
 
 
         File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
-                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
+                File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends");
         if (!dejaPhotoFriendsFile.exists()) {
             dejaPhotoFriendsFile.mkdirs();
 
@@ -255,7 +278,7 @@ public class DejaService extends Service {
 
 
         File dejaPhotoCopiedFile = new File(Environment.getExternalStorageDirectory() +
-                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoCopied");
+                File.separator + "DejaPhoto" + File.separator + "DejaPhotoCopied");
         if (!dejaPhotoCopiedFile.exists()) {
             dejaPhotoCopiedFile.mkdirs();
         }
@@ -342,48 +365,53 @@ public class DejaService extends Service {
     }
 
     /*
-    * Start copy action
+    * Start copy action.
     */
-    public void runCopy()
-    {
+    public void runCopy() {
         Thread worker = new Thread(new DejaCopyThread(copyAction));
         worker.start();
     }
 
-    public class DejaCopyThread implements Runnable
-    {
+    /**
+     * Start addPhoto action.
+     */
+    public void runAddPhoto(String friend, String photo) {
+        Thread worker = new Thread(new DejaThread(queue, addPhoto, friend, photo));
+        worker.start();
+    }
+
+    public class DejaCopyThread implements Runnable {
         String action;
 
-        public DejaCopyThread(String action)
-        {
+        public DejaCopyThread(String action) {
             this.action = action;
         }
 
-        public void run()
-        {
-            if(action.equals(copyAction))
+        public void run() {
+            if (action.equals(copyAction))
                 copyToAlbum();
         }
 
-        public void copyToAlbum()
-        {
+        public void copyToAlbum() {
             OutputStream out = null;
-            try
-            {
+            try {
                 File file = new File(dejaPhotoCopied.getFile() + name);
                 file.createNewFile();
                 out = new FileOutputStream(file);
                 InputStream in = getContentResolver().openInputStream(data);
                 int b = 0;
-                while(b != -1)
-                {
+                while (b != -1) {
                     b = in.read();
                     out.write(b);
                 }
                 out.close();
-            }
-            catch (Exception e)
-            {
+
+                Intent serviceIntent = new Intent(getBaseContext(), FirebaseService.class);
+                serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_PHOTO);
+                serviceIntent.putExtra(FirebaseService.PHOTO, file.getName());
+                serviceIntent.putExtra(FirebaseService.KARMA, 0);
+                startService(serviceIntent);
+            } catch (Exception e) {
                 Log.e("DejaCopy", e.toString());
             }
         }

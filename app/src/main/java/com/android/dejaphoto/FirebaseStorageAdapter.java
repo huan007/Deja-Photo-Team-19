@@ -1,5 +1,7 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -36,8 +38,7 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
     static FirebaseStorageAdapter getInstance() {
 
         //Using lazy instantiation
-        if (ourInstance == null)
-        {
+        if (ourInstance == null) {
             ourInstance = new FirebaseStorageAdapter();
 
             //Used to take care of Storage references
@@ -87,29 +88,40 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
      * @return returns TRUE if photo exists and downloaded. FALSE if not.
      */
     @Override
-    public boolean downloadPhotoFromUser(String email, String photoFileName) {
+    public boolean downloadPhotoFromUser(final String email, final String photoFileName, final Context context) {
 
-     StorageReference downloadTarget = rootDir.child(email).child(photoFileName);
+        StorageReference downloadTarget = rootDir.child(email).child(photoFileName);
 
         File localFile;
 
         //String directory = Environment.getExternalStorageDirectory()+ File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends";
 
-        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
-                File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
+        //File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
+        //        File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
 
-        try {
+
+        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends", photoFileName);
+
+        /*try {
            // localFile = File.createTempFile(directory, "jpg");
             localFile = File.createTempFile( photoFileName, ".jpg", dejaPhotoFriendsFile);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
-        }
+        }*/
 
-        downloadTarget.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+        downloadTarget.getFile(dejaPhotoFriendsFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                 Log.e(debug_tag, "Image downloaded!!!");
+                if (context != null) {
+                    Intent serviceIntent = new Intent(context, DejaService.class);
+                    serviceIntent.putExtra(DejaService.actionFlag, DejaService.addPhoto);
+                    serviceIntent.putExtra(DejaService.friend, email);
+                    serviceIntent.putExtra(DejaService.photoFile, photoFileName);
+                    context.startService(serviceIntent);
+                }
                 //Figure out how to move file to correct directory
             }
         }).addOnFailureListener(new OnFailureListener() {

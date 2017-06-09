@@ -1,6 +1,7 @@
 package com.android.dejaphoto;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.IBinder;
@@ -28,7 +29,9 @@ public class FirebaseService extends Service {
 
     public static final int ADD_FRIEND = 1;
     public static final int ADD_PHOTO = 2;
-    public static final int REMOVE_PHOTOS = 3;
+    public static final int UPDATE_KARMA = 3;
+    public static final int REMOVE_PHOTOS = 4;
+
 
     private static final String PHOTOS = "photos";
     private static final String NULL = "null";
@@ -169,6 +172,9 @@ public class FirebaseService extends Service {
                     addPhoto(intent.getStringExtra(PHOTO), 0);
                 }
                 break;
+            case UPDATE_KARMA:
+                updateKarma(intent.getStringExtra(PHOTO), intent.getIntExtra(KARMA, 0));
+                break;
             case REMOVE_PHOTOS:
                 removePhotos();
                 break;
@@ -212,12 +218,44 @@ public class FirebaseService extends Service {
             return;
 
         // add photo to database
-        Log.d("Firebase Service", "add photo to Firebase");
-        Map<String, Object> photoMap = new HashMap<>();
-        photoMap.put(validateName(photo), Integer.valueOf(karma));
-        database.child(user).child(PHOTOS).updateChildren(photoMap);
-        storage.uploadPhotoFile(new Album().findMyPhoto(photo));
-        karmaChange = false;
+        if (getSharedPreferences("settings", MODE_PRIVATE).getBoolean("share", true)) {
+            Log.d("Firebase Service", "add photo to Firebase");
+            Map<String, Object> photoMap = new HashMap<>();
+            photoMap.put(validateName(photo), Integer.valueOf(karma));
+            database.child(user).child(PHOTOS).updateChildren(photoMap);
+            storage.uploadPhotoFile(new Album().findMyPhoto(photo));
+            System.out.println(photo + " " + new Album().findMyPhoto(photo));
+            karmaChange = false;
+        }
+    }
+
+    /**
+     * Updates friend karma.
+     */
+    private void updateKarma(String photo, final int karma) {
+        if (photo == null)
+            return;
+
+        final String fPhoto = validateName(photo);
+
+        Log.d("Firebase Service", "update akrma");
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot friend : dataSnapshot.getChildren())
+                    for (DataSnapshot photos : friend.child(PHOTOS).getChildren())
+                        try {
+                            if (photos.getKey().equals(fPhoto))
+                                database.child(friend.getKey()).child(PHOTOS).child(fPhoto).setValue(karma);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
     }
 
     /**
@@ -261,13 +299,18 @@ public class FirebaseService extends Service {
                                 }
                             } else {
                                 Log.d("Firebase Service", "photo listener download photo");
-                                FirebaseStorageAdapter.getInstance().downloadPhotoFromUser(unvalidateName(friend), unvalidateName(snapshot.getKey()));
+                                FirebaseStorageAdapter.getInstance()
+                                        .downloadPhotoFromUser(unvalidateName(friend),
+                                                unvalidateName(snapshot.getKey()),
+                                                getBaseContext());
+
+                                //PhotoChooser.photos.add(new Photo(friend, unvalidateName(snapshot.getKey()), getBaseContext()));
                             }
                         }
                 } else {
                     Log.d("Firebase Service", "photo listener empty");
                     File directory = new File(Environment.getExternalStorageDirectory() +
-                            File.separator + "DejaPhoto"+ File.separator + "DejaPhotoAlbum");
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoAlbum");
 
                     for (DataSnapshot snapshot : dataSnapshot.getChildren())
                         if (directory.isDirectory())

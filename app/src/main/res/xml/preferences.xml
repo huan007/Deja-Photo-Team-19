@@ -34,8 +34,8 @@
 
         <Preference
             android:key="photo_picker"
-            android:summary="@string/photo_picker_title"
-            android:title="@string/photo_picker_summary" />
+            android:summary="@string/photo_picker_summary"
+            android:title="@string/photo_picker_title" />
 
     </PreferenceScreen>
 
