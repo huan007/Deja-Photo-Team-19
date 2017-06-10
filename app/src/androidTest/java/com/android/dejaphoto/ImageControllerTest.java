@@ -42,7 +42,8 @@ public class ImageControllerTest {
 
         //Get list of pictures
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        Album.GetAllPhotosFromGallery gallery = new Album.GetAllPhotosFromGallery(file, mainActivity.getApplicationContext(), geoContext);
+        Album gallery = new Album(file);
+        gallery.populatePhotos(mainActivity.getApplicationContext(), geoContext);
 
         PhotoChooser chooser = new PhotoChooser(gallery.images, geoContext);
         PhotoQueue<Photo> queue = new PhotoQueue<>(chooser);

@@ -29,7 +29,8 @@ public class DatabaseTest {
         //Set up the gallery and import all images into the database
         Activity mainActivity = activityTestRule.getActivity();
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        Album.GetAllPhotosFromGallery gallery = new Album.GetAllPhotosFromGallery(file, mainActivity.getApplicationContext(), geoContext);
+        Album gallery = new Album(file);
+        gallery.populatePhotos(mainActivity.getApplicationContext(), geoContext);
         database = new DatabaseManager(gallery.images);
     }
 

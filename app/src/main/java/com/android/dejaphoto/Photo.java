@@ -34,8 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.android.dejaphoto.GetAllPhotosFromGallery.convertDMStoDouble;
-
 /**
  * Created by Phillip on 5/3/17.
  */
@@ -275,8 +273,8 @@ public class Photo {
                     if (longRef.equals("E"))
                         isEast = true;
 
-                    double lat = convertDMStoDouble(latitude, isNorth);
-                    double longtitude = convertDMStoDouble(longitude, isEast);
+                    double lat = Album.convertDMStoDouble(latitude, isNorth);
+                    double longtitude = Album.convertDMStoDouble(longitude, isEast);
 
                     //Update lat and long
                     latitude = String.valueOf(lat);
