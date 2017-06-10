@@ -358,10 +358,13 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void run() {
                     // set next photo
-                    Intent serviceIntent = new Intent(getContext(), DejaService.class);
-                    serviceIntent.putExtra(DejaService.actionFlag, DejaService.refreshAction);
-                    Log.d("Refresh Receiver", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
-                    getContext().startService(serviceIntent);
+                    Context context = getContext();
+                    if (context != null) {
+                        Intent serviceIntent = new Intent(getContext(), DejaService.class);
+                        serviceIntent.putExtra(DejaService.actionFlag, DejaService.refreshAction);
+                        Log.d("Refresh Receiver", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+                        getContext().startService(serviceIntent);
+                    }
 
 
                     // call handler again
