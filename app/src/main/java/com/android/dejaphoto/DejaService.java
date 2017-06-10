@@ -265,8 +265,6 @@ public class DejaService extends Service {
 
         dejaPhotoDCIM = new Album(dejaPhotoDCIMFile);
 
-        GetAllPhotosFromGallery dejaGallery, friendsGallery, copiedGallery;
-
         //Get list of picture
         // Check whether to include albums
        /* if (dejaPhotoAlbum.includePhotos)
@@ -294,7 +292,8 @@ public class DejaService extends Service {
 
 
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, context, geoContext);
+        Album gallery = new Album(file);
+        gallery.populatePhotos(context, geoContext);
 
         PhotoChooser chooser = new PhotoChooser(gallery.getImages(), geoContext);
         queue = new PhotoQueue<>(chooser);

@@ -14,8 +14,6 @@ import com.google.maps.GeoApiContext;
 import org.junit.*;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,7 +42,7 @@ public class ImageControllerTest {
 
         //Get list of pictures
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
-        GetAllPhotosFromGallery gallery = new GetAllPhotosFromGallery(file, mainActivity.getApplicationContext(), geoContext);
+        Album.GetAllPhotosFromGallery gallery = new Album.GetAllPhotosFromGallery(file, mainActivity.getApplicationContext(), geoContext);
 
         PhotoChooser chooser = new PhotoChooser(gallery.images, geoContext);
         PhotoQueue<Photo> queue = new PhotoQueue<>(chooser);
