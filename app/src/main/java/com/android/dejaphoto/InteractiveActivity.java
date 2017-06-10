@@ -1,6 +1,7 @@
 package com.android.dejaphoto;
 
 import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static com.android.dejaphoto.R.drawable.apple;
@@ -42,6 +44,7 @@ public class InteractiveActivity extends AppCompatActivity {
     final String databaseURL = "https://deja-demo.firebaseio.com/";
     FirebaseStorageAdapterInterface storage;
     FirebaseDatabaseAdapterInterface database;
+    File testFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,7 @@ public class InteractiveActivity extends AppCompatActivity {
         }
         else
             Toast.makeText(this, "Unable to get UID", Toast.LENGTH_SHORT).show();
+
     }
 
 
@@ -85,11 +89,24 @@ public class InteractiveActivity extends AppCompatActivity {
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.VISIBLE);
 
+        File dejaPhotoAlbumFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/camera");
+        if (!dejaPhotoAlbumFile.exists()) {
+            Log.d("Interactive", "Path doesn't exist");
+        }
+        //Try to get a test file
+        for (File file : dejaPhotoAlbumFile.listFiles())
+        {
+            if (file.isFile()){
+                testFile = file;
+                break;
+            }
+        }
+
         //Path to file
-        Uri uri = Uri.parse("android.resource://"+ getPackageName()+ "/raw/apple.jpg");
-        File file = new File(uri.getPath());
-        boolean isAFile = file.isFile();
-        UploadTask task = storage.uploadPhotoFile(file);
+        //Uri uri = Uri.parse("android.resource://"+ getPackageName()+ "/raw/apple.jpg");
+        //File file = new File(uri.getPath());
+        boolean isAFile = testFile.isFile();
+        UploadTask task = storage.uploadPhotoFile(testFile);
 
         task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -138,4 +155,61 @@ public class InteractiveActivity extends AppCompatActivity {
 
 
     }
+
+    //testing getListOfPhotoFromUser
+    public void testGetListOfPhotoFromUser(View view){
+
+
+        List<String> photoList;
+
+
+        photoList = database.getListOfPhotoFromUser("vmperkin@ucsd_edu");
+
+        if (photoList.size() == 0)
+            Toast.makeText(this, "User photoList size is 1", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "User photoList exists!", Toast.LENGTH_LONG).show();
+
+
+    }
+
+    //testing addNewPhotoEntry
+    public void testAddNewPhotoEntry(View view){
+
+        boolean check = database.addNewPhotoEntry("PictureOfDog");
+
+        if (check == true)
+            Toast.makeText(this, "Photo added to database!", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "Photo NOT added to database!", Toast.LENGTH_LONG).show();
+
+
+    }
+
+    //testing check photo entry
+    public void testCheckPhotoEntry(View view){
+
+
+        boolean check = database.checkPhotoEntry("PictureOfDog");
+
+        if (check != true)
+            Toast.makeText(this, "Picture of Dog found", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "Picture of Dog not found", Toast.LENGTH_LONG).show();
+
+
+    }
+
+    //testing download photo from storage
+    public void testDownloadPhotoFromStorage(View view){
+
+    boolean downloaded = storage.downloadPhotoFromUser("vmperkin@ucsd.edu", "IMG_20170608_135233.jpg", null);
+
+        if (downloaded != true)
+            Toast.makeText(this, "Picture not downloaded", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(this, "Picture downloaded!", Toast.LENGTH_LONG).show();
+
+    }
+
 }

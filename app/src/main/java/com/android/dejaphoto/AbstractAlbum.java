@@ -31,4 +31,6 @@ public abstract class AbstractAlbum
         includePhotos = value;
     }
 
+    abstract File findMyPhoto(String photo);
+
 }

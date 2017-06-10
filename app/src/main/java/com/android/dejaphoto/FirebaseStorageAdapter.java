@@ -1,19 +1,24 @@
 package com.android.dejaphoto;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.io.IOException;
+
 
 /**
  * Created by Cyrax on 6/2/2017.
@@ -33,8 +38,7 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
     static FirebaseStorageAdapter getInstance() {
 
         //Using lazy instantiation
-        if (ourInstance == null)
-        {
+        if (ourInstance == null) {
             ourInstance = new FirebaseStorageAdapter();
 
             //Used to take care of Storage references
@@ -56,6 +60,9 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
      */
     @Override
     public UploadTask uploadPhotoFile(File photoFile) {
+        if (photoFile == null)
+            return null;
+
         //Start an upload task
         Uri fileUri = Uri.fromFile(photoFile);
         StorageReference targetReference = currUserDir.child(fileUri.getLastPathSegment());
@@ -81,8 +88,51 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
      * @return returns TRUE if photo exists and downloaded. FALSE if not.
      */
     @Override
-    public boolean downloadPhotoFromUser(String email, String photoFileName) {
-        return false;
+    public boolean downloadPhotoFromUser(final String email, final String photoFileName, final Context context) {
+
+        StorageReference downloadTarget = rootDir.child(email).child(photoFileName);
+
+        File localFile;
+
+        //String directory = Environment.getExternalStorageDirectory()+ File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends";
+
+        //File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
+        //        File.separator + "DejaPhoto"+ File.separator + "DejaPhotoFriends");
+
+
+        File dejaPhotoFriendsFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends", photoFileName);
+
+        /*try {
+           // localFile = File.createTempFile(directory, "jpg");
+            localFile = File.createTempFile( photoFileName, ".jpg", dejaPhotoFriendsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }*/
+
+        downloadTarget.getFile(dejaPhotoFriendsFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                Log.e(debug_tag, "Image downloaded!!!");
+                if (context != null) {
+                    Intent serviceIntent = new Intent(context, DejaService.class);
+                    serviceIntent.putExtra(DejaService.actionFlag, DejaService.addPhoto);
+                    serviceIntent.putExtra(DejaService.friend, email);
+                    serviceIntent.putExtra(DejaService.photoFile, photoFileName);
+                    context.startService(serviceIntent);
+                }
+                //Figure out how to move file to correct directory
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(debug_tag, "Image not Downloaded");
+
+            }
+        });
+
+        return true;
     }
 
     /**
@@ -131,5 +181,30 @@ class FirebaseStorageAdapter implements FirebaseStorageAdapterInterface {
     @Override
     public boolean checkPhotoExistInSpecifiedUser(String photoFileName) {
         return false;
+    }
+
+    /**
+     * Remove all photos of the current User
+     *
+     * @return return TRUE if photos are deleted. FALSE if not.
+     */
+    @Override
+    public boolean removeAllPhotos() {
+        final boolean result[] = new boolean[1];
+
+        currUserDir.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(debug_tag, "Successfully deleted directory");
+                result[0] = true;
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(debug_tag, "Failed to delete directory");
+                result[0] = false;
+            }
+        });
+        return result[0];
     }
 }

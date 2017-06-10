@@ -101,14 +101,14 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return List of photos shared by the user
      */
     @Override
-    public List<Photo> getListOfPhotoFromUser(String email) {
+    public List<String> getListOfPhotoFromUser(String email) {
 
-        final List<Photo> photoList = new ArrayList<Photo>();
+        final List<String> photoList = new ArrayList<String>();
         rootDir.child(email).child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
-                    photoList.add(snapshot.getValue(Photo.class));
+                    photoList.add(snapshot.getValue(String.class));
             }
 
             @Override
@@ -127,14 +127,15 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if the photo was successfully added. FALSE if not.
      */
     @Override
-    public boolean addNewPhotoEntry(Photo newPhoto) {
-        final Photo passPhoto = newPhoto;
-        final List<Photo> photoList = new ArrayList<Photo>();
+    public boolean addNewPhotoEntry(String newPhoto) {
+        final String passPhoto = newPhoto;
+        final List<String> photoList = new ArrayList<String>();
+
         currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
-                    photoList.add(snapshot.getValue(Photo.class));
+                    photoList.add(snapshot.getValue(String.class));
                     photoList.add(passPhoto);
 
 
@@ -143,7 +144,6 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
         return true;
@@ -156,16 +156,16 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if the photo is already in the database. FALSE if not.
      */
     @Override
-    public boolean checkPhotoEntry(Photo photo) {
-        final Photo passPhoto = photo;
+    public boolean checkPhotoEntry(String photo) {
+        final String passPhoto = photo;
 
 
-        final List<Photo> photoList = new ArrayList<Photo>();
+        final List<String> photoList = new ArrayList<String>();
         currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
-                    photoList.add(snapshot.getValue(Photo.class));
+                    photoList.add(snapshot.getValue(String.class));
 
             }
 
@@ -191,17 +191,17 @@ class FirebaseDatabaseAdapter implements FirebaseDatabaseAdapterInterface {
      * @return returns TRUE if photo is successfully removed. FALSE if the photo is not there.
      */
     @Override
-    public boolean removePhotoEntry(Photo photo) {
+    public boolean removePhotoEntry(String photo) {
 
-        final Photo passPhoto = photo;
+        final String passPhoto = photo;
 
 
-        final List<Photo> photoList = new ArrayList<Photo>();
+        final List<String> photoList = new ArrayList<String>();
         currUserDir.child("photos").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
-                    photoList.add(snapshot.getValue(Photo.class));
+                    photoList.add(snapshot.getValue(String.class));
                 }
 
             @Override

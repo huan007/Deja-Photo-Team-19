@@ -32,9 +32,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
@@ -167,7 +164,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
             // store email inside shared preference
             SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
-            editor.putString("email", FirebaseService.createID(acct.getEmail()));
+            editor.putString("email", FirebaseService.validateName(acct.getEmail()));
             editor.apply();
 
             // Start DejaService
@@ -232,13 +229,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (dejaUser[0] == null) {
             Log.d(TAG, "Failed to retrieve User's Information");
             //Make new user object in database
-            FirebaseService.makeUser(FirebaseService.createID(acct.getEmail()));
+            FirebaseService.makeUser(FirebaseService.validateName(acct.getEmail()));
             Log.d(TAG, "Created new User in Database!");
         }
     }
 
     private DatabaseReference createUserDatabaseReference(GoogleSignInAccount acct) {
-        FirebaseService.makeUser(FirebaseService.createID(acct.getEmail()));
+        FirebaseService.makeUser(FirebaseService.validateName(acct.getEmail()));
         Log.d(TAG, "Created new User in Database!");
         return FirebaseDatabase.getInstance().getReference().child(acct.getId());
     }

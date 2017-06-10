@@ -34,28 +34,28 @@ public interface FirebaseDatabaseAdapterInterface {
      * @param email E-mail address of the specified user
      * @return List of photos shared by the user
      */
-    public List<Photo> getListOfPhotoFromUser(String email);
+    public List<String> getListOfPhotoFromUser(String email);
 
     /**
      * Extract information from Photo object and create a new entry in current user's list of photo
      * @param newPhoto new photo that will be added to the databse
      * @return returns TRUE if the photo was successfully added. FALSE if not.
      */
-    public boolean addNewPhotoEntry(Photo newPhoto);
+    public boolean addNewPhotoEntry(String newPhoto);
 
     /**
      * Check whether or not the photo is already in the database
      * @param photo photo to be checked
      * @return returns TRUE if the photo is already in the database. FALSE if not.
      */
-    public boolean checkPhotoEntry(Photo photo);
+    public boolean checkPhotoEntry(String photo);
 
     /**
      * Remove photo entry from Firebase Database
      * @param photo photo to be removed
      * @return returns TRUE if photo is successfully removed. FALSE if the photo is not there.
      */
-    public boolean removePhotoEntry(Photo photo);
+    public boolean removePhotoEntry(String photo);
 
     /**
      * Get handle to requested user's photo list. Used to create Listeners

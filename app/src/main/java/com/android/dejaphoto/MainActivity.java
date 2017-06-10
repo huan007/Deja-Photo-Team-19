@@ -7,7 +7,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -29,12 +31,14 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -295,38 +299,51 @@ public class MainActivity extends AppCompatActivity
             addPreferencesFromResource(R.xml.preferences);
 
             // Listener for user adding new friends
-            EditTextPreference friendsPref = (EditTextPreference) findPreference("add_friend");
+            final EditTextPreference friendsPref = (EditTextPreference) findPreference("add_friend");
             friendsPref.setDefaultValue("");
             friendsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    friendsPref.setDefaultValue("");
+                    friendsPref.setText("");
 
-                    String friendEmail = FirebaseService.createID((String) newValue);
-                    String userEmail = getContext().getSharedPreferences("user", MODE_PRIVATE).getString("email", null);
+                    final String friendEmail = FirebaseService.validateName((String) newValue);
+                    final String userEmail = getContext().getSharedPreferences("user", MODE_PRIVATE).getString("email", null);
 
-                    // Check that email entered is of proper format
-                    //  http://howtodoinjava.com/regex/java-regex-validate-email-address/
-                    String emailRegex = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-                    if (!((String) newValue).matches(emailRegex)) {
-                        Toast.makeText(getContext(), "Re-enter proper email address format", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                    // Check that email entered is not the email of current user
-                    else if (userEmail.equals(friendEmail)) {
-                        Toast.makeText(getContext(), "Cannot add yourself as a friend", Toast.LENGTH_LONG).show();
-                        return false;
-                    } else if (FirebaseDatabaseAdapter.getInstance().getUserFromDatabase(friendEmail) == null) {
-                        Toast.makeText(getContext(), "Friend is not DejaPhoto user", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
+                    final Object newNewValue = newValue;
+                    final Context context = getContext();
+                    FirebaseDatabase.getInstance().getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            // Check that email entered is of proper format
+                            // http://howtodoinjava.com/regex/java-regex-validate-email-address/
+                            String emailRegex = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+                            if (!((String) newNewValue).matches(emailRegex)) {
+                                Toast.makeText(context, "Re-enter proper email address format", Toast.LENGTH_LONG).show();
+                            }
+                            // Check that email entered is not the email of current user
+                            else if (userEmail.equals(friendEmail)) {
+                                Toast.makeText(context, "Cannot add yourself as a friend", Toast.LENGTH_LONG).show();
+                            } else if (!dataSnapshot.hasChild(friendEmail)) {
+                                Toast.makeText(context, "Friend is not DejaPhoto user", Toast.LENGTH_LONG).show();
+                            } else {
 
-                    // Add email of new friend
-                    Log.d("New Friend Receiver", "Email is : " + newValue);
+                                // Add email of new friend
+                                Log.d("New Friend Receiver", "Email is : " + newNewValue);
 
-                    Intent serviceIntent = new Intent(getContext(), FirebaseService.class);
-                    serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_FRIEND);
-                    serviceIntent.putExtra(FirebaseService.FRIEND, friendEmail);
-                    getContext().startService(serviceIntent);
+                                Intent serviceIntent = new Intent(context, FirebaseService.class);
+                                serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.ADD_FRIEND);
+                                serviceIntent.putExtra(FirebaseService.FRIEND, friendEmail);
+                                context.startService(serviceIntent);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
 
                     return true;
                 }
@@ -341,10 +358,13 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void run() {
                     // set next photo
-                    Intent serviceIntent = new Intent(getContext(), DejaService.class);
-                    serviceIntent.putExtra(DejaService.actionFlag, DejaService.refreshAction);
-                    Log.d("Refresh Receiver", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
-                    getContext().startService(serviceIntent);
+                    Context context = getContext();
+                    if (context != null) {
+                        Intent serviceIntent = new Intent(getContext(), DejaService.class);
+                        serviceIntent.putExtra(DejaService.actionFlag, DejaService.refreshAction);
+                        Log.d("Refresh Receiver", "Extra string:" + serviceIntent.getStringExtra(DejaService.actionFlag));
+                        getContext().startService(serviceIntent);
+                    }
 
 
                     // call handler again
@@ -368,6 +388,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Log.d("album_main", "entering album");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    Uri uri = Uri.parse(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoAlbum" + File.separator);
+                    intent.setDataAndType(uri, "image/*");
+                    startActivity(Intent.createChooser(intent, "Open folder"));
                     return true;
                 }
             });
@@ -377,6 +402,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Log.d("album_copied", "entering album");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    Uri uri = Uri.parse(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoCopied" + File.separator);
+                    intent.setDataAndType(uri, "image/*");
+                    startActivity(Intent.createChooser(intent, "Open folder"));
                     return true;
                 }
             });
@@ -386,6 +416,20 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Log.d("album_friends", "entering album");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    Uri uri = Uri.parse(Environment.getExternalStorageDirectory() +
+                            File.separator + "DejaPhoto" + File.separator + "DejaPhotoFriends" + File.separator);
+                    intent.setDataAndType(uri, "image/*");
+                    startActivity(Intent.createChooser(intent, "Open folder"));
+                    return true;
+                }
+            });
+
+            // set button click listener for photo_picker
+            findPreference("photo_picker").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("photo_picker", "entering picker");
                     return true;
                 }
             });
@@ -465,6 +509,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     Log.d("own", newValue.toString());
+                    editor.putBoolean("own", (Boolean) newValue);
+                    editor.apply();
                     return true;
                 }
             });
@@ -473,7 +519,9 @@ public class MainActivity extends AppCompatActivity
             findPreference("friends").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    Log.d("own", newValue.toString());
+                    Log.d("friends", newValue.toString());
+                    editor.putBoolean("friends", (Boolean) newValue);
+                    editor.apply();
                     return true;
                 }
             });
@@ -483,6 +531,9 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     Log.d("share", newValue.toString());
+                    editor.putBoolean("share", (Boolean) newValue);
+                    editor.apply();
+
                     Intent serviceIntent = new Intent(getContext(), FirebaseService.class);
                     serviceIntent.putExtra(FirebaseService.ACTION, FirebaseService.REMOVE_PHOTOS);
                     getContext().startService(serviceIntent);
