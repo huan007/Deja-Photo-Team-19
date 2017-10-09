@@ -15,4 +15,7 @@ Phillip Levin (A11511211)
 JIRA:
 https://ets-apps.ucsd.edu/cse-jira/secure/RapidBoard.jspa?rapidView=160&projectKey=TEAM19&view=planning.nodetail
 
+Cloned from andyxor1's repo for display purpose only.
+Original Github link: https://github.com/andyxor1/Deja-Photo-Team-19
+
 
